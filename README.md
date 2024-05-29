@@ -1,28 +1,18 @@
-# FrontendVisualizer
-
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 17.3.7.
-
-## Development server
-
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
-
-## Code scaffolding
-
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
-
-## Build
-
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
-
-## Running unit tests
-
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
-
-## Running end-to-end tests
-
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
-
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
-# Blitzvideo-VisualizerFrontend
+    # Blitzvideo-FrontendVisualizer
+- Vamos a nuestro directorio del frontend e instalamos las dependencias con el siguiente comando:
+     - npm install
+- Luego nos dirigimos al servicio de auth
+     - (./FrontendApp/src/app/servicios/auth.service.ts)
+  De ahi reemplazamos el client_id y el client_secret que estan dentro del codigo por los que generamos recien y guardamos los cambios.
+- Dentro de nuestro directorio de (./FrontendApp) compilamos el proyecto de Angular
+    -  ("ng build")
+- A continuacion creamos un archivo llamado "dockerfile" dentro del directorio que se acaba de generar
+     - (./frontendVisualizer/dist/frontend.visualizer/)
+- Dentro de el archivo "dockerfile" escribiremos lo siguiente:
+    -  "FROM httpd 
+    -  COPY ./browser/ /usr/local/apache2/htdocs"
+  (Hay que fijarse bien si el directorio tiene el nombre de "browser", por lo contrario se cambia)
+- Luego dentro del mismo directorio, generaremos la imagen de Apache, escribiendo lo siguiente:
+    -  docker build -t frontendvisualizer-apache .
+- Despues de generar la imagen, levantamos el proyecto de docker con el siguiente comando dentro de el directorio de donde tengamos los proyectos
+    -  docker-compose up -d
