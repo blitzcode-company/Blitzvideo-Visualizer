@@ -1,0 +1,10 @@
+<app-header></app-header>
+<h2>{{ video.titulo }}</h2>
+
+
+<video controls>
+  <source [src]="video.link">
+</video>
+<p>Usuario: {{ video.canal.nombre }}</p>
+<p>Descripcion:</p>
+<p>{{ video.descripcion }}</p>

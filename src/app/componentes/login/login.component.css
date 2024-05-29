@@ -1,0 +1,141 @@
+.div {
+    background-color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 60px;
+  }
+  @media (max-width: 991px) {
+    .div {
+      padding: 0 20px;
+    }
+  }
+  .div-2 {
+    margin-top: 70px;
+    width: 100%;
+    max-width: 1291px;
+  }
+  @media (max-width: 991px) {
+    .div-2 {
+      max-width: 100%;
+      margin-top: 40px;
+    }
+  }
+  .div-3 {
+    gap: 20px;
+    display: flex;
+  }
+  @media (max-width: 991px) {
+    .div-3 {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0px;
+    }
+  }
+  .column {
+    display: flex;
+    flex-direction: column;
+    line-height: normal;
+    width: 41%;
+    margin-left: 0px;
+  }
+  @media (max-width: 991px) {
+    .column {
+      width: 100%;
+    }
+  }
+  .div-4 {
+    background-color: #d9d9d9;
+    display: flex;
+    flex-grow: 1;
+    flex-direction: column;
+    font-size: 20px;
+    color: #000;
+    font-weight: 400;
+    width: 100%;
+    padding: 72px 68px;
+  }
+  @media (max-width: 991px) {
+    .div-4 {
+      max-width: 100%;
+      padding: 0 20px;
+    }
+  }
+  .div-5 {
+    align-self: center;
+    font: 36px Roboto, sans-serif;
+  }
+  .div-6 {
+    font-family: Inter, sans-serif;
+    letter-spacing: 0.2px;
+    margin-top: 33px;
+  }
+  .div-7 {
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.88);
+    margin-top: 5px;
+    height: 50px;
+  }
+  .div-8 {
+    font-family: Inter, sans-serif;
+    letter-spacing: 0.2px;
+    margin-top: 30px;
+  }
+  .div-9 {
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.88);
+    margin-top: 5px;
+    height: 50px;
+  }
+  .div-10 {
+    border-radius: 8px;
+    background-color: #32b1f9;
+    margin-top: 74px;
+    align-items: center;
+    color: #fff;
+    letter-spacing: 0.32px;
+    justify-content: center;
+    padding: 27px 60px;
+    font: 32px Inter, sans-serif;
+  }
+  @media (max-width: 991px) {
+    .div-10 {
+      margin-top: 40px;
+      padding: 0 20px;
+    }
+  }
+  .div-11 {
+    font-family: Inter, sans-serif;
+    letter-spacing: 0.2px;
+    align-self: center;
+    margin-top: 44px;
+  }
+  @media (max-width: 991px) {
+    .div-11 {
+      margin-top: 40px;
+    }
+  }
+  .column-2 {
+    display: flex;
+    flex-direction: column;
+    line-height: normal;
+    width: 59%;
+    margin-left: 20px;
+  }
+  @media (max-width: 991px) {
+    .column-2 {
+      width: 100%;
+    }
+  }
+  .img {
+    aspect-ratio: 1.1;
+    object-fit: auto;
+    object-position: center;
+    width: 100%;
+    flex-grow: 1;
+  }
+  @media (max-width: 991px) {
+    .img {
+      max-width: 100%;
+    }
+  }

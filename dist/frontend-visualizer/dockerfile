@@ -1,0 +1,2 @@
+FROM httpd 
+COPY ./browser/ /usr/local/apache2/htdocs

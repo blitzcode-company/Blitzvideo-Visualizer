@@ -1,0 +1,29 @@
+<div class="div">
+    <div class="div-2">
+      <div class="div-3">
+        <div class="column">
+          <div class="div-4">
+            <div class="div-5">Login</div>
+            <div class="div-6">Correo electronico</div>
+                <form #dataform="ngForm" (ngSubmit)="onSubmit(dataform)">
+                    <input class="div-7" ngModel name="email">
+                    <div class="div-8">Contraseña</div>
+                    <input type="password" class="div-9" ngModel name="password"> 
+                    <button class="div-10">Iniciar sesion</button>
+                    <div class="div-11">
+                    <span style="letter-spacing: 0.2px"></span>
+                    ¿No tienes una cuenta? <a routerLink="/registro">Haz click aqui</a>
+                    </div>
+                </form>
+          </div>
+        </div>
+        <div class="column-2">
+          <img
+            loading="lazy"
+            src="../../../assets/images/login.jpg"
+            class="img"
+          />
+        </div>
+      </div>
+    </div>
+  </div>

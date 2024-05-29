@@ -1,0 +1,10 @@
+<h1>Registro BlitzVideo</h1>
+
+<form #dataform="ngForm" (ngSubmit)="onSubmit(dataform)">
+    Nombre <input ngModel name="name"> <br>
+    Email <input type="email" ngModel name="email"> <br>
+    Contraseña <input type="password" ngModel name="password"> <br>
+    Confirmar contraseña <input type="password" ngModel name="password_confirmation"> <br>
+
+<button>Login</button>
+</form>

@@ -1,0 +1,18 @@
+<h1>BlitzVideo - Broadcast Yourself</h1>
+
+<ul>
+    <li>
+        <a routerLink="/">Inicio</a>
+    </li>
+    <li *ngIf="!status.isLoggedIn">
+        <a routerLink="/login">Login</a>
+    </li>
+    <li *ngIf="!status.isLoggedIn">
+        <a routerLink="/registro">Registro</a>
+    </li>
+    <li *ngIf="status.isLoggedIn">
+        <a routerLink="/#" (click)="logout()">Cerrar sesion</a>
+    </li>
+</ul>
+
+<router-outlet></router-outlet>
