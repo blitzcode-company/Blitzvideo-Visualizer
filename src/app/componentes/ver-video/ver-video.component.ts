@@ -29,9 +29,7 @@ export class VerVideoComponent implements OnInit {
         const fecha = new Date(this.video.created_at);
         if (!isNaN(fecha.getTime())) {
           this.video.created_at = this.convertirFechaALineaDeTexto(fecha);
-        } else {
-          console.error("La fecha no es válida");
-        }
+        } 
       }
   
       console.log(this.video);
