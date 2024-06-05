@@ -11,6 +11,8 @@ export class AuthService {
   private logoutUrl = "http://localhost:8000/api/v1/logout"
   private registroUrl = "http://localhost:8000/api/v1/user"
   private userLogueado = "http://localhost:8000/api/v1/validate"
+  private mostrarCanal = "http://localhost:8001/api/v1/usuario/"
+
 
 
   constructor(private http: HttpClient, private cookie: CookieService) { }
@@ -73,6 +75,20 @@ export class AuthService {
     } 
     return this.http.get(this.userLogueado, httpOptions)
   }
+
+  obtenerCanalDelUsuario(id:number) {
+    const httpOptions = {
+      headers: new HttpHeaders({
+          'Content-Type' : 'application/json',
+          'Authorization' : 'Bearer ' + this.cookie.get('accessToken')
+      })
+    } 
+    
+    return this.http.get(`${this.mostrarCanal}${id}`, httpOptions);
+
+  }
+
+
 
   getToken() {
     let token = this.cookie.get('accessToken');

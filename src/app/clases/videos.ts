@@ -3,5 +3,6 @@ id:any;
 canal_id:any;
 titulo:any;
 descripcion:any;
+created_at:any;
 link:any;
 }

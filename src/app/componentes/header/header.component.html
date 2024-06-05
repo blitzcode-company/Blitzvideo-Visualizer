@@ -1,18 +1,25 @@
-<h1>BlitzVideo - Broadcast Yourself</h1>
-
-<ul>
-    <li>
-        <a routerLink="/">Inicio</a>
-    </li>
-    <li *ngIf="!status.isLoggedIn">
-        <a routerLink="/login">Login</a>
-    </li>
-    <li *ngIf="!status.isLoggedIn">
-        <a routerLink="/registro">Registro</a>
-    </li>
-    <li *ngIf="status.isLoggedIn">
-        <a routerLink="/#" (click)="logout()">Cerrar sesion</a>
-    </li>
-</ul>
-
-<router-outlet></router-outlet>
+<header class="header">
+  <div class="container">
+    <a href="/" ><img class="logo" src="../../../assets/images/logo.png" alt="Logo de blitzvideo" srcset=""></a>
+    <nav class="nav">
+    </nav>
+    <div class="search-box">
+      <input type="search" class="search-input" placeholder="Search..." aria-label="Search">
+    </div>
+    <div class="dropdown" [class.open]="isDropdownOpen">
+      <button class="dropdown-toggle" (click)="toggleDropdown($event)">
+        <div class="dropdown-content">
+          <a *ngIf="status.isLoggedIn && canalNombre" routerLink="/miCanal" class="dropdown-item canal">{{ canalNombre }}</a>
+          <img src="" alt="mdo" width="32" height="32" class="avatar">
+        </div>
+      </button>
+      <div class="dropdown-menu">
+        <a *ngIf="status.isLoggedIn && canalNombre" routerLink="/micanal" class="dropdown-item">Mi canal</a>
+        <hr class="dropdown-divider">
+        <a *ngIf="status.isLoggedIn" routerLink="/#" (click)="logout()" class="dropdown-item">Cerrar sesión</a>
+        <a *ngIf="!status.isLoggedIn" routerLink="/login" class="dropdown-item">Login</a>
+        <a *ngIf="!status.isLoggedIn" routerLink="/registro" class="dropdown-item">Registro</a>
+      </div>
+    </div>
+  </div>
+</header>

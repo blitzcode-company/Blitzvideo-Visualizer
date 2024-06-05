@@ -1,0 +1,44 @@
+.reproductor, .tituloVideo, .descripcion, .canalynombre {
+    margin-left: 10vh;
+}
+.canalynombre {
+    margin-top: 5px;
+
+    font-family: Roboto-Bold;
+    display: flex;
+    align-items: center; 
+}
+
+.video-container {
+    margin-top: 30px;
+}
+
+.reproductor {
+    width: 1000px;
+}
+
+.descripcion {
+    margin-top: 20px;
+
+    background-color:#d9d9d9;
+    border-radius: 10px;
+    width: 1000px;
+
+}
+
+
+.fechadescripcion {
+    font-family: Roboto-Bold;
+
+
+}
+
+.fotodeperfil {
+    height: 60px;
+  }
+ 
+  
+.canalynombre p {
+    margin-top:20px;
+
+}  
