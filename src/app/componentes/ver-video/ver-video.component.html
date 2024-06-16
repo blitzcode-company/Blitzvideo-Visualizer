@@ -3,13 +3,13 @@
 <div class="video-container">
   <h2 class="tituloVideo">{{ video.titulo }}</h2>
 
-  <video class="reproductor" controls>
-    <source [src]="video.link">
+  
+  <video #videoPlayer class="reproductor" controls>
+    <source [src]="video.link" type="video/mp4">
   </video>
-
  <div class="canalynombre">
-    <img class="fotodeperfil" src="../../../assets/images/logo.png" alt="Logo de blitzvideo" srcset="">
-    <p>{{ video.canal.nombre }}</p>
+    <img class="fotodeperfil" src="{{ video.canal.user.foto }}" alt="Logo del canal del usuario" srcset="">
+    <p> {{ video.canal.nombre }}</p>
  </div>
   <div class="descripcion">
     <p class="fechadescripcion">Fecha de subida: {{ video.created_at}}</p>

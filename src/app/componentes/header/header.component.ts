@@ -34,18 +34,19 @@ export class HeaderComponent {
 
 
   obtenerUsuario() {
-  this.api.mostrarUserLogueado().subscribe(
-  (res) => {
-  this.usuario = res;
-  console.log(res);
-  this.obtenerCanal();
+    this.api.usuario$.subscribe(user => {
+      this.usuario = user;
+      this.obtenerCanal();
 
-  },
-  (error) => {
-  console.error('Error al obtener el usuario:', error);
+    });
+    this.api.mostrarUserLogueado().subscribe();
   }
-  );
+
+
+  obtenerURLImagen() {
+    return this.usuario.foto ? this.usuario.foto : '../../../assets/images/user.png';
   }
+
   obtenerCanal() {
     this.api.obtenerCanalDelUsuario(this.usuario.id).subscribe((res: any) => {
       this.canal = res;

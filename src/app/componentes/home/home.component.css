@@ -1,0 +1,70 @@
+a {
+    text-decoration: none;
+    color: black;
+  }
+  
+
+
+  .container {
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 40px;
+  }
+  
+  .fila {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  
+  .miniatura {
+    transition: all 500ms ease-out;
+  }
+
+  .imagenMiniatura .miniatura:hover {
+    transform: scale(1.10);
+    
+  }
+
+  
+  .canalNombre {
+    font-size: 1em; 
+    color:#4b4b4b;
+  }
+  
+  .video {
+    width: 320px; 
+    max-width: calc(50% - 10px); 
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    padding: 10px;
+    box-sizing: border-box;
+    overflow: hidden;
+
+  }
+
+  .fotoUser {
+    border-radius: 25px;
+  }
+  
+  @media (min-width: 768px) {
+    .video {
+      max-width: calc(33.33% - 10px);
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .video {
+      max-width: calc(25% - 10px); 
+    }
+  }
+  
+  @media (max-width: 767px) {
+    .video {
+      width: 100%;
+      max-width: none; 
+    }
+  }
+  

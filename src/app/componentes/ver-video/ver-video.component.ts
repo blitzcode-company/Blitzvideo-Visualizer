@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { VideosService } from '../../servicios/videos.service';
 import { ActivatedRoute } from '@angular/router';
 import { Videos } from '../../clases/videos';
@@ -9,6 +9,9 @@ import { Videos } from '../../clases/videos';
   styleUrl: './ver-video.component.css'
 })
 export class VerVideoComponent implements OnInit {
+  @ViewChild('videoPlayer', { static: false }) videoPlayer: ElementRef = {} as ElementRef;
+
+
   id: any;
   videos = new Videos();
   video: any;
@@ -32,8 +35,16 @@ export class VerVideoComponent implements OnInit {
         } 
       }
   
+      setTimeout(() => {
+        if (this.videoPlayer && this.videoPlayer.nativeElement) {
+          this.videoPlayer.nativeElement.load();
+        }
+      });
+
       console.log(this.video);
     });
+
+    
   }
   
   convertirFechaALineaDeTexto(fecha: Date): string {

@@ -1,0 +1,25 @@
+<app-header></app-header>
+<div class="box-root padding-bottom--24 flex-flex flex-justifyContent--center">
+  <h2>
+    Edita tu usuario
+  </h2>
+</div>
+<div class="formbg-outer">
+  <div class="formbg">
+    <div class="formbg-inner padding-horizontal--48">
+      <form #dataform="ngForm" (ngSubmit)="onSubmit(dataform)">
+        <div class="field padding-bottom--24">
+          Editar tu nombre
+          <input type="text" id="name" [(ngModel)]="usuario.name" name="name"> <br>
+        </div>
+        <div class="field padding-bottom--24">
+          Agrega o cambia tu foto
+          <input type="file" id="foto" (change)="onFileSelected($event)"> <br>
+        </div>
+        <div class="field padding-bottom--24">
+          <button class="boton" type="submit">Actualizar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

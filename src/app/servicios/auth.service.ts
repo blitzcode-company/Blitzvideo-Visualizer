@@ -1,6 +1,13 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { CookieService } from 'ngx-cookie-service';
+import { Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
+import { tap } from 'rxjs';
+import { catchError } from 'rxjs';
+import { of } from 'rxjs';
+
+
 
 @Injectable({
   providedIn: 'root'
@@ -12,8 +19,10 @@ export class AuthService {
   private registroUrl = "http://localhost:8000/api/v1/user"
   private userLogueado = "http://localhost:8000/api/v1/validate"
   private mostrarCanal = "http://localhost:8001/api/v1/usuario/"
+  private editarUsuarioUrl = "http://localhost:8001/api/v1/usuario/"
 
-
+  private usuarioSubject = new BehaviorSubject<any>(null);
+  public usuario$: Observable<any> = this.usuarioSubject.asObservable();
 
   constructor(private http: HttpClient, private cookie: CookieService) { }
 
@@ -22,7 +31,7 @@ export class AuthService {
     const body = {
       grant_type: "password",
       client_id: "1",
-      client_secret: "GAemt97Hf1v3b92f2LLh2ZOWKHGj57lYsFQKLqm4",
+      client_secret: "lbzFPOR6PyvT8RurLQsWjMHZ67UTisBIUkTEZ1m7",
       username: credentials.email,
       password: credentials.password
 
@@ -66,14 +75,16 @@ export class AuthService {
     return this.http.post(this.registroUrl, body, httpOptions)
   }
 
-  mostrarUserLogueado() {   
+  mostrarUserLogueado() {
     const httpOptions = {
       headers: new HttpHeaders({
-          'Content-Type' : 'application/json',
-          'Authorization' : 'Bearer ' + this.cookie.get('accessToken')
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + this.cookie.get('accessToken')
       })
-    } 
-    return this.http.get(this.userLogueado, httpOptions)
+    };
+    return this.http.get(this.userLogueado, httpOptions).pipe(
+      tap(user => this.usuarioSubject.next(user))
+    );
   }
 
   obtenerCanalDelUsuario(id:number) {
@@ -88,7 +99,26 @@ export class AuthService {
 
   }
 
-
+  editarUsuario(id: number, usuario: any, foto?: File): Observable<any> {
+    const httpOptions = {
+      headers: new HttpHeaders({
+          'Authorization' : 'Bearer ' + this.cookie.get('accessToken')
+      })
+    };
+  
+    const formData: FormData = new FormData();
+    formData.append('name', usuario.name);
+    if (foto) {
+      formData.append('foto', foto);
+    }
+  
+    return this.http.post(`${this.editarUsuarioUrl}${id}`, formData, httpOptions).pipe(
+      catchError(error => {
+        console.error('Error al editar usuario', error);
+        return of(null);
+      })
+    );
+  }
 
   getToken() {
     let token = this.cookie.get('accessToken');

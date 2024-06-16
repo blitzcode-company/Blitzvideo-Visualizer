@@ -23,6 +23,7 @@ ngOnInit() {
 mostrarTodosLosVideos() {
   this.videoService.listarVideos().subscribe(res => {
     this.videos = res;
+    console.log(this.videos)
   });
 }
 
