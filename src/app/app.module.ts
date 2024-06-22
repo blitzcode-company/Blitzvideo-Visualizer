@@ -11,6 +11,7 @@ import { LoginComponent } from './componentes/login/login.component';
 import { RegistroComponent } from './componentes/registro/registro.component';
 import { HttpClientModule, HTTP_INTERCEPTORS} from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
+import { ReactiveFormsModule } from '@angular/forms';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { VerVideoComponent } from './componentes/ver-video/ver-video.component';
 import { EditarUsuarioComponent } from './componentes/editar-usuario/editar-usuario.component';
@@ -32,7 +33,8 @@ import { EditarUsuarioComponent } from './componentes/editar-usuario/editar-usua
     AppRoutingModule,
     HttpClientModule,
     FormsModule,
-    NgbModule
+    NgbModule,
+    ReactiveFormsModule
 
   ],
   providers: [

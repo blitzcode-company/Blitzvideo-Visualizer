@@ -1,0 +1,19 @@
+version: "3.8"
+services:
+  frontendvisualizer:
+    container_name: frontendvisualizer
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: serve-frontendapp
+      args:
+        CLIENT_ID: "1"      
+        CLIENT_SECRET: "lbzFPOR6PyvT8RurLQsWjMHZ67UTisBIUkTEZ1m7" 
+    ports:
+      - "3000:80"
+    networks:
+      - blitzvideo-api_default
+
+networks:
+  blitzvideo-api_default:
+    external: true

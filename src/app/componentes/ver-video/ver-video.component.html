@@ -17,3 +17,55 @@
     <p>{{ video.descripcion }}</p>
   </div>
 </div>
+
+<div class="comentarios-container">
+  <form (ngSubmit)="onSubmit()">
+    <div class="comentarista">
+      <div class="ashe">
+        <div class="inputyenvio">
+          <img [src]="usuario.foto" class="fotoInput" alt="" srcset="">
+          <input type="text" id="nuevoComentario" [(ngModel)]="nuevoComentarioMensaje" name="nuevoComentarioMensaje" placeholder="Escribe un comentario" required>
+        </div>
+        <button class="enviarComentario" type="submit">Enviar</button>
+
+      </div>
+
+    </div>
+  </form>
+  <hr>
+  <div id="comentarios" #comentariosContainer *ngFor="let comentario of comentarios">
+    <div class="comentado">
+      <img [src]="comentario.usuario?.foto" class="fotocomentador" alt="">
+      <p> {{ comentario.usuario?.name }}</p>
+    </div>
+    
+    <p>{{ comentario.mensaje }}</p>
+    <button (click)="toggleResponder(comentario)">Responder</button>
+
+    <div *ngIf="comentarioAResponder === comentario">
+      <form (ngSubmit)="onSubmitComentario()">
+        <div class="inputyenvio">
+          <img [src]="usuario.foto" class="fotoInput" alt="">
+          <input type="text" [(ngModel)]="respuestaMensaje[comentario.id !== undefined ? comentario.id : 'default']" name="respuestaMensaje{{ comentario.id !== undefined ? comentario.id : 'default' }}" placeholder="Escribe una respuesta" required>
+        </div>
+        <button class="enviarComentario" type="submit">Enviar</button>
+      </form>
+    </div>
+    <div *ngFor="let respuesta of comentario.respuestas_hijas">
+      <div class="comentado">
+        <img [src]="respuesta.usuario?.foto" class="fotocomentador" alt="">
+        <p>{{ respuesta.usuario?.name }}</p>
+      </div>
+      <p>{{ respuesta.mensaje }}</p>
+    </div>
+
+
+
+
+
+
+
+
+
+
+

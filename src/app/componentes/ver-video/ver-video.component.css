@@ -1,4 +1,4 @@
-.reproductor, .tituloVideo, .descripcion, .canalynombre {
+.reproductor, .tituloVideo, .descripcion, .canalynombre, .comentarios-container {
     margin-left: 10vh;
 }
 .canalynombre {
@@ -42,3 +42,62 @@
     margin-top:20px;
 
 }  
+
+.fotoInput {
+    width: 80px;
+    border-radius: 100px;
+
+}
+
+.comentarios-container {
+    margin-top: 20px; 
+  }
+  
+  .comentarista {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .inputyenvio {
+    display: flex;
+    align-items: center; 
+    width: 1000px; 
+    margin-top: 10px; 
+  }
+  
+  
+  .inputyenvio img.fotoInput {
+    margin-right: 10px; 
+  }
+  
+  .inputyenvio input[type="text"] {
+    width:960px;
+    height:50px;
+    background-color: #d9d9d9;
+    border: 0;
+
+  }
+  
+  .inputyenvio button {
+    margin-top: 90px;
+    margin-right: 100px;
+  }
+ 
+.enviarComentario {
+    margin-top: 10px;
+    width:5%;
+    height:35px;
+    margin-left: 910px; 
+    background-color: #076dc8;
+  }
+
+  .comentado {
+    display: flex;
+    
+  }
+  
+  .fotocomentador {
+    width: 50px;
+    border-radius: 100px;
+
+  }
