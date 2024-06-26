@@ -6,9 +6,6 @@ services:
       context: .
       dockerfile: Dockerfile
       target: serve-frontendapp  
-      args:
-        CLIENT_ID: "1"      
-        CLIENT_SECRET: "QpDBKw1dSybJhsrbx4l2dmAVp05FFY15Alv0ETjH"
     ports:
       - "3000:80"
     networks:
