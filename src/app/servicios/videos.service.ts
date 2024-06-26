@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Videos } from '../clases/videos';
+import { CookieService } from 'ngx-cookie-service';
 
 
 @Injectable({
@@ -11,8 +12,11 @@ export class VideosService {
 
   
   private api = 'http://localhost:8001/api/v1/videos/'
+  private apiVisita = 'http://localhost:8001/api/v1/usuario'
+  private apiVisitaInvitado = 'http://localhost:8001/api/v1/invitado'
 
-  constructor(private httpClient: HttpClient) { }
+
+  constructor(private httpClient: HttpClient, private cookie:CookieService) { }
 
   listarVideos():Observable<any> {
     const httpOptions = {
@@ -40,7 +44,7 @@ export class VideosService {
     const httpOptions = {
       headers: new HttpHeaders({
           'Content-Type' : 'multipart/form-data',
-          'Authorization' : 'Bearer ' + localStorage.getItem("accessToken") 
+          'Authorization' : 'Bearer ' + this.cookie.get('accessToken')
       })
     }
     const url = `${this.api}${idVideo}/info`;
@@ -52,7 +56,7 @@ export class VideosService {
     const httpOptions = {
       headers: new HttpHeaders({
           'Content-Type' : 'application/json',
-          'Authorization' : 'Bearer ' + localStorage.getItem("accessToken") 
+          'Authorization' : 'Bearer ' + this.cookie.get('accessToken') 
       })
     }
     const url = `${this.api}${idVideo}`;
@@ -63,7 +67,7 @@ export class VideosService {
     const httpOptions = {
       headers: new HttpHeaders({
           'Content-Type' : 'application/json',
-          'Authorization' : 'Bearer ' + localStorage.getItem("accessToken") 
+          'Authorization' : 'Bearer ' + this.cookie.get('accessToken')
       })
     }
 
@@ -76,12 +80,39 @@ export class VideosService {
     const httpOptions = {
       headers: new HttpHeaders({
           'Content-Type' : 'application/json',
-          'Authorization' : 'Bearer ' + localStorage.getItem("accessToken") 
+          'Authorization' : 'Bearer ' + this.cookie.get('accessToken')
       })
     }
 
     const url = `${this.api}buscar/${nombre}`;
     return this.httpClient.get(url, httpOptions);
+  }
+
+  contarVisita(idVideo: any, userId: any): Observable<any> {
+    const httpOptions = {
+      headers: new HttpHeaders({
+          'Content-Type' : 'application/json',
+          'Authorization' : 'Bearer ' + this.cookie.get('accessToken') 
+      })
+    }
+    const url = `${this.apiVisita}/${userId}/visita/${idVideo}`;
+    
+
+    return this.httpClient.get(url, httpOptions);
+
+  }
+
+  contarVisitaInvitado(idVideo: any): Observable<any> {
+    const httpOptions = {
+      headers: new HttpHeaders({
+          'Content-Type' : 'application/json',
+      })
+    }
+    const url = `${this.apiVisitaInvitado}/visita/${idVideo}`;
+    
+
+    return this.httpClient.get(url, httpOptions);
+
   }
 
 }

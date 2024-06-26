@@ -1,6 +1,6 @@
 <header class="header">
   <div class="container">
-    <a href="/" ><img class="logo" src="../../../assets/images/logo.png" alt="Logo de blitzvideo" srcset=""></a>
+    <a href="/" ><img class="logo" src="assets/images/logo.png" alt="Logo de blitzvideo" srcset=""></a>
     <nav class="nav">
     </nav>
     <div class="search-box">
@@ -11,21 +11,20 @@
         <div class="dropdown-content">
           <a *ngIf="status.isLoggedIn && canalNombre" routerLink="/miCanal" class="dropdown-item canal">{{ canalNombre }}</a>
           <img *ngIf="status.isLoggedIn && usuario?.foto" [src]="usuario.foto" alt="mdo" width="32" height="32" class="avatar">
-          <img *ngIf="status.isLoggedIn && !usuario?.foto" src="../../../assets/images/user.png" alt="mdo" width="48" height="32" class="avatar">
-          <img *ngIf="!status.isLoggedIn" src="../../../assets/images/user.png" alt="mdo" width="48" height="32" class="avatar">       
-        
+          <img *ngIf="status.isLoggedIn && !usuario?.foto" src="assets/images/user.png" alt="mdo" width="48" height="32" class="avatar">
+          <img *ngIf="!status.isLoggedIn" src="assets/images/user.png" alt="mdo" width="48" height="32" class="avatar">       
         </div>
       </button>
       <div class="dropdown-menu">
-        <a *ngIf="status.isLoggedIn && !canalNombre" href="http://localhost:4201/#/crearCanal" class="dropdown-item">Crear canal</a>
-        <a *ngIf="status.isLoggedIn && canalNombre" href="http://localhost:4201/#/" class="dropdown-item">Mi canal</a>
+        <a *ngIf="status.isLoggedIn && !canalNombre" href="http://localhost:3001/#/crearCanal" class="dropdown-item">Crear canal</a>
+        <a *ngIf="status.isLoggedIn && canalNombre" href="http://localhost:3001/#/" class="dropdown-item">Mi canal</a>
         <a *ngIf="status.isLoggedIn" routerLink="/editarUsuario" class="dropdown-item">Editar mi usuario</a>
         
 
         <hr class="dropdown-divider">
         <a *ngIf="status.isLoggedIn" routerLink="/#" (click)="logout()" class="dropdown-item">Cerrar sesión</a>
-        <a *ngIf="!status.isLoggedIn" routerLink="/login" class="dropdown-item">Login</a>
-        <a *ngIf="!status.isLoggedIn" routerLink="/registro" class="dropdown-item">Registro</a>
+        <a *ngIf="!status.isLoggedIn" href="http://localhost:3002/#/" class="dropdown-item">Login</a>
+        <a *ngIf="!status.isLoggedIn" href="http://localhost:3002/#/registro" class="dropdown-item">Registro</a>
       </div>
     </div>
   </div>

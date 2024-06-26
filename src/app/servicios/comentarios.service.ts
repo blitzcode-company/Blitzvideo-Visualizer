@@ -1,6 +1,11 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { Comentario } from '../clases/comentario';
+import { map } from 'rxjs/operators';
+import { CookieService } from 'ngx-cookie-service';
+
+
 
 @Injectable({
   providedIn: 'root'
@@ -11,7 +16,10 @@ export class ComentariosService {
 
 
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private cookie:CookieService) { }
+
+
+
 
   traerComentariosDelVideo(idVideo: any): Observable<any> {
     const url = `${this.urlComentarios}/${idVideo}/comentarios`
@@ -22,7 +30,7 @@ export class ComentariosService {
     const url = `${this.urlComentarios}/${idVideo}/comentarios`
     const httpOptions = {
       headers: new HttpHeaders({
-          'Authorization' : 'Bearer ' + localStorage.getItem("accessToken") 
+          'Authorization' : 'Bearer ' + this.cookie.get('accessToken')
 
       })
     }
@@ -34,7 +42,7 @@ export class ComentariosService {
     const url = `${this.urlComentarios}/comentarios/respuesta/${idComentario}`
     const httpOptions = {
       headers: new HttpHeaders({
-          'Authorization' : 'Bearer ' + localStorage.getItem("accessToken") 
+          'Authorization' : 'Bearer ' + this.cookie.get('accessToken') 
 
       })
     }
@@ -45,8 +53,7 @@ export class ComentariosService {
     const url = `${this.urlComentarios}/comentarios/${idComentario}`
     const httpOptions = {
       headers: new HttpHeaders({
-          'Content-Type' : 'application/json',
-          'Authorization' : 'Bearer ' + localStorage.getItem("accessToken") 
+          'Authorization' : 'Bearer ' + this.cookie.get('accessToken')
 
       })
     }

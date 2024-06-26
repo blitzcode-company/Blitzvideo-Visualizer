@@ -64,7 +64,7 @@ export class HeaderComponent {
     localStorage.removeItem("accessToken");
     this.cookie.delete('accessToken');
     this.status.isLoggedIn = false;
-    this.router.navigateByUrl("/login")
+    this.router.navigateByUrl("/#/")
 
   }
 

@@ -3,19 +3,19 @@
     <div class="loginbackground box-background--white padding-top--64">
 
     <div class="box-root padding-top--24 flex-flex flex-direction--column" style="flex-grow: 1; z-index: 9;">
-      <div class="box-root padding-top--48 padding-bottom--24 flex-flex flex-justifyContent--center">
-        <h1 class="logoylogin">
-          <img class="logo" src="../../../assets/images/logo.png" alt="">
-        </h1>
-      </div>
-      <div class="box-root padding-bottom--24 flex-flex flex-justifyContent--center">
-        <h2 >
-          Login
-        </h2>
-      </div>
+  
       <div class="formbg-outer">
         <div class="formbg">
-          
+          <div class="box-root padding-top--48 padding-bottom--24 flex-flex flex-justifyContent--center">
+            <h1 class="logoylogin">
+              <img class="logo" src="../../../assets/images/logo.png" alt="">
+            </h1>
+          </div>
+          <div class="box-root padding-bottom--24 flex-flex flex-justifyContent--center">
+            <h2 >
+              Login
+            </h2>
+          </div>
           <div class="formbg-inner padding-horizontal--48">
             <form id="stripe-login" #dataform="ngForm" (ngSubmit)="onSubmit(dataform)">
               <div class="field padding-bottom--24">
@@ -23,6 +23,11 @@
               </div>
               <div class="field padding-bottom--24">
                 <input type="password" placeholder="Contraseña" name="password"  ngModel name="password">
+              </div>
+              <div class="field padding-bottom--24">
+                <div *ngIf="loginAlerta" class="error">
+                  {{ loginAlerta }}
+                </div>         
               </div>
               <div class="field padding-bottom--24">
                 <button class="boton">Iniciar sesion</button>

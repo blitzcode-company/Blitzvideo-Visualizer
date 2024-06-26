@@ -3,6 +3,7 @@ import { NgForm } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../servicios/auth.service';
 import { Location } from '@angular/common';
+import { Title } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-editar-usuario',
@@ -15,10 +16,12 @@ usuario:any;
 foto: File | undefined = undefined;
 
 
-constructor (public router:Router, private authService: AuthService, public location:Location) {}
+constructor (public router:Router, private authService: AuthService, public location:Location, private titleService:Title) {}
 
 ngOnInit() {
   this.obtenerUsuario();
+  this.titleService.setTitle('Editar usuario - BlitzVideo');
+
 }
 
 obtenerUsuario() {

@@ -5,10 +5,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      target: serve-frontendapp
+      target: serve-frontendapp  
       args:
         CLIENT_ID: "1"      
-        CLIENT_SECRET: "lbzFPOR6PyvT8RurLQsWjMHZ67UTisBIUkTEZ1m7" 
+        CLIENT_SECRET: "QpDBKw1dSybJhsrbx4l2dmAVp05FFY15Alv0ETjH"
     ports:
       - "3000:80"
     networks:
@@ -17,3 +17,4 @@ services:
 networks:
   blitzvideo-api_default:
     external: true
+

@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { VideosService } from '../../servicios/videos.service';
 import { Videos } from '../../clases/videos';
+import { Title } from '@angular/platform-browser';
 
 
 @Component({
@@ -10,12 +11,14 @@ import { Videos } from '../../clases/videos';
 })
 export class HomeComponent {
 
-constructor(private videoService: VideosService){}
+constructor(private videoService: VideosService, private titleService: Title){}
 
 videos:any;
 
 ngOnInit() {
   this.mostrarTodosLosVideos();
+  this.titleService.setTitle('Pagina principal - BlitzVideo');
+
 
 }
 

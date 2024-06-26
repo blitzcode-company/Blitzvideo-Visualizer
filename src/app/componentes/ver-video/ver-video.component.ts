@@ -4,9 +4,11 @@ import { ComentariosService } from '../../servicios/comentarios.service';
 import { ActivatedRoute } from '@angular/router';
 import { Videos } from '../../clases/videos';
 import { AuthService } from '../../servicios/auth.service';
-import { FormBuilder, FormGroup } from '@angular/forms';
-import { Location } from '@angular/common';
 import { Comentario } from '../../clases/comentario';
+import { Title } from '@angular/platform-browser';
+import { PuntuacionesService } from '../../servicios/puntuaciones.service';
+import { StatusService } from '../../servicios/status.service';
+
 
 @Component({
   selector: 'app-ver-video',
@@ -16,51 +18,66 @@ import { Comentario } from '../../clases/comentario';
 export class VerVideoComponent implements OnInit {
   @ViewChild('videoPlayer', { static: false }) videoPlayer: ElementRef = {} as ElementRef;
   @ViewChild('comentariosContainer') comentariosContainer!: ElementRef | undefined;
+ 
 
-
-  id: any;
+  videoId: any;
   videos = new Videos();
   video: any;
   comentario: any;
   comentarios: Comentario[] = [];
   usuario: any;
-  nuevoComentarioMensaje: any;
-  comentarioAResponder: Comentario | null = null;
-  respuestaMensaje: { [key: string]: string } = {};
+  nuevoComentario: any = {
+    usuario_id: '',
+    mensaje: ''
+  };
+  respuestaComentario: any = {
+    usuario_id: '',
+    mensaje: ''
+  };
+  selectedComentarioId: number | null = null;
+  respondingTo: string = ''; 
+  visitaRealizada: boolean = false;
+  visitaRealizadaInvitado: boolean = false;
+  public loggedIn: boolean=false;
 
 
 
   constructor(private route:ActivatedRoute, 
-              private fb: FormBuilder,
               private videoService: VideosService, 
               private comentariosService: ComentariosService, 
               private authService: AuthService,
-              
+              private titleService: Title,
+              private puntuarService: PuntuacionesService,
+              public status:StatusService
               ) 
               {
 
               }
 
   ngOnInit(): void {
-    this.id = this.route.snapshot.params['id']
+    this.videoId = this.route.snapshot.params['id']
     this.mostrarVideo();
     this.traerComentarios();
     this.obtenerUsuario();
     this.crearComentario();
-    this.crearRespuesta(this.comentario);
+    this.visita();
+    this.visitaInvitado()
   }
+
+  
 
   obtenerUsuario() {
     this.authService.usuario$.subscribe(res => {
       this.usuario = res;
       this.crearComentario();
+      this.visita();
     });
 
     this.authService.mostrarUserLogueado().subscribe();
   }
 
   mostrarVideo() {
-    this.videoService.obtenerInformacionVideo(this.id).subscribe(res => {
+    this.videoService.obtenerInformacionVideo(this.videoId).subscribe(res => {
       this.videos = res;
       this.video = this.videos;
   
@@ -77,6 +94,10 @@ export class VerVideoComponent implements OnInit {
         }
       });
 
+      if (this.video && this.video.titulo) {
+        this.titleService.setTitle(this.video.titulo + ' - BlitzVideo');
+      }
+
       console.log(this.video);
     });
 
@@ -84,113 +105,153 @@ export class VerVideoComponent implements OnInit {
   }
 
   traerComentarios(): void {
-    this.comentariosService.traerComentariosDelVideo(this.id)
-      .subscribe(res => {
-        this.comentarios = res;
-        console.log(this.comentarios);
-        this.crearComentario();
-      });
+    this.comentariosService.traerComentariosDelVideo(this.videoId).subscribe(res => {
+      this.comentarios = this.organizarComentarios(res); // Organizar los comentarios al recibirlos
+      console.log(this.comentarios)
+    });
   }
 
-
   crearComentario(): void {
-    if (!this.nuevoComentarioMensaje || !this.nuevoComentarioMensaje.trim()) {
-      return; // No enviar comentarios vacíos
+    if (!this.nuevoComentario.mensaje.trim()) {
+      console.error('El campo mensaje no puede estar vacío.');
+      return;
     }
 
+    this.nuevoComentario.usuario_id = this.usuario.id;
     const usuarioFoto = this.usuario.foto;
     const usuarioNombre = this.usuario.name;
-
+  
     const nuevoComentarioHTML: string = `
-    <div style="display: flex;">
-      <img src="${usuarioFoto}" style="width: 50px; border-radius: 100px;" alt="">
-      <p>${usuarioNombre}</p>
-    </div>
-    
-    <p>${this.nuevoComentarioMensaje}</p>
-  `;
+      <div style="display: flex;">
+        <img src="${usuarioFoto}" style="width: 50px; border-radius: 100px;" alt="">
+        <p>${usuarioNombre}</p>
+      </div>
+      
+      <p>${this.nuevoComentario.mensaje}</p>
+    `;
+
     const comentariosContainer: HTMLElement | null = document.getElementById('comentarios');
     if (comentariosContainer) {
       comentariosContainer.innerHTML += nuevoComentarioHTML;
     }
-    const nuevoComentario: Comentario = {
-      video_id: this.id,
-      usuario_id: this.usuario.id,
-      respuesta_id: null, 
-      mensaje: this.nuevoComentarioMensaje
-    };
+    
+    this.comentariosService.crearComentario(this.videoId, this.nuevoComentario).subscribe(() => {
+      this.traerComentarios();
+     
+      this.nuevoComentario.mensaje = '';
+      this.selectedComentarioId = null;
+    }, error => {
+    
+      console.error('Error al crear comentario:', error);
+    });
+  }
+  
 
-    this.comentariosService.crearComentario(this.id, nuevoComentario)
-      .subscribe(res => {
-        console.log('Se ha creado el comentario con éxito', res);
-        this.comentarios.push(res);
-        this.nuevoComentarioMensaje = '';
-        if (this.comentariosContainer && this.comentariosContainer.nativeElement) {
-          this.comentariosContainer.nativeElement.scrollIntoView({ behavior: 'smooth' });
-        }
-      },
-      error => {
-        console.log('Error al crear comentario', error);
+  responderComentario(idComentario: number) {
+    this.selectedComentarioId = idComentario;
+  }
+
+  enviarRespuesta(): void {
+    if (this.selectedComentarioId !== null) {
+      this.respuestaComentario.video_id = this.videoId;
+      this.respuestaComentario.usuario_id = this.usuario.id;
+
+      this.comentariosService.responderComentario(this.selectedComentarioId, this.respuestaComentario).subscribe(() => {
+        this.traerComentarios();
+        this.respuestaComentario.mensaje = '';
+        this.selectedComentarioId = null;
+      }, error => {
+        console.error('Error al responder comentario:', error);
       });
+    }
+  }
+
+ toggleResponder(comentario: Comentario): void {
+    this.selectedComentarioId = comentario.id ?? null;
+    this.respondingTo = comentario.user?.name || '';
+    this.respuestaComentario.mensaje = `@${this.respondingTo} `;
   }
 
 
-  crearRespuesta(comentario: Comentario): void {
-    console.log('Comentario a responder:', comentario);
+  toggleRespuestas(comentario: Comentario): void {
+    comentario.mostrarRespuestas = !comentario.mostrarRespuestas;
+  }
 
-    this.comentarioAResponder = comentario;
-    if (typeof comentario.id === 'undefined') {
-        console.error('ID de comentario no definido');
-        return;
-    }
-    const mensaje = this.respuestaMensaje && this.respuestaMensaje[comentario.id];
-    console.log('Mensaje:', mensaje);
-    if (!mensaje || !mensaje.trim()) {
-        console.error('Mensaje vacío');
-        return;
-    }
-    const usuarioId = this.usuario ? this.usuario.id : null;
-    console.log('ID de usuario:', usuarioId);
-    if (!usuarioId) {
-        console.error('ID de usuario no encontrado');
-        return;
-    }
-    const nuevaRespuesta: Comentario = {
-        video_id: this.id,
-        usuario_id: usuarioId,
-        respuesta_id: comentario.id,
-        mensaje: mensaje
-    };
 
-    console.log('Nueva respuesta:', nuevaRespuesta);
-  
-    this.comentariosService.responderComentario(comentario.id, nuevaRespuesta)
-        .subscribe(res => {
-            console.log('Respuesta exitosa:', res);
-            comentario.respuestas_hijas = comentario.respuestas_hijas || [];
-            comentario.respuestas_hijas.push(res);
-            if (typeof comentario.id !== 'undefined') {
-                this.respuestaMensaje[comentario.id] = '';
-            }
-            if (this.comentariosContainer && this.comentariosContainer.nativeElement) {
-                this.comentariosContainer.nativeElement.scrollIntoView({ behavior: 'smooth' });
-            }
-        },
+  organizarComentarios(comentarios: Comentario[]): Comentario[] {
+    const mapaComentarios: { [key: number]: Comentario } = {};
+    const comentariosAnidados: Comentario[] = [];
+
+    comentarios.forEach(comentario => {
+      comentario.respuestas = []; // Inicializamos el array de respuestas para cada comentario
+      if (comentario.id !== undefined) {
+        mapaComentarios[comentario.id] = comentario;
+      }    
+    });
+
+    comentarios.forEach(comentario => {
+      if (comentario.respuesta_id && mapaComentarios[comentario.respuesta_id]) {
+        mapaComentarios[comentario.respuesta_id].respuestas!.push(comentario);
+      } else {
+        comentariosAnidados.push(comentario);
+      }
+    });
+
+    return comentariosAnidados;
+  }
+
+  puntuar(valora: number): void {
+    this.puntuarService.puntuar(this.videoId, this.usuario.id, valora).subscribe(response => {
+      console.log(response.message);
+    }, error => {
+      console.error(error.error.message);
+    });
+  }
+
+  editarPuntuacion(idPuntua: number, valora: number): void {
+    this.puntuarService.editarPuntuacion(idPuntua, valora).subscribe(response => {
+      console.log(response.message);
+    }, error => {
+      console.error(error.error.message);
+    });
+  }
+
+  bajaLogicaPuntuacion(idPuntua: number): void {
+    this.puntuarService.quitarPuntuacion(idPuntua).subscribe(response => {
+      console.log(response.message);
+    }, error => {
+      console.error(error.error.message);
+    });
+  }
+
+  visita(): void {
+    if (!this.visitaRealizada) {
+      this.videoService.contarVisita(this.videoId, this.usuario.id).subscribe(
+        response => {
+          console.log(response.message); 
+        }, 
         error => {
-            console.error('Error al crear respuesta:', error);
-        });
-}
-  
-  
-  
-toggleResponder(comentario: Comentario): void {
-  console.log('Comentario a responder:', comentario);
-  if (this.comentarioAResponder === comentario) {
-      this.comentarioAResponder = null; 
-  } else {
-      this.comentarioAResponder = comentario; 
+          console.error(error.error.message); 
+        }
+      );
+      this.visitaRealizada = true; 
+    }
   }
-}
+
+  visitaInvitado(): void {
+    if (!this.visitaRealizadaInvitado) {
+      this.videoService.contarVisitaInvitado(this.videoId).subscribe(
+        response => {
+          console.log(response.message); 
+        }, 
+        error => {
+          console.error(error.error.message); 
+        }
+      );
+      this.visitaRealizadaInvitado = true; 
+    }
+  }
+  
 
 
   convertirFechaALineaDeTexto(fecha: Date): string {
@@ -217,21 +278,9 @@ toggleResponder(comentario: Comentario): void {
     return lineaDeTexto;
   }
   
-  onSubmit() {
-      console.log('Formulario enviado', this.nuevoComentarioMensaje);
-      this.crearComentario();
-      
-    }
+ 
 
-    onSubmitComentario() {
-      if (this.comentarioAResponder !== null) {
-        console.log('Comentario a responder en onSubmit:', this.comentarioAResponder);
-        console.log('Respuesta mensaje:', this.respuestaMensaje);
-        this.crearRespuesta(this.comentarioAResponder);
-    } else {
-        console.error('No hay un comentario para responder');
-    }
-    }
+    
   }
 
 
