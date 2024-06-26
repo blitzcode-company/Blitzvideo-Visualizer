@@ -1,18 +1,40 @@
-    # Blitzvideo-FrontendVisualizer
-- Vamos a nuestro directorio del frontend e instalamos las dependencias con el siguiente comando:
-     - npm install
-- Luego nos dirigimos al servicio de auth
-     - (./FrontendApp/src/app/servicios/auth.service.ts)
-  De ahi reemplazamos el client_id y el client_secret que estan dentro del codigo por los que generamos recien y guardamos los cambios.
-- Dentro de nuestro directorio de (./FrontendApp) compilamos el proyecto de Angular
-    -  ("ng build")
-- A continuacion creamos un archivo llamado "dockerfile" dentro del directorio que se acaba de generar
-     - (./frontendVisualizer/dist/frontend.visualizer/)
-- Dentro de el archivo "dockerfile" escribiremos lo siguiente:
-    -  "FROM httpd 
-    -  COPY ./browser/ /usr/local/apache2/htdocs"
-  (Hay que fijarse bien si el directorio tiene el nombre de "browser", por lo contrario se cambia)
-- Luego dentro del mismo directorio, generaremos la imagen de Apache, escribiendo lo siguiente:
-    -  docker build -t frontendvisualizer-apache .
-- Despues de generar la imagen, levantamos el proyecto de docker con el siguiente comando dentro de el directorio de donde tengamos los proyectos
-    -  docker-compose up -d
+# Blitzvideo-FrontendVisualizer
+
+<p align="center">
+    <img src="https://drive.google.com/uc?export=download&id=1yyVoEHmLQgzYpDJJJvjtpo1MHdZNP84k" width="200">
+</p>
+
+### Configuración del proyecto
+
+-   Para comenzar, clona el repositorio de GitHub a tu máquina local. Abre una terminal y ejecuta el siguiente comando:
+
+`Vía SSH:`
+
+```
+git clone git@github.com:blitzcode-company/Blitzvideo-Visualizer.git
+```
+
+`Vía HTTPS:`
+
+```
+git clone https://github.com/blitzcode-company/Blitzvideo-Visualizer.git
+```
+
+-   Ingresamos al proyecto `cd Blitzvideo-Visualizer` y ejecutamos:
+
+```
+npm install
+```
+
+-   Generamos el contenedor de Blitzvideo-Visualizer con:
+
+```
+docker compose up -d
+```
+
+- El contenedor se abrira en el puerto 3000 en
+
+
+```
+localhost:3000
+```
