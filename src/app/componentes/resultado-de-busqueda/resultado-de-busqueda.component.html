@@ -1,0 +1,32 @@
+<app-header></app-header>
+<div class="search-results">
+  <h2>Resultados de búsqueda para "{{ nombre }}"</h2>
+  <div class="container">
+    <!-- Mostrar mensaje si no hay videos -->
+    <div *ngIf="videos.length === 0" class="no-results">
+      <p>No se encontraron resultados para "{{ nombre }}"</p>
+    </div>
+    
+    <!-- Mostrar resultados si hay videos -->
+    <div *ngIf="videos.length > 0" class="results-container">
+      <div class="video-search-result" *ngFor="let video of videos">
+        <a [routerLink]="['/video', video.id]">
+          <img class="thumbnail" [src]="video.miniatura" alt="Miniatura del video">
+          <div class="video-info">
+            <h3 class="title">{{ video.titulo }}</h3>
+            <p class="description">{{ video.descripcion }}</p>
+            <div class="details">
+              <div>
+                <img [src]="video.canal.user.foto" class="fotoCanal" width="30px" alt="">
+                <span class="channel">{{ video.canal.nombre }}</span>
+              </div>
+              <span class="views">{{ video.visitas_count }} visualizaciones</span>
+              <span class="date">{{ video.created_at }}</span>
+            </div>
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+

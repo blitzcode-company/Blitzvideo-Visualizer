@@ -8,18 +8,18 @@ import { Comentario } from '../../clases/comentario';
 import { Title } from '@angular/platform-browser';
 import { PuntuacionesService } from '../../servicios/puntuaciones.service';
 import { StatusService } from '../../servicios/status.service';
-
+import { Observable } from 'rxjs';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-ver-video',
   templateUrl: './ver-video.component.html',
-  styleUrl: './ver-video.component.css'
+  styleUrls: ['./ver-video.component.css']  
 })
 export class VerVideoComponent implements OnInit {
-  @ViewChild('videoPlayer', { static: false }) videoPlayer: ElementRef = {} as ElementRef;
-  @ViewChild('comentariosContainer') comentariosContainer!: ElementRef | undefined;
- 
+  @ViewChild('videoPlayer', { static: false }) videoPlayer: ElementRef | undefined;
 
+  puntuacionSeleccionada: number | null = null;
   videoId: any;
   videos = new Videos();
   video: any;
@@ -35,61 +35,60 @@ export class VerVideoComponent implements OnInit {
     mensaje: ''
   };
   selectedComentarioId: number | null = null;
-  respondingTo: string = ''; 
+  respondingTo: string = '';
   visitaRealizada: boolean = false;
   visitaRealizadaInvitado: boolean = false;
-  public loggedIn: boolean=false;
+  public loggedIn: boolean = false;
+  puntuacionActual: any = {};
+  valorPuntuacion: number | null = null; 
 
-
-
-  constructor(private route:ActivatedRoute, 
-              private videoService: VideosService, 
-              private comentariosService: ComentariosService, 
-              private authService: AuthService,
-              private titleService: Title,
-              private puntuarService: PuntuacionesService,
-              public status:StatusService
-              ) 
-              {
-
-              }
+  constructor(
+    private route: ActivatedRoute,
+    private videoService: VideosService,
+    private comentariosService: ComentariosService,
+    private authService: AuthService,
+    private titleService: Title,
+    private puntuarService: PuntuacionesService,
+    public status: StatusService,
+    public dialog: MatDialog
+  ) {}
 
   ngOnInit(): void {
-    this.videoId = this.route.snapshot.params['id']
+    this.videoId = this.route.snapshot.params['id'];
     this.mostrarVideo();
-    this.traerComentarios();
     this.obtenerUsuario();
-    this.crearComentario();
-    this.visita();
-    this.visitaInvitado()
+    this.visitar();
+     if (this.usuario && this.usuario.id) {
+      this.obtenerPuntuacionActual(); 
+    }
+    console.log('Puntuación seleccionada inicial:', this.puntuacionSeleccionada);
+
   }
 
-  
-
-  obtenerUsuario() {
+  obtenerUsuario(): void {
     this.authService.usuario$.subscribe(res => {
       this.usuario = res;
-      this.crearComentario();
-      this.visita();
+      console.log('Usuario obtenido:', this.usuario);
+      this.obtenerPuntuacionActual();  
     });
 
     this.authService.mostrarUserLogueado().subscribe();
   }
 
-  mostrarVideo() {
+  mostrarVideo(): void {
     this.videoService.obtenerInformacionVideo(this.videoId).subscribe(res => {
       this.videos = res;
       this.video = this.videos;
-  
+
       if (this.video && this.video.created_at) {
         const fecha = new Date(this.video.created_at);
         if (!isNaN(fecha.getTime())) {
           this.video.created_at = this.convertirFechaALineaDeTexto(fecha);
-        } 
+        }
       }
-  
+
       setTimeout(() => {
-        if (this.videoPlayer && this.videoPlayer.nativeElement) {
+        if (this.videoPlayer?.nativeElement) {
           this.videoPlayer.nativeElement.load();
         }
       });
@@ -97,190 +96,118 @@ export class VerVideoComponent implements OnInit {
       if (this.video && this.video.titulo) {
         this.titleService.setTitle(this.video.titulo + ' - BlitzVideo');
       }
-
       console.log(this.video);
     });
-
-    
-  }
-
-  traerComentarios(): void {
-    this.comentariosService.traerComentariosDelVideo(this.videoId).subscribe(res => {
-      this.comentarios = this.organizarComentarios(res); // Organizar los comentarios al recibirlos
-      console.log(this.comentarios)
-    });
-  }
-
-  crearComentario(): void {
-    if (!this.nuevoComentario.mensaje.trim()) {
-      console.error('El campo mensaje no puede estar vacío.');
-      return;
-    }
-
-    this.nuevoComentario.usuario_id = this.usuario.id;
-    const usuarioFoto = this.usuario.foto;
-    const usuarioNombre = this.usuario.name;
-  
-    const nuevoComentarioHTML: string = `
-      <div style="display: flex;">
-        <img src="${usuarioFoto}" style="width: 50px; border-radius: 100px;" alt="">
-        <p>${usuarioNombre}</p>
-      </div>
-      
-      <p>${this.nuevoComentario.mensaje}</p>
-    `;
-
-    const comentariosContainer: HTMLElement | null = document.getElementById('comentarios');
-    if (comentariosContainer) {
-      comentariosContainer.innerHTML += nuevoComentarioHTML;
-    }
-    
-    this.comentariosService.crearComentario(this.videoId, this.nuevoComentario).subscribe(() => {
-      this.traerComentarios();
-     
-      this.nuevoComentario.mensaje = '';
-      this.selectedComentarioId = null;
-    }, error => {
-    
-      console.error('Error al crear comentario:', error);
-    });
-  }
-  
-
-  responderComentario(idComentario: number) {
-    this.selectedComentarioId = idComentario;
-  }
-
-  enviarRespuesta(): void {
-    if (this.selectedComentarioId !== null) {
-      this.respuestaComentario.video_id = this.videoId;
-      this.respuestaComentario.usuario_id = this.usuario.id;
-
-      this.comentariosService.responderComentario(this.selectedComentarioId, this.respuestaComentario).subscribe(() => {
-        this.traerComentarios();
-        this.respuestaComentario.mensaje = '';
-        this.selectedComentarioId = null;
-      }, error => {
-        console.error('Error al responder comentario:', error);
-      });
-    }
-  }
-
- toggleResponder(comentario: Comentario): void {
-    this.selectedComentarioId = comentario.id ?? null;
-    this.respondingTo = comentario.user?.name || '';
-    this.respuestaComentario.mensaje = `@${this.respondingTo} `;
-  }
-
-
-  toggleRespuestas(comentario: Comentario): void {
-    comentario.mostrarRespuestas = !comentario.mostrarRespuestas;
-  }
-
-
-  organizarComentarios(comentarios: Comentario[]): Comentario[] {
-    const mapaComentarios: { [key: number]: Comentario } = {};
-    const comentariosAnidados: Comentario[] = [];
-
-    comentarios.forEach(comentario => {
-      comentario.respuestas = []; // Inicializamos el array de respuestas para cada comentario
-      if (comentario.id !== undefined) {
-        mapaComentarios[comentario.id] = comentario;
-      }    
-    });
-
-    comentarios.forEach(comentario => {
-      if (comentario.respuesta_id && mapaComentarios[comentario.respuesta_id]) {
-        mapaComentarios[comentario.respuesta_id].respuestas!.push(comentario);
-      } else {
-        comentariosAnidados.push(comentario);
-      }
-    });
-
-    return comentariosAnidados;
   }
 
   puntuar(valora: number): void {
-    this.puntuarService.puntuar(this.videoId, this.usuario.id, valora).subscribe(response => {
-      console.log(response.message);
-    }, error => {
-      console.error(error.error.message);
-    });
-  }
-
-  editarPuntuacion(idPuntua: number, valora: number): void {
-    this.puntuarService.editarPuntuacion(idPuntua, valora).subscribe(response => {
-      console.log(response.message);
-    }, error => {
-      console.error(error.error.message);
-    });
-  }
-
-  bajaLogicaPuntuacion(idPuntua: number): void {
-    this.puntuarService.quitarPuntuacion(idPuntua).subscribe(response => {
-      console.log(response.message);
-    }, error => {
-      console.error(error.error.message);
-    });
-  }
-
-  visita(): void {
-    if (!this.visitaRealizada) {
-      this.videoService.contarVisita(this.videoId, this.usuario.id).subscribe(
-        response => {
-          console.log(response.message); 
-        }, 
-        error => {
-          console.error(error.error.message); 
-        }
-      );
-      this.visitaRealizada = true; 
+    if (!this.usuario || !this.usuario.id) {
+      window.location.href = 'http://localhost:3002/#/'; 
     }
-  }
-
-  visitaInvitado(): void {
-    if (!this.visitaRealizadaInvitado) {
-      this.videoService.contarVisitaInvitado(this.videoId).subscribe(
-        response => {
-          console.log(response.message); 
-        }, 
-        error => {
-          console.error(error.error.message); 
-        }
-      );
-      this.visitaRealizadaInvitado = true; 
-    }
-  }
   
+    if (this.puntuacionSeleccionada === valora) {
+      this.eliminarPuntuacion();
+    } else {
+      this.valorPuntuacion = valora;
+      this.puntuacionSeleccionada = valora;  
+      this.crearActualizarPuntuacion();  
+    }
+  }
 
+  obtenerPuntuacionActual(): void {
+    this.puntuarService.obtenerPuntuacionActual(this.videoId, this.usuario.id).subscribe(
+      response => {
+        this.puntuacionActual = response;
+        this.puntuacionSeleccionada = this.puntuacionActual.valora; 
+        console.log('Puntuación actual:', this.puntuacionActual);
+        console.log('Puntuación seleccionada:', this.puntuacionSeleccionada);
+      },
+      error => {
+        if (error.status === 404) {
+          console.warn('El usuario no ha dado una valoración para este video.');
+          this.puntuacionSeleccionada = null; 
+        } else {
+          console.error('Error al obtener la puntuación actual:', error);
+        }
+      }
+    );
+  }
+
+  eliminarPuntuacion(): void {
+    if (this.valorPuntuacion === null) {
+      console.error('No se ha seleccionado un valor de puntuación para eliminar.');
+      return;
+    }
+  
+    this.puntuarService.quitarPuntuacion(this.videoId, this.usuario.id, this.valorPuntuacion).subscribe(
+      response => {
+        console.log(response.message);
+        this.puntuacionActual = null;
+        this.valorPuntuacion = null; 
+        this.puntuacionSeleccionada = null;  
+      },
+      error => {
+        console.error('Error al eliminar la puntuación:', error.error.message);
+      }
+    );
+  }
+
+  crearActualizarPuntuacion(): void {
+    if (this.valorPuntuacion === null) {
+      console.error('No se ha seleccionado un valor de puntuación para crear o actualizar.');
+      return;
+    }
+  
+    this.puntuarService.puntuar(this.videoId, this.usuario.id, this.valorPuntuacion).subscribe(
+      response => {
+        console.log(response.message);
+        this.obtenerPuntuacionActual();  
+      },
+      error => {
+        console.error('Error al crear o actualizar la puntuación:', error.error.message);
+      }
+    );
+  }
+
+  visitar(): void {
+    const esInvitado = !this.usuario;
+    if ((esInvitado && !this.visitaRealizadaInvitado) || (!esInvitado && !this.visitaRealizada)) {
+      let visitaObservable: Observable<any>;
+
+      if (esInvitado) {
+        visitaObservable = this.videoService.contarVisitaInvitado(this.videoId);
+        this.visitaRealizadaInvitado = true;
+      } else {
+        if (this.usuario && this.usuario.id) {
+          visitaObservable = this.videoService.contarVisita(this.videoId, this.usuario.id);
+          this.visitaRealizada = true;
+        } else {
+          console.error('Usuario no está autenticado o no tiene un ID válido.');
+          return;
+        }
+      }
+
+      visitaObservable.subscribe(
+        response => {
+          console.log(response.message);
+        },
+        error => {
+          console.error('Error al contar visita:', error);
+        }
+      );
+    }
+  }
 
   convertirFechaALineaDeTexto(fecha: Date): string {
     const meses = [
-      "enero",
-      "febrero",
-      "marzo",
-      "abril",
-      "mayo",
-      "junio",
-      "julio",
-      "agosto",
-      "septiembre",
-      "octubre",
-      "noviembre",
-      "diciembre"
+      'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+      'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
     ];
-  
+
     const dia = fecha.getDate();
     const mes = meses[fecha.getMonth()];
     const año = fecha.getFullYear();
-  
-    const lineaDeTexto = `${dia} de ${mes} de ${año}`;
-    return lineaDeTexto;
+
+    return `${dia} de ${mes} de ${año}`;
   }
-  
- 
-
-    
-  }
-
-
+}

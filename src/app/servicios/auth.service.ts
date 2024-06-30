@@ -3,10 +3,11 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { CookieService } from 'ngx-cookie-service';
 import { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
-import { tap } from 'rxjs';
+import { tap, map } from 'rxjs';
 import { catchError } from 'rxjs';
 import { of } from 'rxjs';
-
+import { MatDialog } from '@angular/material/dialog';
+import { UsuarioRequeridoComponent } from '../Modales/usuario-requerido/usuario-requerido.component';
 
 
 @Injectable({
@@ -24,8 +25,17 @@ export class AuthService {
   private usuarioSubject = new BehaviorSubject<any>(null);
   public usuario$: Observable<any> = this.usuarioSubject.asObservable();
 
-  constructor(private http: HttpClient, private cookie: CookieService) { }
+  constructor(private http: HttpClient, private cookie: CookieService, private dialog: MatDialog) { }
 
+  isAuthenticated(): Observable<boolean> {
+    return this.usuario$.pipe(
+      map(usuario => !!usuario && !!usuario.id)
+    );
+  }
+
+  showUsuarioRequeridoModal(): void {
+    this.dialog.open(UsuarioRequeridoComponent);
+  }
 
   sendLogin(credentials: any) {
     const body = {

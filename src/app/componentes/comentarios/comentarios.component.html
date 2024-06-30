@@ -1,0 +1,65 @@
+<div class="comentarios-container">
+  <form (ngSubmit)="crearComentario()">
+    <div class="comentarista">
+      <div class="ashe">
+        <div class="inputyenvio">
+          <img *ngIf="status.isLoggedIn && usuario?.foto" [src]="usuario?.foto" class="fotoInput" alt="Foto del usuario">
+          <img *ngIf="!status.isLoggedIn && !usuario?.foto" src="assets/images/user.png" class="fotoInput" alt="Foto del usuario">
+          <img *ngIf="status.isLoggedIn && !usuario?.foto" src="assets/images/user.png" class="fotoInput" alt="Foto del usuario">
+          <input type="text" id="nuevoComentario" [(ngModel)]="nuevoComentario.mensaje" name="nuevoComentarioMensaje"
+            placeholder="Escribe un comentario" required>
+        </div>
+        <button class="enviarComentario" type="submit">Enviar</button>
+      </div>
+    </div>
+  </form>
+  <hr>
+  <div id="comentarios">
+  </div>
+  <div class="contenedorcomentarios">
+    <div *ngFor="let comentario of comentarios.reverse()" class="comentario">
+      <div class="comentado">
+        <img *ngIf="!comentario.user?.foto" src="assets/images/user.png" class="fotocomentador"
+        alt="Foto del comentador">
+        <img *ngIf="comentario.user?.foto" [src]="comentario.user?.foto" class="fotocomentador"
+          alt="Foto del comentador">
+        <p>{{ comentario.user?.name }}</p>
+      </div>
+
+      <p>{{ comentario.mensaje }}</p>
+      <button (click)="toggleResponder(comentario)" class="botonResponder" >Responder</button>
+      <a (click)="toggleRespuestas(comentario)">
+        {{ comentario.mostrarRespuestas ? 'Ocultar respuestas' : '' + (comentario.respuestas?.length || 0) + ' respuestas' }}
+      </a>      
+      <form *ngIf="selectedComentarioId === comentario.id" (ngSubmit)="enviarRespuesta()">
+        <div>
+          <input type="text" [(ngModel)]="respuestaComentario.mensaje" name="respuestaMensaje"
+            required>
+          <button type="submit">Enviar respuesta</button>
+        </div>
+      </form>
+
+      <div *ngIf="comentario.mostrarRespuestas" class="respuestas">
+        <div *ngIf="comentario.respuestas && comentario.respuestas.length > 0" class="respuestas-container">
+          <div *ngFor="let respuesta of comentario.respuestas" class="respuesta">
+          <div class="respondido">
+            <img *ngIf="!respuesta.user?.foto" src="assets/images/user.png" class="fotoRespuesta" alt="Foto del usuario que responde">
+            <img *ngIf="respuesta.user?.foto" [src]="respuesta.user?.foto" class="fotoRespuesta" alt="Foto del usuario que responde">
+            <p>{{ respuesta.user?.name }}</p>
+          </div>
+            <p>{{ respuesta.mensaje }}</p>
+            <button (click)="toggleResponder(respuesta)" class="botonResponder">Responder</button>
+            <form *ngIf="selectedComentarioId === respuesta.id" (ngSubmit)="enviarRespuesta()">
+              <div>
+                <br>
+                <input type="text" [(ngModel)]="respuestaComentario.mensaje" name="respuestaMensaje"
+                  required>
+                <button type="submit">Enviar respuesta</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

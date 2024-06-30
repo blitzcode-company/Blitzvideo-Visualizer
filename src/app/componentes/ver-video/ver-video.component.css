@@ -3,9 +3,43 @@
 }
 
 .puntuar {
-  margin-left: 100vh;
+    background-color: #2d2d2d;
+  margin-left: 95vh;
+  display: flex;
+  justify-content: space-between;
+  width: 12%;
+  border-radius: 100px;
+}
+
+.puntuar a {
+    display: inline-block;
+    text-decoration: none; 
+  }
+
+.puntuar img {
+    width: 40px;
+    height: 40px;
 
 }
+.puntuar a img {
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    cursor: pointer;
+    
+  }
+  
+  .puntuar a img:hover {
+    transform: scale(1.2);
+    opacity: 0.8;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  }
+  
+  .puntuar a.selected img {
+    border: 2px solid #076dc8; 
+    transform: scale(1.2); 
+    opacity: 1; 
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5); 
+  }
+
 .visitas {
   margin-left: 75vh;
   font-family: Roboto;
@@ -63,87 +97,3 @@
 
 }  
 
-.fotoInput {
-    width: 80px;
-    border-radius: 100px;
-
-}
-
-.comentarios-container {
-    margin-top: 20px; 
-  }
-  
-  .comentarista {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .inputyenvio {
-    display: flex;
-    align-items: center; 
-    width: 1000px; 
-    margin-top: 170px; 
-  }
-  
-  
-  .inputyenvio img.fotoInput {
-    margin-right: 10px; 
-  }
-  
-  .inputyenvio input[type="text"] {
-    width:960px;
-    height:50px;
-    background-color: #d9d9d9;
-    border: 0;
-
-  }
-  
-  .inputyenvio button {
-    margin-top: 90px;
-    margin-right: 100px;
-  }
- 
-.enviarComentario {
-    margin-top: 10px;
-    width:5%;
-    height:35px;
-    margin-left: 910px; 
-     background-color: #076dc8;
-    color: white;
-  }
-
-  .botonResponder {
-    background-color: #076dc8;
-    color:white;
-  }
-
-  .respondido {
-    display:  flex;
-  }
-
-  .comentado{
-    display: flex;
-     
-  }
-  
-  .fotocomentador {
-    width: 50px;
-    border-radius: 100px ;
-
-  }
-
-  .fotoRespuesta  {
-    width:  45px;
-    border-radius: 100px;
-
-  }
-
-.comentario{
-  margin-bottom: 30px;
-}
-
-.respuesta {
-  margin-bottom:10px;
-  margin-top:10px
-
-}

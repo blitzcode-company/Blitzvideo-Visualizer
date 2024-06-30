@@ -48,6 +48,12 @@ a {
   .fotoUser {
     border-radius: 25px;
   }
+
+  .fotoUserDefault {
+    border-radius: 25px;
+    width:75px;
+    height:50px
+  }
   
   @media (min-width: 768px) {
     .video {

@@ -9,13 +9,17 @@ import { HeaderComponent } from './componentes/header/header.component';
 import { CookieService } from 'ngx-cookie-service';
 import { LoginComponent } from './componentes/login/login.component';
 import { RegistroComponent } from './componentes/registro/registro.component';
-import { HttpClientModule, HTTP_INTERCEPTORS} from '@angular/common/http';
-import { FormsModule } from '@angular/forms';
-import { ReactiveFormsModule } from '@angular/forms';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms'; 
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { VerVideoComponent } from './componentes/ver-video/ver-video.component';
 import { EditarUsuarioComponent } from './componentes/editar-usuario/editar-usuario.component';
-
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
+import { ComentariosComponent } from './componentes/comentarios/comentarios.component';
+import { UsuarioRequeridoComponent } from './Modales/usuario-requerido/usuario-requerido.component';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatButtonModule } from '@angular/material/button';
+import { ResultadoDeBusquedaComponent } from './componentes/resultado-de-busqueda/resultado-de-busqueda.component'; 
 
 @NgModule({
   declarations: [
@@ -26,7 +30,10 @@ import { EditarUsuarioComponent } from './componentes/editar-usuario/editar-usua
     LoginComponent,
     RegistroComponent,
     VerVideoComponent,
-    EditarUsuarioComponent
+    EditarUsuarioComponent,
+    ComentariosComponent,
+    UsuarioRequeridoComponent,
+    ResultadoDeBusquedaComponent
   ],
   imports: [
     BrowserModule,
@@ -34,12 +41,18 @@ import { EditarUsuarioComponent } from './componentes/editar-usuario/editar-usua
     HttpClientModule,
     FormsModule,
     NgbModule,
-    ReactiveFormsModule
-
+    ReactiveFormsModule,
+    MatDialogModule,
+    MatButtonModule
+  ],
+  exports: [
+    VerVideoComponent,
+    ComentariosComponent
   ],
   providers: [
     provideClientHydration(), 
-    CookieService
+    CookieService, 
+    provideAnimationsAsync()
   ],
   bootstrap: [AppComponent]
 })

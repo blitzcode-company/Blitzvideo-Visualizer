@@ -4,7 +4,7 @@
     <nav class="nav">
     </nav>
     <div class="search-box">
-      <input type="search" class="search-input" placeholder="Search..." aria-label="Search">
+      <input type="text" [(ngModel)]="nombre" placeholder="Buscar video" (keyup.enter)="buscarVideos()" class="search-input" aria-label="Search" >
     </div>
     <div class="dropdown" [class.open]="isDropdownOpen">
       <button class="dropdown-toggle" (click)="toggleDropdown($event)">

@@ -5,12 +5,15 @@
     <div class="video" *ngFor="let video of chunk">
       <a [routerLink]="['/video', video.id]">
         <div class="imagenMiniatura">
-          <img class="miniatura" [src]="video.miniatura" width="290" height="160" alt="miniatura">
+          <img *ngIf="video.miniatura" class="miniatura" [src]="video.miniatura" width="290" height="160" alt="miniatura">
+          <img *ngIf="!video.miniatura" class="miniatura" src="/Blitzvideo-Visualizer/src/assets/images/miniaturaDefault.jpg" width="290" height="160" alt="miniatura">
+
         </div>
         <h2>{{ video.titulo }}</h2>
         <hr>
         <h3 class="canalNombre">
-          <img class="fotoUser" src="{{ video.canal.user.foto }}" alt="Foto del canal" width="48" height="48">
+          <img *ngIf="video.canal.user.foto" class="fotoUser" src="{{ video.canal.user.foto }}" alt="Foto del canal" width="48" height="48">
+          <img *ngIf="!video.canal.user.foto" class="fotoUserDefault" src="/assets/images/user.png" alt="Foto del canal" width="48" height="48">
             {{ video.canal.nombre }}
         </h3>
       </a>

@@ -31,6 +31,8 @@ export class HeaderComponent {
   canals = new Canal();
   canalId:any;
   canalNombre:any
+  nombre: string = '';
+
 
 
   obtenerUsuario() {
@@ -40,6 +42,12 @@ export class HeaderComponent {
 
     });
     this.api.mostrarUserLogueado().subscribe();
+  }
+
+  buscarVideos(): void {
+    if (this.nombre.trim()) {
+      this.router.navigate(['/buscar', this.nombre]);
+    }
   }
 
 

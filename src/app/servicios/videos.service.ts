@@ -3,7 +3,7 @@ import { Observable } from 'rxjs';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Videos } from '../clases/videos';
 import { CookieService } from 'ngx-cookie-service';
-
+import moment from 'moment'; 
 
 @Injectable({
   providedIn: 'root'
@@ -80,14 +80,14 @@ export class VideosService {
     const httpOptions = {
       headers: new HttpHeaders({
           'Content-Type' : 'application/json',
-          'Authorization' : 'Bearer ' + this.cookie.get('accessToken')
       })
     }
 
-    const url = `${this.api}buscar/${nombre}`;
-    return this.httpClient.get(url, httpOptions);
+    const url = `${this.api}nombre/${nombre}`;
+    return this.httpClient.get<any[]>(url, httpOptions);
   }
 
+  
   contarVisita(idVideo: any, userId: any): Observable<any> {
     const httpOptions = {
       headers: new HttpHeaders({
