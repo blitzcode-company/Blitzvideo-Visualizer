@@ -3,9 +3,8 @@
     <div class="comentarista">
       <div class="ashe">
         <div class="inputyenvio">
-          <img *ngIf="status.isLoggedIn && usuario?.foto" [src]="usuario?.foto" class="fotoInput" alt="Foto del usuario">
+          <img *ngIf="status.isLoggedIn && usuario?.foto"[src]="usuario?.foto" class="fotoInput" alt="Foto del usuario">
           <img *ngIf="!status.isLoggedIn && !usuario?.foto" src="assets/images/user.png" class="fotoInput" alt="Foto del usuario">
-          <img *ngIf="status.isLoggedIn && !usuario?.foto" src="assets/images/user.png" class="fotoInput" alt="Foto del usuario">
           <input type="text" id="nuevoComentario" [(ngModel)]="nuevoComentario.mensaje" name="nuevoComentarioMensaje"
             placeholder="Escribe un comentario" required>
         </div>
@@ -15,12 +14,8 @@
   </form>
   <hr>
   <div id="comentarios">
-  </div>
-  <div class="contenedorcomentarios">
-    <div *ngFor="let comentario of comentarios.reverse()" class="comentario">
+    <div *ngFor="let comentario of comentarios" class="comentario">
       <div class="comentado">
-        <img *ngIf="!comentario.user?.foto" src="assets/images/user.png" class="fotocomentador"
-        alt="Foto del comentador">
         <img *ngIf="comentario.user?.foto" [src]="comentario.user?.foto" class="fotocomentador"
           alt="Foto del comentador">
         <p>{{ comentario.user?.name }}</p>
@@ -43,7 +38,6 @@
         <div *ngIf="comentario.respuestas && comentario.respuestas.length > 0" class="respuestas-container">
           <div *ngFor="let respuesta of comentario.respuestas" class="respuesta">
           <div class="respondido">
-            <img *ngIf="!respuesta.user?.foto" src="assets/images/user.png" class="fotoRespuesta" alt="Foto del usuario que responde">
             <img *ngIf="respuesta.user?.foto" [src]="respuesta.user?.foto" class="fotoRespuesta" alt="Foto del usuario que responde">
             <p>{{ respuesta.user?.name }}</p>
           </div>

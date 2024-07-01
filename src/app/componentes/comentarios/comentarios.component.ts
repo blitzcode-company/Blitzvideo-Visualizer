@@ -36,34 +36,34 @@ export class ComentariosComponent implements OnInit {
 
   traerComentarios(): void {
     this.comentariosService.traerComentariosDelVideo(this.videoId).subscribe(res => {
-      this.comentarios = this.organizarComentarios(res);
+      this.comentarios = this.organizarComentarios(res); // Organizar los comentarios al recibirlos
+      console.log(this.comentarios)
     });
   }
 
-crearComentario(): void {
-  if (!this.nuevoComentario.mensaje.trim()) {
-    console.error('El campo mensaje no puede estar vacío.');
-    return;
-  }
+  crearComentario(): void {
+    if (!this.nuevoComentario.mensaje.trim()) {
+      console.error('El campo mensaje no puede estar vacío.');
+      return;
+    }
 
-  if (!this.usuario || !this.usuario.id) {
-    window.location.href = 'http://localhost:3002/#/'; 
+    if (!this.usuario || !this.usuario.id) {
+      window.location.href = 'http://localhost:3002/#/'; 
+  
+    }
+   
 
-  }
-
-  this.nuevoComentario.usuario_id = this.usuario.id;
-
-  this.comentariosService.crearComentario(this.videoId, this.nuevoComentario).subscribe(
-    () => {
+    this.comentariosService.crearComentario(this.videoId, this.nuevoComentario).subscribe(() => {
       this.traerComentarios();
+
       this.nuevoComentario.mensaje = '';
       this.selectedComentarioId = null;
-    },
-    error => {
+    }, error => {
+
       console.error('Error al crear comentario:', error);
-    }
-  );
-}
+    });
+  }
+
 
   responderComentario(idComentario: number) {
     this.selectedComentarioId = idComentario;
@@ -72,12 +72,6 @@ crearComentario(): void {
   enviarRespuesta(): void {
     if (this.selectedComentarioId !== null) {
       this.respuestaComentario.video_id = this.videoId;
-
-      if (!this.usuario || !this.usuario.id) {
-        this.dialog.open(UsuarioRequeridoComponent);
-        return;
-      }
-
       this.respuestaComentario.usuario_id = this.usuario.id;
 
       this.comentariosService.responderComentario(this.selectedComentarioId, this.respuestaComentario).subscribe(() => {
@@ -90,18 +84,42 @@ crearComentario(): void {
     }
   }
 
-  toggleResponder(comentario: Comentario): void {
+ toggleResponder(comentario: Comentario): void {
     this.selectedComentarioId = comentario.id ?? null;
     this.respondingTo = comentario.user?.name || '';
     this.respuestaComentario.mensaje = `@${this.respondingTo} `;
   }
 
+
   toggleRespuestas(comentario: Comentario): void {
     comentario.mostrarRespuestas = !comentario.mostrarRespuestas;
   }
 
+
   organizarComentarios(comentarios: Comentario[]): Comentario[] {
-    // Lógica de organización de comentarios, si es necesaria
-    return comentarios;
+    const mapaComentarios: { [key: number]: Comentario } = {};
+    const comentariosAnidados: Comentario[] = [];
+
+    comentarios.forEach(comentario => {
+      comentario.respuestas = []; // Inicializamos el array de respuestas para cada comentario
+      if (comentario.id !== undefined) {
+        mapaComentarios[comentario.id] = comentario;
+      }    
+    });
+
+    comentarios.forEach(comentario => {
+      if (comentario.respuesta_id && mapaComentarios[comentario.respuesta_id]) {
+        mapaComentarios[comentario.respuesta_id].respuestas!.push(comentario);
+      } else {
+        comentariosAnidados.push(comentario);
+      }
+    });
+
+    return comentariosAnidados;
   }
+
+  
+
+
+
 }
