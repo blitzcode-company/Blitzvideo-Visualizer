@@ -1,0 +1,38 @@
+<div class="comentario">
+    <div class="comentario-header">
+      <img *ngIf="comentario.user?.foto" [src]="comentario.user?.foto" class="fotoUsuario" alt="Foto del usuario">
+      <img *ngIf="!comentario.user?.foto" src="assets/images/user.png" class="fotoUsuario" alt="Foto del usuario">
+      <div class="comentario-info">
+        <div class="nombreyfecha">
+          <strong>{{ comentario.user?.name }} </strong>
+          <span class="date"> - {{ comentario.created_at }}</span>
+        </div>
+
+        <p>{{ comentario.mensaje }}</p>
+        <a href="#" (click)="toggleResponder(comentario); $event.preventDefault()">Responder</a>
+
+      </div>
+    </div>
+    <div class="comentario-footer">
+
+      <a href="#" *ngIf="comentario.respuestas && comentario.respuestas.length" (click)="toggleRespuestas(comentario); $event.preventDefault()">
+        {{ comentario.mostrarRespuestas ? 'Ocultar Respuestas' : 'Ver Respuestas' }}
+      </a>
+    </div>
+    <form *ngIf="selectedComentarioId === comentario.id" (ngSubmit)="enviarRespuesta()">
+      <div class="responderComentario">
+        <input type="text" [(ngModel)]="respuestaComentario.mensaje" name="respuestaComentarioMensaje" placeholder="Escribe una respuesta" required>
+        <button type="submit">Enviar</button>
+      </div>
+    </form>
+    <div class="respuestas" *ngIf="comentario.mostrarRespuestas">
+      <app-contenido-de-comentarios
+        *ngFor="let respuesta of comentario.respuestas"
+        [comentario]="respuesta"
+        [videoId]="videoId"
+        [usuario]="usuario"
+        (nuevoComentario)="nuevoComentario.emit()"
+      ></app-contenido-de-comentarios>
+    </div>
+  </div>
+  

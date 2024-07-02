@@ -8,7 +8,9 @@ export class Comentario {
     video_id: any;
     respuesta_id?: any;
     mensaje: any;
-    respuestas?: Comentario[];
+    created_at:any;
+
+    respuestas?: Comentario[] = [];
     mostrarRespuestas: boolean = false; 
 
 

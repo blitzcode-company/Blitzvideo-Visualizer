@@ -1,4 +1,14 @@
 import {
+  animate,
+  animateChild,
+  group,
+  query,
+  state,
+  style,
+  transition,
+  trigger
+} from "./chunk-SWX735QX.js";
+import {
   A11yModule,
   BidiModule,
   Directionality,
@@ -20,16 +30,6 @@ import {
   hasModifierKey,
   supportsScrollBehavior
 } from "./chunk-FJRUYOHK.js";
-import {
-  animate,
-  animateChild,
-  group,
-  query,
-  state,
-  style,
-  transition,
-  trigger
-} from "./chunk-SWX735QX.js";
 import {
   DOCUMENT,
   Location

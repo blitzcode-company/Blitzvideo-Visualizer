@@ -5,4 +5,5 @@ titulo:any;
 descripcion:any;
 created_at:any;
 link:any;
+ultimoVideo: Videos | null = null;
 }

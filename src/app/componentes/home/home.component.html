@@ -12,9 +12,11 @@
         <h2>{{ video.titulo }}</h2>
         <hr>
         <h3 class="canalNombre">
+          <a [routerLink]="['/canal', video.canal.id]">
           <img *ngIf="video.canal.user.foto" class="fotoUser" src="{{ video.canal.user.foto }}" alt="Foto del canal" width="48" height="48">
           <img *ngIf="!video.canal.user.foto" class="fotoUserDefault" src="/assets/images/user.png" alt="Foto del canal" width="48" height="48">
             {{ video.canal.nombre }}
+          </a>
         </h3>
       </a>
     </div>

@@ -3,10 +3,10 @@
 <div class="video-container">
   <h2 class="tituloVideo">{{ video.titulo }}</h2>
 
-  
-  <video #videoPlayer class="reproductor" controls>
+  <video #videoPlayer class="reproductor" controls autoplay>
     <source [src]="video.link" type="video/mp4">
   </video>
+  
   <div class="puntuar">
     <a href="#" (click)="puntuar(5); $event.preventDefault()" [ngClass]="{'selected': puntuacionSeleccionada === 5}">
       <img src="assets/images/5.png" alt="Puntuación 5" srcset="">
@@ -24,26 +24,26 @@
       <img src="assets/images/1.png" alt="Puntuación 1" srcset="">
     </a>
   </div>
-  
- <div class="canalynombre">
-  
-    <img class="fotodeperfil" src="{{ video.canal.user.foto }}" alt="Logo del canal del usuario" srcset="">
-    <p class="nombreCanal"> {{ video.canal.nombre }}</p>
-
+  <div class="info-container">
     <div class="visitas">
       <p>{{ video.visitas_count }} visualizaciones</p>
     </div>
- </div>
 
+    <div class="canalynombre">
+      <a [routerLink]="['/canal', video.canal.id]">
+        <img *ngIf="!video.canal.user.foto" class="fotodeperfil" src="assets/images/user.png" alt="Logo del canal del usuario" srcset="">
+
+        <img *ngIf="video.canal.user.foto" class="fotodeperfil" [src]="video.canal.user.foto" alt="Logo del canal del usuario" srcset="">
+        <p class="nombreCanal">{{ video.canal.nombre }}</p>
+      </a>
+    </div>
+  </div>
   <div class="descripcion">
     <br>
-    <br>
-    <p class="fechadescripcion">Fecha de subida: {{ video.created_at}}</p>
+    <p class="fechadescripcion">Fecha de subida: {{ video.created_at }}</p>
     <p>Descripción:</p>
     <p>{{ video.descripcion }}</p>
   </div>
-  
 </div>
 
 <app-comentarios [videoId]="videoId" [usuario]="usuario"></app-comentarios>
-

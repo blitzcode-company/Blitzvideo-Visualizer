@@ -4,6 +4,7 @@ import { StatusService } from '../../servicios/status.service';
 import { CookieService } from 'ngx-cookie-service';
 import { AuthService } from '../../servicios/auth.service';
 import { Canal } from '../../clases/canal';
+import { CanalService } from '../../servicios/canal.service';
 
 @Component({
   selector: 'app-header',
@@ -17,6 +18,7 @@ export class HeaderComponent {
     public status:StatusService,
     private cookie:CookieService,
     private api:AuthService,
+    private canalService: CanalService
 ){}    
 
   
@@ -32,7 +34,6 @@ export class HeaderComponent {
   canalId:any;
   canalNombre:any
   nombre: string = '';
-
 
 
   obtenerUsuario() {

@@ -21,6 +21,9 @@
     height: 40px;
 
 }
+
+
+
 .puntuar a img {
     transition: transform 0.3s ease, opacity 0.3s ease;
     cursor: pointer;
@@ -41,17 +44,22 @@
   }
 
 .visitas {
-  margin-left: 75vh;
-  font-family: Roboto;
+  margin-left: 100vh;
+  margin-bottom: -60px;
 }
 
-.canalynombre {
+.canalynombre a {
+    text-decoration: none;
+    color: #2d2d2d;
     margin-top: 5px;
     font-family: Roboto-Bold;
     display: flex;
     align-items: center; 
 }
 
+.canalynombre {
+  margin-top: 0px;
+}
 
 .nombreCanal {
     margin-left: 110px;
@@ -65,15 +73,13 @@
 .reproductor {
     width: 1000px;
 }
-
 .descripcion {
-    z-index: 0;
-    margin-top: -15px;
-    background-color:#d9d9d9;
+    margin-top: -10px;
+    background-color: #d9d9d9; 
     border-radius: 10px;
+    padding: 10px; 
     width: 1000px;
-    position: absolute;
-
+    position: relative; 
 }
 
 
@@ -82,13 +88,15 @@
 }
 
 .fotodeperfil {
+    width: 90px;
     height: 90px;
     border-radius: 100px;
     z-index: 10;
-    margin-top: 30px;
+    margin-top: 15px;
     margin-left:15px;
-    position:absolute;
 
+    position:absolute;
+    object-fit: cover;
   }
  
   

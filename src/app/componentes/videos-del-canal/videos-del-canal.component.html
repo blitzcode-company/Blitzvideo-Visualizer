@@ -1,0 +1,34 @@
+<app-header></app-header>
+<header>
+  <div class="banner">
+    <img src="banner.jpg" alt="Banner del canal">
+  </div>
+  <div class="profile">
+    <img *ngIf="!usuario.foto" src="assets/images/user.png" alt="Foto de perfil" class="profile-pic">
+    <img *ngIf="usuario.foto" [src]="usuario.foto" alt="Foto de perfil" class="profile-pic">
+    <div class="profile-info">
+      <h1>{{ canalNombre }}</h1>
+    </div>
+  </div>
+</header>
+<nav>
+  <ul>
+    <li><a [routerLink]="['/canal', canalId]">Inicio</a></li>
+    <li><a [routerLink]="['/canal', canalId, 'videos']">Videos</a></li>
+  </ul>
+</nav>
+<main>
+  <section class="video-grid">
+    <div *ngFor="let chunk of videos | chunkPipe: 4" class="video-row">
+      <div *ngFor="let video of chunk" class="video-card">
+        <a [routerLink]="['/video', video.id]">
+          <img [src]="video.miniatura" alt="Miniatura del video">
+          <div class="video-info">
+            <h3>{{ video.titulo }}</h3>
+            <p>{{ video.visitas_count }} vistas • {{ video.created_at | date:'short' }}</p>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+</main>

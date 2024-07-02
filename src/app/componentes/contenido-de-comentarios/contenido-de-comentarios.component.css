@@ -1,0 +1,74 @@
+.comentario {
+    margin-bottom: 30px;
+    border-left: 2px solid #d9d9d9;
+    padding-left: 10px;
+  }
+  
+  .comentario-header {
+    display: flex;
+    align-items: center;
+  }
+  
+  .comentario-info {
+    margin-left: 10px;
+  }
+  
+  .comentario-footer {
+    margin-top: 10px;
+  }
+  
+  .fotoUsuario {
+      width: 60px;
+      height: 60px;
+      border-radius: 100px;
+      object-fit: cover;
+
+
+  }
+
+  .date {
+    color: #7a7a7a;
+  }
+  
+  .nombreyfecha {
+    display: flex;
+    gap: 10px;
+
+  }
+
+  .botonResponder {
+    background-color: #076dc8;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+  }
+  
+  .responderComentario {
+    display: flex;
+    flex-direction: column;
+    margin-top: 10px;
+  }
+  
+  .responderComentario input[type="text"] {
+    width: 45%;
+    height: 40px;
+    background-color: #f1f1f1;
+    border: 1px solid #ccc;
+    padding-left: 10px;
+    margin-bottom: 10px;
+  }
+  
+  .responderComentario button {
+    background-color: #076dc8;
+    width: 5%;
+    color: white;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+  }
+  
+  .respuestas {
+    margin-top: 10px;
+  }
+  
