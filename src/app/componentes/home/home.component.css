@@ -28,6 +28,18 @@ a {
     
   }
 
+  .video-info h3 {
+    margin: 0 0 5px;
+    font-size: 16px;
+    color: #333;
+  }
+  
+  .video-info p {
+    margin: 0;
+    color: #888;
+    font-size: 14px;
+  }
+
   
   .canalNombre {
     font-size: 1em; 

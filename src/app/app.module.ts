@@ -21,6 +21,13 @@ import { ComentariosService } from './servicios/comentarios.service';
 import { ContenidoDeComentariosComponent } from './componentes/contenido-de-comentarios/contenido-de-comentarios.component';
 import { VerCanalComponent } from './componentes/ver-canal/ver-canal.component';
 import { VideosDelCanalComponent } from './componentes/videos-del-canal/videos-del-canal.component';
+import {VgCoreModule} from '@videogular/ngx-videogular/core';
+import {VgControlsModule} from '@videogular/ngx-videogular/controls';
+import {VgOverlayPlayModule} from '@videogular/ngx-videogular/overlay-play';
+import {VgBufferingModule} from '@videogular/ngx-videogular/buffering';
+import { ReproductorVideoComponent } from './componentes/reproductor-video/reproductor-video.component'
+import { RouterModule } from '@angular/router';
+
 
 @NgModule({
   declarations: [
@@ -36,16 +43,25 @@ import { VideosDelCanalComponent } from './componentes/videos-del-canal/videos-d
     ContenidoDeComentariosComponent,
     VideosDelCanalComponent,
     VerCanalComponent,
+    ReproductorVideoComponent,
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     HttpClientModule,
     FormsModule,
+    RouterModule.forRoot([
+      { path: 'video/:id', component: VerVideoComponent },
+    ]),
     NgbModule,
     ReactiveFormsModule,
     MatDialogModule,
-    MatButtonModule
+    MatButtonModule,
+    VgCoreModule,
+    VgControlsModule,
+    VgOverlayPlayModule,
+    VgBufferingModule
+    
   ],
   exports: [
     VerVideoComponent,

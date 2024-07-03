@@ -1,41 +1,25 @@
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
-import { VideosService } from '../../servicios/videos.service';
-import { ComentariosService } from '../../servicios/comentarios.service';
+import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Videos } from '../../clases/videos';
+import { VideosService } from '../../servicios/videos.service';
 import { AuthService } from '../../servicios/auth.service';
-import { Comentario } from '../../clases/comentario';
 import { Title } from '@angular/platform-browser';
 import { PuntuacionesService } from '../../servicios/puntuaciones.service';
 import { StatusService } from '../../servicios/status.service';
 import { Observable } from 'rxjs';
-import { MatDialog } from '@angular/material/dialog';
+import { Videos } from '../../clases/videos';
 
 @Component({
   selector: 'app-ver-video',
   templateUrl: './ver-video.component.html',
-  styleUrls: ['./ver-video.component.css']  
+  styleUrls: ['./ver-video.component.css']
 })
 export class VerVideoComponent implements OnInit {
-  @ViewChild('videoPlayer', { static: false }) videoPlayer: ElementRef | undefined;
-
   puntuacionSeleccionada: number | null = null;
   videoId: any;
   videos = new Videos();
   video: any;
   comentario: any;
-  comentarios: Comentario[] = [];
   usuario: any;
-  nuevoComentario: any = {
-    usuario_id: '',
-    mensaje: ''
-  };
-  respuestaComentario: any = {
-    usuario_id: '',
-    mensaje: ''
-  };
-  selectedComentarioId: number | null = null;
-  respondingTo: string = '';
   visitaRealizada: boolean = false;
   visitaRealizadaInvitado: boolean = false;
   public loggedIn: boolean = false;
@@ -45,12 +29,10 @@ export class VerVideoComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private videoService: VideosService,
-    private comentariosService: ComentariosService,
     private authService: AuthService,
     private titleService: Title,
     private puntuarService: PuntuacionesService,
-    public status: StatusService,
-    public dialog: MatDialog
+    public status: StatusService
   ) {}
 
   ngOnInit(): void {
@@ -58,11 +40,6 @@ export class VerVideoComponent implements OnInit {
     this.mostrarVideo();
     this.obtenerUsuario();
     this.visitar();
-     if (this.usuario && this.usuario.id) {
-      this.obtenerPuntuacionActual(); 
-    }
-    console.log('Puntuación seleccionada inicial:', this.puntuacionSeleccionada);
-
   }
 
   obtenerUsuario(): void {
@@ -77,21 +54,13 @@ export class VerVideoComponent implements OnInit {
 
   mostrarVideo(): void {
     this.videoService.obtenerInformacionVideo(this.videoId).subscribe(res => {
-      this.videos = res;
-      this.video = this.videos;
-
+      this.video = res;
       if (this.video && this.video.created_at) {
         const fecha = new Date(this.video.created_at);
         if (!isNaN(fecha.getTime())) {
           this.video.created_at = this.convertirFechaALineaDeTexto(fecha);
         }
       }
-
-      setTimeout(() => {
-        if (this.videoPlayer?.nativeElement) {
-          this.videoPlayer.nativeElement.load();
-        }
-      });
 
       if (this.video && this.video.titulo) {
         this.titleService.setTitle(this.video.titulo + ' - BlitzVideo');
@@ -104,7 +73,7 @@ export class VerVideoComponent implements OnInit {
     if (!this.usuario || !this.usuario.id) {
       window.location.href = 'http://localhost:3002/#/'; 
     }
-  
+
     if (this.puntuacionSeleccionada === valora) {
       this.eliminarPuntuacion();
     } else {
@@ -138,7 +107,7 @@ export class VerVideoComponent implements OnInit {
       console.error('No se ha seleccionado un valor de puntuación para eliminar.');
       return;
     }
-  
+
     this.puntuarService.quitarPuntuacion(this.videoId, this.usuario.id, this.valorPuntuacion).subscribe(
       response => {
         console.log(response.message);
@@ -157,7 +126,7 @@ export class VerVideoComponent implements OnInit {
       console.error('No se ha seleccionado un valor de puntuación para crear o actualizar.');
       return;
     }
-  
+
     this.puntuarService.puntuar(this.videoId, this.usuario.id, this.valorPuntuacion).subscribe(
       response => {
         console.log(response.message);

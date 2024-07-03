@@ -35,11 +35,16 @@
                 "src/assets"
               ],
               "styles": [
+                "./node_modules/@videogular/ngx-videogular/fonts/videogular.css",
                 "src/custom-theme.scss",
                 "node_modules/bootstrap/dist/css/bootstrap.min.css",
                 "src/styles.css"
+
               ],
-              "scripts": [],
+              "scripts": [
+                "./node_modules/xgplayer/dist/index.min.js"
+
+              ],
               "server": "src/main.server.ts",
               "prerender": true,
               "ssr": {
@@ -101,10 +106,13 @@
                 "src/assets"
               ],
               "styles": [
+                "./node_modules/@videogular/ngx-videogular/fonts/videogular.css",
                 "src/styles.css",
                 "src/custom-theme.scss"
               ],
-              "scripts": []
+              "scripts": [
+                "./node_modules/xgplayer/dist/index.min.js"
+              ]
             }
           }
         }

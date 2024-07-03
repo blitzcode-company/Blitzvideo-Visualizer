@@ -9,7 +9,10 @@
           <img *ngIf="!video.miniatura" class="miniatura" src="/Blitzvideo-Visualizer/src/assets/images/miniaturaDefault.jpg" width="290" height="160" alt="miniatura">
 
         </div>
-        <h2>{{ video.titulo }}</h2>
+        <div class="video-info">
+          <h3>{{ video.titulo }}</h3>
+          <p>{{ video.visitas_count }} vistas • {{ video.created_at | date:'short' }}</p>
+        </div>
         <hr>
         <h3 class="canalNombre">
           <a [routerLink]="['/canal', video.canal.id]">
