@@ -1,4 +1,21 @@
-<video #videoPlayer class="reproductor" controls autoplay>
-    <source [src]="videoUrl" type="video/mp4">
-    Tu navegador no soporta la etiqueta de video.
-  </video>
+<div class="reproductor">
+  <div class="video-container">
+    <video #videoPlayer class="video" (timeupdate)="updateProgressBar()" autoplay>
+      <source [src]="videoUrl" type="video/mp4">
+      Tu navegador no soporta la etiqueta de video.
+    </video>
+    <div class="controls">
+      <button (click)="togglePlayPause()">
+        <i [class]="isPlaying ? 'fas fa-pause' : 'fas fa-play'"></i>
+      </button>
+      <input type="range" #progressBar class="progress" value="0" min="0" max="100" (input)="seek(progressBar)">
+      <button (click)="toggleMute()">
+        <i [class]="isMuted ? 'fas fa-volume-mute' : 'fas fa-volume-up'"></i>
+      </button>
+      <input type="range" #volumeSlider class="volume" value="100" min="0" max="100" (input)="changeVolume(volumeSlider)">
+      <button (click)="toggleFullscreen()">
+        <i class="fas fa-expand"></i>
+      </button>
+    </div>
+  </div>
+</div>

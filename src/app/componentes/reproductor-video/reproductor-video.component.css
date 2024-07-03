@@ -1,6 +1,54 @@
 .reproductor {
     margin-left: 10vh;
     width: 1000px;
-
-
-}
+  }
+  
+  .video-container {
+    position: relative;
+    width: 1000px;
+    background-color: #000;
+  }
+  
+  .video {
+    width: 100%;
+    display: block;
+  }
+  
+  .controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.7);
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+  }
+  
+  button, input[type="range"] {
+    background: none;
+    border: none;
+    color: white;
+  }
+  
+  button {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  button i {
+    font-size: 20px; 
+  }
+  
+  input[type="range"] {
+    flex-grow: 1;
+    margin: 0 10px;
+  }
+  
+  input.volume {
+    width: 100px; 
+    flex-grow: 0; 
+  }
+  
