@@ -1,9 +1,8 @@
 <app-header></app-header>
+<div [ngStyle]="{'--profile-banner': 'url(' + canal.portada + ')'}">
 <header>
-  <div class="banner">
-    <img src="banner.jpg" alt="Banner del canal">
-  </div>
-  <div class="profile">
+  
+  <div class="profile" >
     <img *ngIf="!usuario.foto" src="assets/images/user.png" alt="Foto de perfil" class="profile-pic">
     <img *ngIf="usuario.foto" [src]="usuario.foto" alt="Foto de perfil" class="profile-pic">
     <div class="profile-info">
@@ -17,6 +16,7 @@
     <li><a [routerLink]="['/canal', canalId, 'videos']">Videos</a></li>
   </ul>
 </nav>
+</div>
 <main>
   <section class="ultimo-video" *ngIf="ultimoVideo">
     <h2>Último Video Subido</h2>

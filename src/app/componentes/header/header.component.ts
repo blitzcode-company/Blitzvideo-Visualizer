@@ -70,11 +70,11 @@ export class HeaderComponent {
   }
 
   logout() {
-    localStorage.removeItem("accessToken");
     this.cookie.delete('accessToken');
+    console.log('Cookie accessToken eliminada');
     this.status.isLoggedIn = false;
-    this.router.navigateByUrl("/#/")
-
+    this.router.navigate(['/']);
+    
   }
 
   isDropdownOpen = false;

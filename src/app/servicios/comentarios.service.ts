@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Comentario } from '../clases/comentario';
 import { map } from 'rxjs/operators';
@@ -41,14 +41,61 @@ export class ComentariosService {
     return this.http.post(url, respuesta, httpOptions)
   }
 
-  editarComentario(idComentario: any, respuesta:any): Observable<any> {
-    const url = `${this.apiUrl}api/v1/videos/comentarios/${idComentario}`
+  editarComentario(idComentario: number, mensaje: string, usuario_id: number): Observable<any> {
+    const url = `${this.apiUrl}api/v1/videos/comentarios/${idComentario}`;
     const httpOptions = {
       headers: new HttpHeaders({
-          'Authorization' : 'Bearer ' + this.cookie.get('accessToken')
+        'Authorization': 'Bearer ' + this.cookie.get('accessToken'),
+        'Content-Type': 'application/json'
       })
-    }
-    return this.http.post(url, respuesta, httpOptions)
+    };
+    return this.http.post(url, { mensaje, usuario_id }, httpOptions);  
   }
 
+  eliminarComentario(idComentario: number, usuario_id: number): Observable<any> {
+    const url = `${this.apiUrl}api/v1/videos/comentarios/${idComentario}`;  
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Authorization': 'Bearer ' + this.cookie.get('accessToken'),
+        'Content-Type': 'application/json'
+      }),
+      body: { usuario_id }  
+    };
+    return this.http.delete(url, httpOptions);
+  }
+
+  getEstadoMeGusta(idComentario: number, idUsuario: number): Observable<any> {
+    const url = `${this.apiUrl}api/v1/videos/comentarios/${idComentario}/me-gusta?userId=${idUsuario}`;
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Authorization': 'Bearer ' + this.cookie.get('accessToken'),
+        'Content-Type': 'application/json'
+      })
+    };
+    return this.http.get<any>(url, httpOptions);
+  }
+
+  darMeGusta(idComentario: number, usuarioId: number): Observable<any> {
+    const url = `${this.apiUrl}api/v1/videos/comentarios/${idComentario}/me-gusta`;
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Authorization': 'Bearer ' + this.cookie.get('accessToken'),
+        'Content-Type': 'application/json'
+      })
+    };
+    const body = { usuario_id: usuarioId };
+    return this.http.post(url, body, httpOptions);
+  }
+  
+  quitarMeGusta(idMeGusta: number, usuarioId: number): Observable<any> {
+    const url = `${this.apiUrl}api/v1/videos/comentarios/me-gusta/${idMeGusta}`;
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Authorization': 'Bearer ' + this.cookie.get('accessToken'),
+        'Content-Type': 'application/json'
+      })
+    };
+    const body = { usuario_id: usuarioId };
+    return this.http.delete(url, { body, ...httpOptions });
+  }
 }

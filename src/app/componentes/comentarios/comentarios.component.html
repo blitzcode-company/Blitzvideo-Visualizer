@@ -12,12 +12,14 @@
   </form>
   <hr>
   <div id="comentarios">
-    <app-contenido-de-comentarios
-      *ngFor="let comentario of comentarios"
-      [comentario]="comentario"
-      [videoId]="videoId"
-      [usuario]="usuario"
-      (nuevoComentario)="traerComentarios()"
-    ></app-contenido-de-comentarios>
+      <app-contenido-de-comentarios
+        *ngFor="let comentario of comentarios"
+        [comentario]="comentario"
+        [videoId]="videoId"
+        [usuario]="usuario"
+        (nuevoComentario)="traerComentarios()"
+        (comentarioEliminado)="onComentarioEliminado($event)"
+        (comentarioEditado)="onComentarioEditado($event)"
+      ></app-contenido-de-comentarios>
   </div>
 </div>

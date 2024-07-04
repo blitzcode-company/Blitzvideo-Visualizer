@@ -45,15 +45,14 @@ export class AuthService {
     return this.http.get(url, httpOptions);
   }
 
-  editarUsuario(id: number, usuario: any, foto?: File): Observable<any> {
+  editarUsuario(id: number, formData: FormData): Observable<any> {
     const url = `${this.apiUrl}api/v1/usuario/${id}`
-    const body = { name: usuario.name, foto: foto};
     const httpOptions = {
       headers: new HttpHeaders({
           'Authorization' : 'Bearer ' + this.cookie.get('accessToken')
       })
     };
-    return this.http.post(url, body, httpOptions).pipe(
+    return this.http.post(url, formData, httpOptions).pipe(
       catchError(error => {
         console.error('Error al editar usuario', error);
         return of(null);

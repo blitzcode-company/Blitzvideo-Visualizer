@@ -12,8 +12,9 @@ export class Comentario {
 
     respuestas?: Comentario[] = [];
     mostrarRespuestas: boolean = false; 
-
-
+    likedByUser: boolean = false;  
+    meGustaId: number | null = null;
+    
     constructor(user: Usuario) {
         this.user = user;
         this.usuario = user;

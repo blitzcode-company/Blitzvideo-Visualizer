@@ -4,6 +4,7 @@ import { CanalService } from '../../servicios/canal.service';
 import { AuthService } from '../../servicios/auth.service';
 import { Canal } from '../../clases/canal';
 import { Videos } from '../../clases/videos';
+import { Title } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-ver-canal',
@@ -25,7 +26,7 @@ export class VerCanalComponent implements OnInit {
     this.canalId = this.route.snapshot.params['id'];
     this.obtenerCanal();
   }
-  constructor(private canalService: CanalService,private route: ActivatedRoute){}
+  constructor(private canalService: CanalService,private route: ActivatedRoute, private titleService: Title){}
 
   obtenerCanal() {
     this.canalService.listarVideosDeCanal(this.canalId).subscribe(
@@ -43,6 +44,10 @@ export class VerCanalComponent implements OnInit {
           if (this.ultimoVideo) {
             this.ultimoVideo.indice = this.videos.findIndex(videosGeneral => videosGeneral.id === this.ultimoVideo.id) + 1;
             console.log('Índice del último video:', this.ultimoVideo.indice);
+          }
+
+          if (this.canal && this.canal.nombre) {
+            this.titleService.setTitle(this.canal.nombre + ' - BlitzVideo');
           }
           
           

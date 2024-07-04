@@ -24,13 +24,18 @@ export class ComentariosComponent implements OnInit {
     mensaje: ''
   };
   respondingTo: string = '';
+  editingComentarioId: number | null = null;  
+  editingComentarioMensaje: string = '';  
 
   constructor(private comentariosService: ComentariosService, public status: StatusService, private authService: AuthService) {}
 
   ngOnInit(): void {
     this.traerComentarios();
+    this.obtenerEstadosDeMeGusta();
   }
 
+  
+  
   traerComentarios(): void {
     this.comentariosService.traerComentariosDelVideo(this.videoId).subscribe(
       (res: any[]) => { 
@@ -86,6 +91,40 @@ export class ComentariosComponent implements OnInit {
     }
   }
 
+  eliminarComentario(idComentario: number, usuario_id: number) {
+    if (this.usuario.id !== usuario_id) {
+      console.error('No tienes permiso para eliminar este comentario.');
+      return;
+    }
+
+    this.comentariosService.eliminarComentario(idComentario, usuario_id).subscribe(
+      response => {
+        console.log('Comentario eliminado:', response);
+        this.traerComentarios();  
+      },
+      error => {
+        console.error('Error al eliminar comentario:', error);
+      }
+    );
+  }
+
+  editarComentario(comentario: Comentario) {
+    this.editingComentarioId = comentario.id ?? null;
+    this.editingComentarioMensaje = comentario.mensaje;
+  }
+
+  actualizarComentario(comentario: Comentario): void {
+    if (this.editingComentarioId !== null) {
+      this.comentariosService.editarComentario(this.editingComentarioId, this.editingComentarioMensaje, this.usuario.id).subscribe(() => {
+        this.traerComentarios();
+        this.editingComentarioId = null;
+        this.editingComentarioMensaje = '';
+      }, error => {
+        console.error('Error al editar comentario:', error);
+      });
+    }
+  }
+
   toggleResponder(comentario: Comentario): void {
     this.selectedComentarioId = comentario.id ?? null;
     this.respondingTo = comentario.user?.name || '';
@@ -103,7 +142,7 @@ export class ComentariosComponent implements OnInit {
     comentarios.forEach(comentario => {
       comentario.respuestas = comentario.respuestas || [];
       comentarioMap.set(comentario.id!, comentario);
-      comentario.created_at = moment(comentario.created_at).fromNow();  // Formatear fecha
+      comentario.created_at = moment(comentario.created_at).fromNow();
     });
 
     comentarios.forEach(comentario => {
@@ -117,4 +156,56 @@ export class ComentariosComponent implements OnInit {
 
     return comentariosRaiz;
   }
+
+  obtenerEstadosDeMeGusta(): void {
+    this.comentarios.forEach(comentario => {
+      this.comentariosService.getEstadoMeGusta(comentario.id!, this.usuario.id).subscribe(
+        (res: any) => {
+          comentario.likedByUser = res.likedByUser;
+          comentario.meGustaId = res.meGustaId;
+        },
+        (error) => {
+          console.error('Error al obtener el estado de Me Gusta:', error);
+        }
+      );
+    });
+  }
+
+  darMeGusta(comentarioId: number): void {
+    if (!this.usuario || !this.usuario.id) {
+      window.location.href = 'http://localhost:3002/#/'; 
+    }
+
+    this.comentariosService.darMeGusta(comentarioId, this.usuario.id).subscribe(
+      () => {
+        console.log('Me Gusta dado al comentario.');
+        this.traerComentarios();  
+      },
+      error => {
+        console.error('Error al dar Me Gusta:', error);
+      }
+    );
+  }
+
+  quitarMeGusta(comentarioId: number, meGustaId: number): void {
+    
+    this.comentariosService.quitarMeGusta(meGustaId, this.usuario.id).subscribe(
+      () => {
+        console.log('Me Gusta quitado del comentario.');
+        this.traerComentarios(); 
+      },
+      error => {
+        console.error('Error al quitar Me Gusta:', error);
+      }
+    );
+  }
+  
+  
+  onComentarioEliminado(event: { id: number, usuario_id: number }) {
+  this.eliminarComentario(event.id, event.usuario_id);
+}
+
+onComentarioEditado(comentario: Comentario) {
+  this.actualizarComentario(comentario);
+}
 }

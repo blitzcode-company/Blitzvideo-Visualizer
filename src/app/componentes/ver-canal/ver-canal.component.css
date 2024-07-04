@@ -58,10 +58,16 @@ main {
   padding: 20px;
 }
 
-/* Estilo para la sección del último video */
+.profile {
+  background-image: var(--profile-banner); 
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
 .ultimo-video {
   margin-bottom: 30px;
-  text-align: center; /* Centra el contenido dentro de la sección */
+  text-align: center; 
 }
 
 .ultimo-video h2 {
@@ -76,8 +82,8 @@ main {
   border-radius: 4px;
   overflow: hidden;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  max-width: 600px; /* Ajusta el ancho máximo del contenedor del último video */
-  margin: 0 auto; /* Centra el contenedor */
+  max-width: 600px;
+  margin: 0 auto; 
 }
 
 .ultimo-video-miniatura {

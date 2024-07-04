@@ -1,38 +1,65 @@
 <div class="comentario">
-    <div class="comentario-header">
-      <img *ngIf="comentario.user?.foto" [src]="comentario.user?.foto" class="fotoUsuario" alt="Foto del usuario">
-      <img *ngIf="!comentario.user?.foto" src="assets/images/user.png" class="fotoUsuario" alt="Foto del usuario">
-      <div class="comentario-info">
-        <div class="nombreyfecha">
-          <strong>{{ comentario.user?.name }} </strong>
-          <span class="date"> - {{ comentario.created_at }}</span>
+  <div class="comentario-header">
+    <img *ngIf="comentario.user?.foto" [src]="comentario.user?.foto" class="fotoUsuario" alt="Foto del usuario">
+    <img *ngIf="!comentario.user?.foto" src="assets/images/user.png" class="fotoUsuario" alt="Foto del usuario">
+
+    <div class="comentario-info">
+      <div class="nombreyfecha">
+        <strong>{{ comentario.user?.name }}</strong>
+        <span class="date"> {{ comentario.created_at }}</span>
+      </div>
+
+      <div class="comentario-actions-menu" *ngIf="comentario.user?.id === usuario?.id">
+        <button class="menu-button" (click)="toggleMenu($event)">⋮</button>
+        <div *ngIf="showMenu" class="menu-dropdown">
+          <button (click)="toggleEdit(comentario)">Editar</button>
+          <button (click)="eliminarComentario(comentario.id!, comentario.user?.id)">Eliminar</button>
         </div>
-
-        <p>{{ comentario.mensaje }}</p>
-        <a href="#" (click)="toggleResponder(comentario); $event.preventDefault()">Responder</a>
-
       </div>
-    </div>
-    <div class="comentario-footer">
 
-      <a href="#" *ngIf="comentario.respuestas && comentario.respuestas.length" (click)="toggleRespuestas(comentario); $event.preventDefault()">
-        {{ comentario.mostrarRespuestas ? 'Ocultar Respuestas' : 'Ver Respuestas' }}
-      </a>
-    </div>
-    <form *ngIf="selectedComentarioId === comentario.id" (ngSubmit)="enviarRespuesta()">
-      <div class="responderComentario">
-        <input type="text" [(ngModel)]="respuestaComentario.mensaje" name="respuestaComentarioMensaje" placeholder="Escribe una respuesta" required>
-        <button type="submit">Enviar</button>
+      <div *ngIf="editingComentarioId === comentario.id" class="edit-comentario-form">
+        <input [(ngModel)]="editingComentarioMensaje" placeholder="Edita tu comentario...">
+        <button (click)="editarComentario(comentario)">Actualizar</button>
+        <button (click)="toggleEdit(null)">Cancelar</button>
       </div>
-    </form>
-    <div class="respuestas" *ngIf="comentario.mostrarRespuestas">
-      <app-contenido-de-comentarios
-        *ngFor="let respuesta of comentario.respuestas"
-        [comentario]="respuesta"
-        [videoId]="videoId"
-        [usuario]="usuario"
-        (nuevoComentario)="nuevoComentario.emit()"
-      ></app-contenido-de-comentarios>
+    
+      <p *ngIf="editingComentarioId !== comentario.id">{{ comentario.mensaje }}</p>
+    
+      <a href="#" (click)="toggleResponder(comentario); $event.preventDefault()">Responder</a>
+
+      <button (click)="darMeGusta()" *ngIf="!comentario.likedByUser" class="botonLike" aria-label="Dar Me Gusta">
+        <i class="fas fa-thumbs-up"></i>
+      </button>
+      <button (click)="quitarMeGusta()" *ngIf="comentario.likedByUser" class="botonLike" aria-label="Quitar Me Gusta">
+        <i class="fas fa-thumbs-up liked"></i>
+      </button>
     </div>
   </div>
-  
+
+  <div class="comentario-footer">
+    <a href="#" *ngIf="comentario.respuestas && comentario.respuestas.length" (click)="toggleRespuestas(comentario); $event.preventDefault()">
+      {{ comentario.mostrarRespuestas ? 'Ocultar Respuestas' : 'Ver Respuestas' }}
+    </a>
+  </div>
+
+  <!-- Formulario para enviar una respuesta -->
+  <form *ngIf="selectedComentarioId === comentario.id" (ngSubmit)="enviarRespuesta()">
+    <div class="responderComentario">
+      <input type="text" [(ngModel)]="respuestaComentario.mensaje" name="respuestaComentarioMensaje" placeholder="Escribe una respuesta" required>
+      <button type="submit">Enviar</button>
+    </div>
+  </form>
+
+  <!-- Lista de respuestas -->
+  <div class="respuestas" *ngIf="comentario.mostrarRespuestas">
+    <app-contenido-de-comentarios
+      *ngFor="let respuesta of comentario.respuestas"
+      [comentario]="respuesta"
+      [videoId]="videoId"
+      [usuario]="usuario"
+      (nuevoComentario)="nuevoComentario.emit()"
+      (comentarioEliminado)="eliminarComentario($event.id, $event.usuario_id)"
+      (comentarioEditado)="editarComentario($event)"
+    ></app-contenido-de-comentarios>
+  </div>
+</div>

@@ -49,7 +49,14 @@ onFileSelected(event: any): void {
 
 editarUsuario(): void {
   const userId = this.usuario.id;
-  this.authService.editarUsuario(userId, this.usuario, this.foto).subscribe(
+  const formData = new FormData();
+  formData.append('nombre', this.usuario.nombre); 
+
+  if (this.foto) { 
+    formData.append('foto', this.foto);
+  }
+
+  this.authService.editarUsuario(userId, formData).subscribe(
     res => {
       console.log('Usuario actualizado correctamente', res);
     },
@@ -58,7 +65,6 @@ editarUsuario(): void {
     }
   );
 }
-
 onSubmit(dataform: any) {
   console.log('Formulario enviado', dataform);
   this.editarUsuario();
