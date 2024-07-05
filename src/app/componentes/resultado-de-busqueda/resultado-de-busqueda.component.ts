@@ -35,7 +35,7 @@ export class ResultadoDeBusquedaComponent implements OnInit{
 
   listarVideosPorNombre(nombre: string): void {
     this.videoService.listarVideosPorNombre(nombre).subscribe(
-      (res: any[]) => {  // Acepta los datos crudos del servicio
+      (res: any[]) => {  
         this.videos = res.map(videoData => {
           return {
             ...videoData,
@@ -51,7 +51,7 @@ export class ResultadoDeBusquedaComponent implements OnInit{
   }
 
   tiempoTranscurrido(fecha: Date | string): string {
-    return moment(fecha).fromNow();  // Calcula el tiempo transcurrido usando moment.js
+    return moment(fecha).fromNow(); 
   }
 
 

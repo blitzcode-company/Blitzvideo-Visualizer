@@ -42,7 +42,6 @@
     </a>
   </div>
 
-  <!-- Formulario para enviar una respuesta -->
   <form *ngIf="selectedComentarioId === comentario.id" (ngSubmit)="enviarRespuesta()">
     <div class="responderComentario">
       <input type="text" [(ngModel)]="respuestaComentario.mensaje" name="respuestaComentarioMensaje" placeholder="Escribe una respuesta" required>
@@ -50,7 +49,6 @@
     </div>
   </form>
 
-  <!-- Lista de respuestas -->
   <div class="respuestas" *ngIf="comentario.mostrarRespuestas">
     <app-contenido-de-comentarios
       *ngFor="let respuesta of comentario.respuestas"

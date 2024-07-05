@@ -16,15 +16,15 @@
         </div>
       </button>
       <div class="dropdown-menu">
-        <a *ngIf="status.isLoggedIn && !canalNombre" [href]="serverIp + ':3001/#/crearCanal" class="dropdown-item">Crear canal</a>
-        <a *ngIf="status.isLoggedIn && canalNombre" [href]="serverIp + ':3001/#/'" class="dropdown-item">Mi canal</a>
+        <a *ngIf="status.isLoggedIn && !canalNombre" [href]="serverIp + '3001' + '/#/crearCanal'" class="dropdown-item">Crear canal</a>
+        <a *ngIf="status.isLoggedIn && canalNombre" [href]="serverIp + '3001' + '/#/'" class="dropdown-item">Mi canal</a>
         <a *ngIf="status.isLoggedIn" routerLink="/editarUsuario" class="dropdown-item">Editar mi usuario</a>
         
 
         <hr class="dropdown-divider">
         <a *ngIf="status.isLoggedIn" routerLink="/#" (click)="logout()" class="dropdown-item">Cerrar sesión</a>
-        <a *ngIf="!status.isLoggedIn" [href]="serverIp + ':3000/#/'" class="dropdown-item">Login</a>
-        <a *ngIf="!status.isLoggedIn" [href]="serverIp + ':3000/#/'registro" class="dropdown-item">Registro</a>
+        <a *ngIf="!status.isLoggedIn" [href]="serverIp +  '3002' + '/#/'" class="dropdown-item">Login</a>
+        <a *ngIf="!status.isLoggedIn" [href]="serverIp +  '3002' + '/#/registro'" class="dropdown-item">Registro</a>
       </div>
     </div>
   </div>
