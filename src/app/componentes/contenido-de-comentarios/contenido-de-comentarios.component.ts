@@ -1,6 +1,7 @@
 import { Component, EventEmitter, HostListener,Input, OnInit, Output } from '@angular/core';
 import { Comentario } from '../../clases/comentario';
 import { ComentariosService } from '../../servicios/comentarios.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-contenido-de-comentarios',
@@ -25,6 +26,7 @@ export class ContenidoDeComentariosComponent implements OnInit{
   };
   editingComentarioId: number | null = null;
   editingComentarioMensaje: string = '';
+  serverIp = environment.serverIp
   constructor(private comentariosService: ComentariosService) {}
 
   ngOnInit(): void {
@@ -107,14 +109,13 @@ export class ContenidoDeComentariosComponent implements OnInit{
 
   darMeGusta(): void {
     if (!this.usuario || !this.usuario.id) {
-      window.location.href = 'http://localhost:3002/#/'; 
+      window.location.href = `${this.serverIp}:3002/#/`; 
     }
 
     this.comentariosService.darMeGusta(this.comentario.id!, this.usuario.id).subscribe(
       (response) => {
-        // Actualiza el estado de Me Gusta en la interfaz de usuario
         this.comentario.likedByUser = true;
-        this.comentario.meGustaId = response.meGustaId; // Guarda el ID de "Me Gusta"
+        this.comentario.meGustaId = response.meGustaId;
       },
       (error) => {
         console.error('Error al dar Me Gusta:', error);
@@ -130,9 +131,8 @@ export class ContenidoDeComentariosComponent implements OnInit{
 
     this.comentariosService.quitarMeGusta(this.comentario.meGustaId, this.usuario.id).subscribe(
       () => {
-        // Actualiza el estado de Me Gusta en la interfaz de usuario
         this.comentario.likedByUser = false;
-        this.comentario.meGustaId = null; // Limpia el ID de "Me Gusta"
+        this.comentario.meGustaId = null; 
       },
       (error) => {
         console.error('Error al quitar Me Gusta:', error);

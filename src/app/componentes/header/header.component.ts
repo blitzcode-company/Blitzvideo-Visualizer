@@ -5,6 +5,7 @@ import { CookieService } from 'ngx-cookie-service';
 import { AuthService } from '../../servicios/auth.service';
 import { Canal } from '../../clases/canal';
 import { CanalService } from '../../servicios/canal.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-header',
@@ -21,7 +22,8 @@ export class HeaderComponent {
     private canalService: CanalService
 ){}    
 
-  
+  serverIp = environment.serverIp;
+
   public loggedIn: boolean=false;
 
     ngOnInit() {

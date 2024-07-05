@@ -7,6 +7,7 @@ import { PuntuacionesService } from '../../servicios/puntuaciones.service';
 import { StatusService } from '../../servicios/status.service';
 import { Observable } from 'rxjs';
 import { Videos } from '../../clases/videos';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-ver-video',
@@ -25,6 +26,7 @@ export class VerVideoComponent implements OnInit {
   public loggedIn: boolean = false;
   puntuacionActual: any = {};
   valorPuntuacion: number | null = null; 
+  serverIp = environment.serverIp
 
   constructor(
     private route: ActivatedRoute,
@@ -71,7 +73,7 @@ export class VerVideoComponent implements OnInit {
 
   puntuar(valora: number): void {
     if (!this.usuario || !this.usuario.id) {
-      window.location.href = 'http://localhost:3002/#/'; 
+      window.location.href = `${this.serverIp}:3002/#/`; 
     }
 
     if (this.puntuacionSeleccionada === valora) {

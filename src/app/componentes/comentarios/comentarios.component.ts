@@ -4,6 +4,7 @@ import { ComentariosService } from '../../servicios/comentarios.service';
 import { StatusService } from '../../servicios/status.service';
 import { AuthService } from '../../servicios/auth.service';
 import moment from 'moment';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-comentarios',
@@ -26,6 +27,7 @@ export class ComentariosComponent implements OnInit {
   respondingTo: string = '';
   editingComentarioId: number | null = null;  
   editingComentarioMensaje: string = '';  
+  serverIp = environment.serverIp
 
   constructor(private comentariosService: ComentariosService, public status: StatusService, private authService: AuthService) {}
 
@@ -55,7 +57,7 @@ export class ComentariosComponent implements OnInit {
     }
 
     if (!this.usuario || !this.usuario.id) {
-      window.location.href = 'http://localhost:3002/#/';
+      window.location.href = `${this.serverIp}:3002/#/`; 
     }
 
     this.nuevoComentario.usuario_id = this.usuario.id; 
@@ -173,7 +175,7 @@ export class ComentariosComponent implements OnInit {
 
   darMeGusta(comentarioId: number): void {
     if (!this.usuario || !this.usuario.id) {
-      window.location.href = 'http://localhost:3002/#/'; 
+      window.location.href = `${this.serverIp}:3002/#/`; 
     }
 
     this.comentariosService.darMeGusta(comentarioId, this.usuario.id).subscribe(
