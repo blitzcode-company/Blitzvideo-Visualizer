@@ -64,7 +64,6 @@ export class HeaderComponent {
       if (res.canales && res.canales.length > 0) {
         this.canalId = res.canales[0].id;
         this.canalNombre = res.canales[0].nombre;
-        console.log(res.canales[0].id);
       } else {
         console.error('El usuario no tiene canal hecho');
       }

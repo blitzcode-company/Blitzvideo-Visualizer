@@ -1,8 +1,13 @@
 .comentario {
-  margin-bottom: 30px;
-  border-left: 2px solid #d9d9d9;
+  margin-top: 0px;
+  margin-bottom: 50px;
   padding-left: 10px;
-  position: relative; 
+  position: relative;
+  max-width: 1000px;
+}
+
+a {
+  text-decoration: none;
 }
 
 .comentario-header {
@@ -12,8 +17,8 @@
 }
 
 .fotoUsuario {
-  width: 60px;
-  height: 60px;
+  width: 40px;
+  height: 40px;
   border-radius: 100px;
   object-fit: cover;
 }
@@ -35,36 +40,33 @@
 
 .edit-comentario-form {
   margin-bottom: 10px;
+  display: flex;
+  flex-direction: row;
+  gap:5px
 }
 
 .edit-comentario-form input {
-  width: 25%;
   padding: 5px;
-  margin-bottom: 5px;
   background-color: #f1f1f1;
   border: 1px solid #ccc;
 }
-
 .menu-button {
   background: none;
   border: none;
   font-size: 20px;
   cursor: pointer;
   color: #333;
-  margin-right: 100vh;
-  margin-top: 0;
-  margin-bottom: 0; 
-  position: absolute; 
-  top: 10px; 
-  right: 10px; 
+  position: absolute;
+  top: 10px;
+  right: 10px;
 }
 
 .menu-dropdown {
   display: flex;
   flex-direction: column;
   position: absolute;
-  top: 40px; 
-  margin-left: 77vh;
+  top: 40px;
+  right: 10px;
   background-color: #fff;
   box-shadow: 0 2px 4px rgba(0,0,0,0.2);
   border-radius: 4px;
@@ -83,8 +85,10 @@
   background-color: #f0f0f0;
 }
 
+
 .comentario-footer {
-  margin-top: 10px;
+  margin-top: 5px;
+  margin-left: 50px;
 }
 
 .botonResponder {
@@ -97,6 +101,9 @@
 }
 .botonLike {
   margin-left: 10px;
+  background:none;
+  border: none;
+  cursor: pointer;
 }
 
 .liked {
@@ -116,22 +123,29 @@
 .responderComentario input[type="text"] {
   width: calc(50% - 80px); 
   height: 40px;
-  background-color: #f1f1f1;
-  border: 1px solid #ccc;
+  border: none; 
   padding-left: 10px;
   margin-bottom: 10px;
+  transition: background-color 0.3s ease, padding-bottom 0.3s ease, border-bottom 0.3s ease; 
+
 }
 
 .responderComentario button {
-  background-color: #076dc8;
-  color: white;
-  width: 70px; 
-  border: none;
-  padding: 10px;
+   border: none;
+  outline: none;
   cursor: pointer;
-  margin-left: 82vh; 
+}
+
+.responderComentario input:focus {
+  background-color: #fff; 
+  padding-bottom: 12px; 
+  border-bottom: 1px solid #007bff;
+  outline: none; 
+
 }
 
 .respuestas {
   margin-top: 10px;
+  margin-left: 50px;
+
 }

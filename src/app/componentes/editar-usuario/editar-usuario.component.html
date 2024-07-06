@@ -1,25 +1,47 @@
 <app-header></app-header>
-<div class="box-root padding-bottom--24 flex-flex flex-justifyContent--center">
-  <h2>
-    Edita tu usuario
-  </h2>
-</div>
-<div class="formbg-outer">
-  <div class="formbg">
-    <div class="formbg-inner padding-horizontal--48">
-      <form #dataform="ngForm" (ngSubmit)="onSubmit(dataform)">
-        <div class="field padding-bottom--24">
-          Editar tu nombre
-          <input type="text" id="name" [(ngModel)]="usuario.name" name="name"> <br>
+<div class="container">
+  <div class="header">
+    <h2>Edita tu usuario</h2>
+  </div>
+  <div class="form-container">
+    <form #dataform="ngForm" (ngSubmit)="onSubmit(dataform)" enctype="multipart/form-data">
+      <div class="form-group">
+        <label for="name">Editar tu nombre</label>
+        <input 
+          type="text" 
+          id="name" 
+          [(ngModel)]="usuario.name" 
+          name="name" 
+          class="form-control" 
+          required>
+      </div>
+
+      <div class="form-group">
+        <label for="foto">Agrega o cambia tu foto</label>
+        <div class="photo-upload">
+          <img 
+            [src]="usuario.foto ? usuario.foto : 'assets/images/user.png'" 
+            alt="Foto de usuario" 
+            class="user-photo"
+            id="userPhoto">
+          <input 
+            type="file" 
+            id="foto" 
+            (change)="onFileSelected($event)" 
+            class="file-input">
+          <label for="foto" class="upload-button">
+            <i class="fa fa-upload"></i> Cambiar Foto
+          </label>
         </div>
-        <div class="field padding-bottom--24">
-          Agrega o cambia tu foto
-          <input type="file" id="foto" (change)="onFileSelected($event)"> <br>
-        </div>
-        <div class="field padding-bottom--24">
-          <button class="boton" type="submit">Actualizar</button>
-        </div>
-      </form>
+      </div>
+
+      <div class="form-group">
+        <button class="btn-submit" type="submit">Actualizar</button>
+      </div>
+    </form>
+
+    <div *ngIf="alerta.length" class="alert-container">
+      <div *ngFor="let mensaje of alerta" class="alert alert-info">{{ mensaje }}</div>
     </div>
   </div>
 </div>

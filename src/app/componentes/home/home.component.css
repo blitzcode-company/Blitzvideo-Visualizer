@@ -1,93 +1,110 @@
 a {
-    text-decoration: none;
-    color: black;
-  }
-  
+  text-decoration: none;
+  color: black;
+}
 
+.container {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* Cuatro columnas por defecto */
+  gap: 20px; /* Espacio entre los videos */
+  margin-top: 40px;
+  box-sizing: border-box;
+}
 
+/* Estilo para los elementos del video */
+.video {
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+/* Efecto hover para la miniatura */
+.miniatura {
+  object-fit: cover;
+  transition: all 500ms ease-out;
+}
+
+.imagenMiniatura .miniatura:hover {
+  transform: scale(1.10);
+}
+
+/* Estilos para la información del video */
+.video-info h3 {
+  margin: 0 0 5px;
+  font-size: 16px;
+  color: #333;
+  overflow: hidden;
+  text-overflow: ellipsis; /* Manejo de texto largo */
+  white-space: nowrap; /* Evita el salto de línea */
+}
+
+.video-info p {
+  margin: 0;
+  color: #888;
+  font-size: 14px;
+}
+
+/* Estilos para el nombre del canal */
+.canalNombre {
+  font-size: 1em;
+  color: #4b4b4b;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Estilos para el enlace del canal */
+.canal-link {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.canal-link:hover {
+  text-decoration: underline;
+}
+
+.fotoUser {
+  border-radius: 25px;
+  object-fit: cover;
+}
+
+/* Estilos para la foto del usuario por defecto */
+.fotoUserDefault {
+  border-radius: 25px;
+  width: 75px;
+  height: 50px;
+  object-fit: cover;
+}
+
+/* Estilos para la foto del usuario por defecto */
+
+/* Estilos para la línea horizontal entre el contenido del video y el nombre del canal */
+hr {
+  border: 0;
+  border-top: 1px solid #e0e0e0;
+  margin: 10px 0;
+}
+
+/* Estilos responsivos */
+@media (max-width: 1200px) {
   .container {
-    display: flex;
-    flex-wrap: wrap;
-    margin-top: 40px;
+    grid-template-columns: repeat(3, 1fr); /* 3 columnas para pantallas grandes pero no tan grandes */
   }
-  
-  .fila {
-    width: 100%;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    margin-bottom: 20px;
-  }
-  
-  .miniatura {
-    transition: all 500ms ease-out;
-  }
+}
 
-  .imagenMiniatura .miniatura:hover {
-    transform: scale(1.10);
-    
+@media (max-width: 992px) {
+  .container {
+    grid-template-columns: repeat(2, 1fr); /* 2 columnas para pantallas medianas */
   }
-  
+}
 
-  .video-info h3 {
-    margin: 0 0 5px;
-    font-size: 16px;
-    color: #333;
+@media (max-width: 767px) {
+  .container {
+    grid-template-columns: 1fr; /* 1 columna en pantallas pequeñas */
   }
-  
-  .video-info p {
-    margin: 0;
-    color: #888;
-    font-size: 14px;
-  }
-
-  
-  .canalNombre {
-    font-size: 1em; 
-    color:#4b4b4b;
-  }
-  
-  .video {
-    width: 320px; 
-    max-width: calc(50% - 10px); 
-    margin-bottom: 20px;
-    border: 1px solid #ccc;
-    padding: 10px;
-    box-sizing: border-box;
-    overflow: hidden;
-
-  }
-
-  .fotoUser {
-    border-radius: 25px;
-    object-fit: cover;
-
-  }
-
-  .fotoUserDefault {
-    border-radius: 25px;
-    width:75px;
-    height:50px;
-    object-fit: cover;
-
-  }
-  
-  @media (min-width: 768px) {
-    .video {
-      max-width: calc(33.33% - 10px);
-    }
-  }
-  
-  @media (min-width: 1024px) {
-    .video {
-      max-width: calc(25% - 10px); 
-    }
-  }
-  
-  @media (max-width: 767px) {
-    .video {
-      width: 100%;
-      max-width: none; 
-    }
-  }
-  
+}

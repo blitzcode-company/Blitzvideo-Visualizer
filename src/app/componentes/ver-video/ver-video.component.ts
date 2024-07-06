@@ -47,7 +47,6 @@ export class VerVideoComponent implements OnInit {
   obtenerUsuario(): void {
     this.authService.usuario$.subscribe(res => {
       this.usuario = res;
-      console.log('Usuario obtenido:', this.usuario);
       this.obtenerPuntuacionActual();  
     });
 
@@ -67,7 +66,6 @@ export class VerVideoComponent implements OnInit {
       if (this.video && this.video.titulo) {
         this.titleService.setTitle(this.video.titulo + ' - BlitzVideo');
       }
-      console.log(this.video);
     });
   }
 
@@ -90,8 +88,7 @@ export class VerVideoComponent implements OnInit {
       response => {
         this.puntuacionActual = response;
         this.puntuacionSeleccionada = this.puntuacionActual.valora; 
-        console.log('Puntuación actual:', this.puntuacionActual);
-        console.log('Puntuación seleccionada:', this.puntuacionSeleccionada);
+
       },
       error => {
         if (error.status === 404) {
@@ -112,7 +109,6 @@ export class VerVideoComponent implements OnInit {
 
     this.puntuarService.quitarPuntuacion(this.videoId, this.usuario.id, this.valorPuntuacion).subscribe(
       response => {
-        console.log(response.message);
         this.puntuacionActual = null;
         this.valorPuntuacion = null; 
         this.puntuacionSeleccionada = null;  
@@ -131,7 +127,6 @@ export class VerVideoComponent implements OnInit {
 
     this.puntuarService.puntuar(this.videoId, this.usuario.id, this.valorPuntuacion).subscribe(
       response => {
-        console.log(response.message);
         this.obtenerPuntuacionActual();  
       },
       error => {

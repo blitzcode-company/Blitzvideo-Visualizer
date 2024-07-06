@@ -21,12 +21,13 @@ ngOnInit() {
 
 
 }
-
+onImageError(event: any) {
+  event.target.src = 'assets/images/video-default.png';
+}
 
 mostrarTodosLosVideos() {
   this.videoService.listarVideos().subscribe(res => {
     this.videos = res;
-    console.log(this.videos)
   });
 }
 

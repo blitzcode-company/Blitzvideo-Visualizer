@@ -7,6 +7,8 @@ import { EditarUsuarioComponent } from './componentes/editar-usuario/editar-usua
 import { ResultadoDeBusquedaComponent } from './componentes/resultado-de-busqueda/resultado-de-busqueda.component';
 import { VerCanalComponent } from './componentes/ver-canal/ver-canal.component';
 import { VideosDelCanalComponent } from './componentes/videos-del-canal/videos-del-canal.component';
+import { NoEncontradoComponent } from './componentes/no-encontrado/no-encontrado.component';
+
 
 const routes: Routes = [
   {path: '', component: HomeComponent},
@@ -16,8 +18,7 @@ const routes: Routes = [
   { path: 'canal/:id', component: VerCanalComponent},
   { path: 'canal/:id/videos', component: VideosDelCanalComponent},
 
-  { path: '**', redirectTo: '', pathMatch: 'full' }  
-
+  { path: '**', component: NoEncontradoComponent }, 
 ];
 
 @NgModule({

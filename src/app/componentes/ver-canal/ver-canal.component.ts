@@ -43,7 +43,6 @@ export class VerCanalComponent implements OnInit {
 
           if (this.ultimoVideo) {
             this.ultimoVideo.indice = this.videos.findIndex(videosGeneral => videosGeneral.id === this.ultimoVideo.id) + 1;
-            console.log('Índice del último video:', this.ultimoVideo.indice);
           }
 
           if (this.canal && this.canal.nombre) {

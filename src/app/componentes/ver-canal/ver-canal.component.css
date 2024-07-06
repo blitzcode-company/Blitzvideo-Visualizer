@@ -1,42 +1,61 @@
+.banner-container {
+  --profile-banner-height: 150px; 
+  height: var(--profile-banner-height);
+  background-image: var(--profile-banner);
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  border-bottom: 1px solid #e0e0e0;
+  position: relative; 
+}
 
 header {
-  background-color: #fff;
-  border-bottom: 1px solid #e0e0e0;
-  padding-bottom: 20px;
-}
-
-.banner img {
-  width: 100%;
-  height: auto;
-}
-
-.profile {
   display: flex;
+  flex-direction: column;
   align-items: center;
+  justify-content: center;
   padding: 20px;
-  flex-wrap: wrap;
+  box-sizing: border-box;
+  position: absolute;
+  bottom: -50px; 
+  width: 300px; 
+  max-width: 1200px; 
+  left: 0; 
+  transform: none; 
+  text-align: center; 
 }
 
 .profile-pic {
-  width: 80px;
-  height: 80px;
+  width: 120px; 
+  height: 120px; 
   border-radius: 50%;
-  margin-right: 20px;
+  margin-bottom: 10px; 
   object-fit: cover;
+  border: 4px solid #fff;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); 
 }
 
 .profile-info {
-  flex-grow: 1;
+  text-align: center;
+}
+
+.profile-info h1 {
+  margin: 0;
+  font-size: 28px;
+  color: #333;
+}
+
+nav {
+  background-color: #fff;
+  border-bottom: 1px solid #e0e0e0;
+  margin: 20px 0;
 }
 
 nav ul {
   list-style: none;
   display: flex;
   padding: 0;
-  background-color: #fff;
-  border-bottom: 1px solid #e0e0e0;
   margin: 0;
-  flex-wrap: wrap;
 }
 
 nav ul li {
@@ -54,20 +73,16 @@ nav ul li a:hover {
   background-color: #f1f1f1;
 }
 
+
 main {
   padding: 20px;
 }
 
-.profile {
-  background-image: var(--profile-banner); 
-  background-position: center;
-  background-size: cover;
-  background-repeat: no-repeat;
-}
+
 
 .ultimo-video {
   margin-bottom: 30px;
-  text-align: center; 
+  text-align: center;
 }
 
 .ultimo-video h2 {
@@ -112,16 +127,13 @@ main {
 }
 
 .video-grid {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(600px, 1fr));
   gap: 20px;
 }
 
 .video-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-  justify-content: space-between;
+  display: contents;
 }
 
 .video-card {
@@ -130,7 +142,6 @@ main {
   border-radius: 4px;
   overflow: hidden;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  flex: 1 1 22%; 
 }
 
 .video-card img {
@@ -156,12 +167,12 @@ main {
 
 @media (max-width: 768px) {
   .video-card {
-    flex: 1 1 45%; 
+    flex: 1 1 45%;
   }
 }
 
 @media (max-width: 480px) {
   .video-card {
-    flex: 1 1 100%; 
+    flex: 1 1 100%;
   }
 }

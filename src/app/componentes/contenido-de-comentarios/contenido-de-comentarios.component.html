@@ -19,8 +19,9 @@
 
       <div *ngIf="editingComentarioId === comentario.id" class="edit-comentario-form">
         <input [(ngModel)]="editingComentarioMensaje" placeholder="Edita tu comentario...">
-        <button (click)="editarComentario(comentario)">Actualizar</button>
-        <button (click)="toggleEdit(null)">Cancelar</button>
+        <button (click)="toggleEdit(null)"  class="btn btn-secondary">Cancelar</button>
+        <button (click)="editarComentario(comentario)" class="btn btn-primary">Actualizar</button>
+
       </div>
     
       <p *ngIf="editingComentarioId !== comentario.id">{{ comentario.mensaje }}</p>
@@ -38,15 +39,16 @@
 
   <div class="comentario-footer">
     <a href="#" *ngIf="comentario.respuestas && comentario.respuestas.length" (click)="toggleRespuestas(comentario); $event.preventDefault()">
-      {{ comentario.mostrarRespuestas ? 'Ocultar Respuestas' : 'Ver Respuestas' }}
+      {{ comentario.mostrarRespuestas ? 'Ocultar Respuestas' : 'Ver respuestas' }}
     </a>
   </div>
 
   <form *ngIf="selectedComentarioId === comentario.id" (ngSubmit)="enviarRespuesta()">
     <div class="responderComentario">
       <input type="text" [(ngModel)]="respuestaComentario.mensaje" name="respuestaComentarioMensaje" placeholder="Escribe una respuesta" required>
-      <button type="submit">Enviar</button>
     </div>
+    <button class="btn btn-primary" type="submit">Enviar</button>
+
   </form>
 
   <div class="respuestas" *ngIf="comentario.mostrarRespuestas">

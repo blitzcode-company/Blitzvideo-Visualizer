@@ -1,5 +1,5 @@
 .canalynombre, .comentarios-container {
-  margin-left: 10vh;
+  margin-left: 12vh;
 }
 
 .fotoInput {
@@ -32,23 +32,30 @@
 .inputyenvio input[type="text"] {
   width: 800px;
   height: 50px;
-  background-color: #d9d9d9;
-  border: 0;
   padding-left: 10px;
+  border: none; 
+  transition: background-color 0.3s ease, padding-bottom 0.3s ease, border-bottom 0.3s ease; 
 }
+.input-container {
+  position: relative; 
+}
+
+.inputyenvio input[type="text"]:focus {
+  background-color: #fff; 
+  padding-bottom: 12px; 
+  border-bottom: 1px solid #007bff;
+  outline: none; 
+}
+
 
 .inputyenvio button {
   margin-top: 0;
   margin-left: 20px;
-  background-color: #076dc8;
-  color: white;
   border: none;
   padding: 10px 20px;
-  cursor: pointer;
 }
 
 .enviarComentario {
-  width: 5%;
   margin-left: 910px;
   background-color: #076dc8;
   color: white;
@@ -116,9 +123,7 @@
 }
 
 .responderComentario button {
-  background-color: #076dc8;
-  color: white;
-  border: none;
+ 
   padding: 10px;
   cursor: pointer;
 }

@@ -4,13 +4,15 @@
       <div class="inputyenvio">
         <img *ngIf="usuario?.foto" [src]="usuario?.foto" class="fotoInput" alt="Foto del usuario">
         <img *ngIf="!usuario?.foto" src="assets/images/user.png" class="fotoInput" alt="Foto del usuario">
+        <div class="input-container">
         <input type="text" id="nuevoComentario" [(ngModel)]="nuevoComentario.mensaje" name="nuevoComentarioMensaje"
-          placeholder="Escribe un comentario" required>
-        <button class="enviarComentario" type="submit">Enviar</button>
+          placeholder="Escribe un comentario..." required>
+        </div>
+        <button class="btn btn-primary" type="submit">Enviar</button>
       </div>
     </div>
   </form>
-  <hr>
+  <br>
   <div id="comentarios">
       <app-contenido-de-comentarios
         *ngFor="let comentario of comentarios"

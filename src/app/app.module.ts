@@ -27,6 +27,7 @@ import {VgOverlayPlayModule} from '@videogular/ngx-videogular/overlay-play';
 import {VgBufferingModule} from '@videogular/ngx-videogular/buffering';
 import { ReproductorVideoComponent } from './componentes/reproductor-video/reproductor-video.component'
 import { RouterModule } from '@angular/router';
+import { NoEncontradoComponent } from './componentes/no-encontrado/no-encontrado.component';
 
 
 @NgModule({
@@ -44,6 +45,7 @@ import { RouterModule } from '@angular/router';
     VideosDelCanalComponent,
     VerCanalComponent,
     ReproductorVideoComponent,
+    NoEncontradoComponent,
   ],
   imports: [
     BrowserModule,
@@ -69,7 +71,6 @@ import { RouterModule } from '@angular/router';
     ComentariosComponent
   ],
   providers: [
-    provideClientHydration(), 
     CookieService, 
     provideAnimationsAsync(),
     ComentariosService

@@ -14,6 +14,8 @@ export class EditarUsuarioComponent implements OnInit{
 
 usuario:any;
 foto: File | undefined = undefined;
+alerta: string[] = [];
+fotoFile:  File | undefined = undefined;
 
 
 constructor (public router:Router, private authService: AuthService, public location:Location, private titleService:Title) {}
@@ -33,35 +35,42 @@ obtenerUsuario() {
 }
 
 
-onFileChange(event: any) {
-  const file = event.target.files[0];
-  if (file) {
-    this.usuario.foto = file;
-  }
-  console.log('Archivo seleccionado:', this.usuario.foto);
-}
 
 onFileSelected(event: any): void {
-  if (event.target.files.length > 0) {
-    this.foto = event.target.files[0];
+  this.fotoFile = event.target.files[0];
+  if (this.fotoFile) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const userPhoto = document.getElementById('userPhoto') as HTMLImageElement;
+      if (userPhoto) {
+        userPhoto.src = reader.result as string;
+      }
+    };
+    reader.readAsDataURL(this.fotoFile);
+  } else {
+    console.error('No file selected');
   }
 }
-
 editarUsuario(): void {
   const userId = this.usuario.id;
   const formData = new FormData();
   formData.append('nombre', this.usuario.nombre); 
 
-  if (this.foto) { 
-    formData.append('foto', this.foto);
+  if (this.fotoFile) {
+    formData.append('foto', this.fotoFile);
   }
+
 
   this.authService.editarUsuario(userId, formData).subscribe(
     res => {
       console.log('Usuario actualizado correctamente', res);
+      this.alerta.push('Usuario actualizado correctamente');
+
     },
     error => {
       console.error('Error al actualizar el usuario', error);
+      this.alerta.push('Error al actualizar el usuario');
+
     }
   );
 }

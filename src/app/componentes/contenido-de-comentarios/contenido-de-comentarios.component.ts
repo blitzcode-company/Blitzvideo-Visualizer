@@ -38,7 +38,7 @@ export class ContenidoDeComentariosComponent implements OnInit{
 
   toggleResponder(comentario: Comentario): void {
     this.selectedComentarioId = comentario.id ?? null;
-    this.respuestaComentario.mensaje = `@${comentario.user?.name} `;
+    this.respuestaComentario.mensaje = '';
   }
 
   enviarRespuesta(): void {
