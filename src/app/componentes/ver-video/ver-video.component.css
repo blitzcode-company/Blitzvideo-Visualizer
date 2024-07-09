@@ -94,9 +94,14 @@
   font-family: Roboto-Bold;
   margin: 0; 
   font-size: 16px; 
+  z-index: 100;
   color: #333; 
 }
 
+.info-container a {
+  text-decoration: none;
+
+}
 .fotodeperfil {
   width: 70px;
   height: 70px;
@@ -123,7 +128,9 @@
   grid-column: 1 / 2;
   grid-row: 5;
   margin-left: 10vh;
-  background-color: #d9d9d9; 
+  background-color: #edede9; 
+  border: 1px solid #e0e0e0;
+
   border-radius: 10px;
   padding: 10px; 
   width: 100%; 
@@ -131,6 +138,8 @@
   position: relative; 
   margin-top: -40px;
   z-index: 5;
+  box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.1);
+
 }
 
 @media (max-width: 768px) {

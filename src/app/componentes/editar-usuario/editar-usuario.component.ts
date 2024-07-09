@@ -28,7 +28,7 @@ ngOnInit() {
 
 obtenerUsuario() {
   this.authService.usuario$.subscribe(res => {
-    this.usuario = res;
+    this.usuario =  res;
    
   });
   this.authService.mostrarUserLogueado().subscribe();
@@ -51,6 +51,14 @@ onFileSelected(event: any): void {
     console.error('No file selected');
   }
 }
+
+triggerFileInput() {
+  const fileInput = document.getElementById('foto') as HTMLInputElement;
+  if (fileInput) {
+    fileInput.click(); // Dispara el evento click en el input de tipo file
+  }
+}
+
 editarUsuario(): void {
   const userId = this.usuario.id;
   const formData = new FormData();

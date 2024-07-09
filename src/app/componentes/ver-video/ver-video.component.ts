@@ -88,7 +88,6 @@ export class VerVideoComponent implements OnInit {
       response => {
         this.puntuacionActual = response;
         this.puntuacionSeleccionada = this.puntuacionActual.valora; 
-
       },
       error => {
         if (error.status === 404) {

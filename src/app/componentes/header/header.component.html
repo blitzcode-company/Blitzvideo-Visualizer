@@ -14,8 +14,8 @@
         <div class="dropdown-content">
           <a *ngIf="status.isLoggedIn && usuario?.name" class="dropdown-item canal">{{ usuario?.name }}</a>
           <img *ngIf="status.isLoggedIn && usuario?.foto" [src]="usuario.foto" alt="mdo" width="32" height="32" class="avatar">
-          <img *ngIf="status.isLoggedIn && !usuario?.foto" src="assets/images/user.png" alt="mdo" width="48" height="32" class="avatar">
-          <img *ngIf="!status.isLoggedIn" src="assets/images/user.png" alt="mdo" width="48" height="32" class="avatar">       
+          <img *ngIf="status.isLoggedIn && !usuario?.foto" src="assets/images/user.png" alt="mdo" height="32" class="avatar">
+          <img *ngIf="!status.isLoggedIn" src="assets/images/user.png" alt="mdo"  height="32" class="avatar">       
         </div>
       </button>
       <div class="dropdown-menu">

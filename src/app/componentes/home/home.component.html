@@ -1,23 +1,22 @@
 <app-header></app-header>
-<div class="container">
-  <div class="video" *ngFor="let video of videos">
+<div class="video-grid">
+  <div class="video-card" *ngFor="let video of videos">
     <a [routerLink]="['/video', video.id]" class="video-link">
-      <div class="imagenMiniatura">
-        <img class="miniatura" [src]="video.miniatura ? video.miniatura : 'assets/images/video-default.png'" 
-             width="290" height="160" alt="miniatura" (error)="onImageError($event)">
+      <div class="miniatura-container">
+        <img class="miniatura" [src]="video.miniatura ? video.miniatura : 'assets/images/video-default.png'" alt="Miniatura del video">
       </div>
       <div class="video-info">
         <h3>{{ video.titulo }}</h3>
         <p>{{ video.visitas_count }} vistas • {{ video.created_at | date:'short' }}</p>
       </div>
       <hr>
-      <h2 class="canalNombre">
+      <div class="canalNombre">
         <a [routerLink]="['/canal', video.canal.id]" class="canal-link">
-          <img *ngIf="video.canal.user.foto" class="fotoUser" [src]="video.canal.user.foto" alt="Foto del canal" width="48" height="48">
-          <img *ngIf="!video.canal.user.foto" class="fotoUserDefault" src="/assets/images/user.png" alt="Foto del canal" width="48" height="48">
+          <img *ngIf="video.canal.user.foto" class="fotoUser" [src]="video.canal.user.foto" alt="Foto del canal">
+          <img *ngIf="!video.canal.user.foto" class="fotoUserDefault" src="/assets/images/user.png" alt="Foto del canal">
           {{ video.canal.nombre }}
         </a>
-      </h2>
+      </div>
     </a>
   </div>
 </div>

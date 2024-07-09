@@ -23,15 +23,13 @@
             [src]="usuario.foto ? usuario.foto : 'assets/images/user.png'" 
             alt="Foto de usuario" 
             class="user-photo"
-            id="userPhoto">
+            id="userPhoto"
+            (click)="triggerFileInput()">
           <input 
             type="file" 
             id="foto" 
             (change)="onFileSelected($event)" 
             class="file-input">
-          <label for="foto" class="upload-button">
-            <i class="fa fa-upload"></i> Cambiar Foto
-          </label>
         </div>
       </div>
 
