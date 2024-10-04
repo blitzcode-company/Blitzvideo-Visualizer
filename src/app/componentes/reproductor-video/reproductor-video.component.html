@@ -1,4 +1,4 @@
-<div class="reproductor">
+<div class="reproductor" [ngClass]="{'cinema-mode': isCinemaMode}">
   <div class="video-container">
     <video #videoPlayer class="video" (timeupdate)="updateProgressBar()" autoplay>
       <source [src]="videoUrl" type="video/mp4">
@@ -15,6 +15,9 @@
       <input type="range" #volumeSlider class="volume" value="100" min="0" max="100" (input)="changeVolume(volumeSlider)">
       <button (click)="toggleFullscreen()">
         <i class="fas fa-expand"></i>
+      </button>
+      <button (click)="toggleCinemaMode()">
+        <i [class]="isCinemaMode ? 'fas fa-compress' : 'fas fa-film'"></i>
       </button>
     </div>
   </div>

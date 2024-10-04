@@ -1,10 +1,12 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
 import { Comentario } from '../clases/comentario';
 import { map } from 'rxjs/operators';
 import { CookieService } from 'ngx-cookie-service';
 import { environment } from '../../environments/environment';
+import { catchError } from 'rxjs/operators'; 
+
 
 
 @Injectable({
@@ -53,15 +55,20 @@ export class ComentariosService {
   }
 
   eliminarComentario(idComentario: number, usuario_id: number): Observable<any> {
-    const url = `${this.apiUrl}api/v1/videos/comentarios/${idComentario}`;  
+    const url = `${this.apiUrl}api/v1/videos/comentarios/${idComentario}`;  // URL para eliminar comentario por ID
     const httpOptions = {
       headers: new HttpHeaders({
         'Authorization': 'Bearer ' + this.cookie.get('accessToken'),
         'Content-Type': 'application/json'
       }),
-      body: { usuario_id }  
+      body: { usuario_id }  // Pasar usuario_id en el cuerpo de la solicitud
     };
-    return this.http.delete(url, httpOptions);
+    return this.http.delete(url, httpOptions).pipe(
+      catchError(error => {
+        console.error('Error en el servicio de eliminación de comentario:', error);
+        return throwError(error);
+      })
+    );
   }
 
   getEstadoMeGusta(idComentario: number, idUsuario: number): Observable<any> {

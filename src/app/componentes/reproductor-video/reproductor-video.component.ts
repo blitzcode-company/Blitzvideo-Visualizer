@@ -1,6 +1,5 @@
 import { Component, Input, OnInit, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
 
-
 @Component({
   selector: 'app-reproductor-video',
   templateUrl: './reproductor-video.component.html',
@@ -8,10 +7,13 @@ import { Component, Input, OnInit, AfterViewInit, ViewChild, ElementRef } from '
 })
 export class ReproductorVideoComponent implements OnInit, AfterViewInit {
   @Input() videoUrl: string | undefined;
-
   @ViewChild('videoPlayer', { static: false }) videoPlayer: ElementRef<HTMLVideoElement> | undefined;
   @ViewChild('progressBar', { static: true }) progressBar!: ElementRef<HTMLInputElement>;
   @ViewChild('volumeSlider', { static: true }) volumeSlider!: ElementRef<HTMLInputElement>;
+
+  isPlaying = false;
+  isMuted = false;
+  isCinemaMode = false;
 
   constructor(private el: ElementRef) { }
 
@@ -23,11 +25,6 @@ export class ReproductorVideoComponent implements OnInit, AfterViewInit {
     }
   }
 
-
-  isPlaying = false;
-  isMuted = false;
-
- 
   togglePlayPause() {
     const video: HTMLVideoElement | undefined = this.videoPlayer?.nativeElement;
     if (video) {
@@ -84,5 +81,9 @@ export class ReproductorVideoComponent implements OnInit, AfterViewInit {
         document.exitFullscreen();
       }
     }
+  }
+
+  toggleCinemaMode() {
+    this.isCinemaMode = !this.isCinemaMode;
   }
 }

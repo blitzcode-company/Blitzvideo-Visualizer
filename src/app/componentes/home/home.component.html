@@ -1,22 +1,41 @@
 <app-header></app-header>
-<div class="video-grid">
-  <div class="video-card" *ngFor="let video of videos">
-    <a [routerLink]="['/video', video.id]" class="video-link">
-      <div class="miniatura-container">
-        <img class="miniatura" [src]="video.miniatura ? video.miniatura : 'assets/images/video-default.png'" alt="Miniatura del video">
-      </div>
-      <div class="video-info">
-        <h3>{{ video.titulo }}</h3>
-        <p>{{ video.visitas_count }} vistas • {{ video.created_at | date:'short' }}</p>
-      </div>
-      <hr>
-      <div class="canalNombre">
-        <a [routerLink]="['/canal', video.canal.id]" class="canal-link">
-          <img *ngIf="video.canal.user.foto" class="fotoUser" [src]="video.canal.user.foto" alt="Foto del canal">
-          <img *ngIf="!video.canal.user.foto" class="fotoUserDefault" src="/assets/images/user.png" alt="Foto del canal">
-          {{ video.canal.nombre }}
-        </a>
-      </div>
-    </a>
+<div class="container">
+  <div class="sidebar">
+    <a href="#">Inicio</a>
+    <a [href]="serverIp + '3001' + '/#/misVideos'">Mi canal</a>
+    <a href="/playlists">Listas de reproduccion</a>
+    <hr class="lineaSideBar">
+    <a>Suscripciones</a>
+    <div class="canalesSuscritos"  *ngFor="let canal of canales">
+      <a [routerLink]="['/canal', canal.id]"> 
+        <img *ngIf="!canal.user.foto" class="fotoUserSuscriptores" src="/assets/images/user.png" alt="Foto del canal">
+
+        <img *ngIf="canal.user.foto" class="fotoUserSuscriptores" [src]="canal.user.foto" alt="">
+        {{ canal.nombre }}
+      </a>
+    </div>
+  </div>
+
+  <div class="video-grid">
+    <div class="video-card" *ngFor="let video of videos">
+      <a [routerLink]="['/video', video.id]" class="video-link">
+        <div class="miniatura-container">
+          <img class="miniatura" [src]="video.miniatura ? video.miniatura : 'assets/images/video-default.png'" alt="Miniatura del video">
+          <p> {{  video.duracionFormateada  }}</p>
+        </div>
+        <div class="video-info">
+          <h3>{{ video.titulo }}</h3>
+          <p>{{ video.visitas_count }} vistas • {{ video.created_at | date:'short' }}</p>
+        </div>
+        <hr>
+        <div class="canalNombre">
+          <a [routerLink]="['/canal', video.canal.id]" class="canal-link">
+            <img *ngIf="video.canal.user.foto" class="fotoUser" [src]="video.canal.user.foto" alt="Foto del canal">
+            <img *ngIf="!video.canal.user.foto" class="fotoUserDefault" src="/assets/images/user.png" alt="Foto del canal">
+            {{ video.canal.nombre }}
+          </a>
+        </div>
+      </a>
+    </div>
   </div>
 </div>

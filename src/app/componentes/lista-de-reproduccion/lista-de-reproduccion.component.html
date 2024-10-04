@@ -1,0 +1,32 @@
+<app-header></app-header>
+<div class="container">
+  <div class="sidebar">
+    <a href="#">Inicio</a>
+    <a [href]="serverIp + '3001' + '/#/misVideos'">Mi canal</a>
+    <a href="/playlists">Listas de reproduccion</a>
+    <hr class="lineaSideBar">
+    <a>Suscripciones</a>
+    <div class="canalesSuscritos"  *ngFor="let canal of canales">
+      <a [routerLink]="['/canal', canal.id]"> 
+        <img *ngIf="!canal.user.foto" class="fotoUserSuscriptores" src="/assets/images/user.png" alt="Foto del canal">
+
+        <img *ngIf="canal.user.foto" class="fotoUserSuscriptores" [src]="canal.user.foto" alt="">
+        {{ canal.nombre }}
+      </a>
+    </div>
+  </div>
+
+  <div class="video-grid">
+    <div class="video-card" *ngFor="let lista of listas">
+      <a [routerLink]="['/playlists', lista.id]" class="video-link">
+        <div class="miniatura-container">
+          <img class="miniatura" [src]="lista.imagen" alt="Miniatura de la lista">
+        </div>
+        <div class="video-info">
+          <h3>{{ lista.nombre }}</h3>
+        </div>
+        <hr>
+      </a>
+    </div>
+  </div>
+</div>

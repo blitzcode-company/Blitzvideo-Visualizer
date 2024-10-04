@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ElementRef, ViewChild, AfterViewInit, AfterViewChecked } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { VideosService } from '../../servicios/videos.service';
 import { AuthService } from '../../servicios/auth.service';
@@ -8,15 +8,21 @@ import { StatusService } from '../../servicios/status.service';
 import { Observable } from 'rxjs';
 import { Videos } from '../../clases/videos';
 import { environment } from '../../../environments/environment';
+import { MatDialog } from '@angular/material/dialog';
+import { CrearListaReproduccionComponent } from '../crear-lista-reproduccion/crear-lista-reproduccion.component';
+import { SuscripcionesService } from '../../servicios/suscripciones.service';
+
 
 @Component({
   selector: 'app-ver-video',
   templateUrl: './ver-video.component.html',
   styleUrls: ['./ver-video.component.css']
 })
-export class VerVideoComponent implements OnInit {
+export class VerVideoComponent implements OnInit, AfterViewInit, AfterViewChecked {
   puntuacionSeleccionada: number | null = null;
   videoId: any;
+  canalId: any;
+  userId: any;
   videos = new Videos();
   video: any;
   comentario: any;
@@ -26,15 +32,25 @@ export class VerVideoComponent implements OnInit {
   public loggedIn: boolean = false;
   puntuacionActual: any = {};
   valorPuntuacion: number | null = null; 
-  serverIp = environment.serverIp
+  serverIp = environment.serverIp;
+  isExpanded = false;
+  isContentOverflowing = false;
+  isCinemaMode = false;
+  public suscrito: boolean = false;
+  mensaje: string = '';
+  numeroDeSuscriptores: any;
+
+  @ViewChild('descripcion', { static: true }) descripcionElement: ElementRef | undefined;
 
   constructor(
     private route: ActivatedRoute,
     private videoService: VideosService,
+    private suscripcionService: SuscripcionesService,
     private authService: AuthService,
     private titleService: Title,
     private puntuarService: PuntuacionesService,
-    public status: StatusService
+    public status: StatusService,
+    public dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
@@ -42,20 +58,56 @@ export class VerVideoComponent implements OnInit {
     this.mostrarVideo();
     this.obtenerUsuario();
     this.visitar();
+    this.verificarSuscripcion();
+    this.listarNumeroDeSuscriptores();
+
+  }
+
+  ngAfterViewInit(): void {
+    setTimeout(() => {
+      this.checkContentOverflow();
+    }, 0);
+  }
+
+  ngAfterViewChecked(): void {
+    this.checkContentOverflow();
   }
 
   obtenerUsuario(): void {
     this.authService.usuario$.subscribe(res => {
       this.usuario = res;
+      this.userId = this.usuario.id
       this.obtenerPuntuacionActual();  
+      this.verificarSuscripcion();
+
     });
 
     this.authService.mostrarUserLogueado().subscribe();
   }
 
+
+  toggleCinemaMode() {
+    this.isCinemaMode = !this.isCinemaMode;
+  }
+
+  toggleExpand(event: MouseEvent) {
+    event.preventDefault();
+    this.isExpanded = !this.isExpanded;
+    setTimeout(() => this.checkContentOverflow(), 0);
+  }
+
+
+  checkContentOverflow() {
+    if (this.descripcionElement) {
+      const element = this.descripcionElement.nativeElement;
+      this.isContentOverflowing = element.scrollHeight > element.clientHeight;
+    }
+  }
+
   mostrarVideo(): void {
     this.videoService.obtenerInformacionVideo(this.videoId).subscribe(res => {
       this.video = res;
+      console.log(this.video)
       if (this.video && this.video.created_at) {
         const fecha = new Date(this.video.created_at);
         if (!isNaN(fecha.getTime())) {
@@ -66,6 +118,11 @@ export class VerVideoComponent implements OnInit {
       if (this.video && this.video.titulo) {
         this.titleService.setTitle(this.video.titulo + ' - BlitzVideo');
       }
+      
+      this.videoId = this.video.id;
+      this.canalId = this.video.canal_id
+
+      this.listarNumeroDeSuscriptores();
     });
   }
 
@@ -175,4 +232,80 @@ export class VerVideoComponent implements OnInit {
 
     return `${dia} de ${mes} de ${año}`;
   }
+
+  abrirModalCrearLista(): void {
+    const dialogRef = this.dialog.open(CrearListaReproduccionComponent, {
+      width: '500px',
+      data: { videoId: this.videoId } 
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        console.log('Lista creada o video agregado');
+      }
+    });
+  }
+  
+  
+  suscribirse(): void {
+    this.suscripcionService.suscribirse(this.userId, this.canalId).subscribe(
+      response => {
+        this.mensaje = 'Suscripción exitosa';
+        this.suscrito = true; 
+      },
+      error => this.handleError(error)
+    );
+  }
+
+  listarNumeroDeSuscriptores() {
+    this.suscripcionService.listarNumeroDeSuscriptores(this.canalId).subscribe(res => {
+      this.numeroDeSuscriptores = res;
+      console.log(this.numeroDeSuscriptores)
+    });
+  }
+  
+
+  anularSuscripcion(): void {
+    this.suscripcionService.anularSuscripcion(this.userId, this.canalId).subscribe(
+      () => {
+        this.mensaje = 'Suscripción anulada';
+        this.suscrito = false; 
+      },
+      error => this.handleError(error)
+    );
+  }
+
+  
+  toggleSuscripcion(): void {
+    if (this.suscrito) {
+      this.anularSuscripcion(); 
+    } else {
+      this.suscribirse(); 
+    }
+  }
+
+  verificarSuscripcion(): void {
+    this.suscripcionService.verificarSuscripcion(this.userId, this.canalId).subscribe(
+      response => {
+        this.suscrito = response.suscrito; 
+      },
+      error => {
+        if (error.status === 404) {
+          this.suscrito = false; 
+          console.warn('El usuario no está suscrito a este canal.');
+        } else {
+          console.error('Error al verificar la suscripción:', error);
+        }
+      }
+    );
+  }
+  
+  private handleError(error: any): void {
+    if (error.status === 409) {
+      this.mensaje = 'Ya estás suscrito a este canal.';
+    } else {
+      this.mensaje = error.error.message || 'Ha ocurrido un error inesperado.';
+    }
+  }
+  
 }

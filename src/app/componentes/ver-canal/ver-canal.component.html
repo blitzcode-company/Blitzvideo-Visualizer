@@ -1,4 +1,5 @@
 <app-header></app-header>
+
 <div class="banner-container" [ngStyle]="{'--profile-banner': 'url(' + canal.portada + ')'}">
   <header>
     <div class="profile">
@@ -7,8 +8,17 @@
       <div class="profile-info">
         <h1>{{ canalNombre }}</h1>
       </div>
+      <div>
+      
+        <button (click)="suscrito ? anularSuscripcion() : suscribirse()">
+          {{ suscrito ? 'Suscrito' : 'Suscribirse' }}
+      </button>
+        
+      </div>
     </div>
+   
   </header>
+  
 </div>
 
 <nav>

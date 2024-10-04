@@ -9,45 +9,75 @@
     <app-reproductor-video [videoUrl]="video?.link"></app-reproductor-video>
   </div>
  
-  <div class="puntuar">
-    <a href="#" (click)="puntuar(5); $event.preventDefault()" [ngClass]="{'selected': puntuacionSeleccionada === 5}">
-      <img src="assets/images/5.png" alt="Puntuación 5" srcset="">
-    </a>
-    <a href="#" (click)="puntuar(4); $event.preventDefault()" [ngClass]="{'selected': puntuacionSeleccionada === 4}">
-      <img src="assets/images/4.png" alt="Puntuación 4" srcset="">
-    </a>
-    <a href="#" (click)="puntuar(3); $event.preventDefault()" [ngClass]="{'selected': puntuacionSeleccionada === 3}">
-      <img src="assets/images/3.png" alt="Puntuación 3" srcset="">
-    </a>
-    <a href="#" (click)="puntuar(2); $event.preventDefault()" [ngClass]="{'selected': puntuacionSeleccionada === 2}">
-      <img src="assets/images/2.png" alt="Puntuación 2" srcset="">
-    </a>
-    <a href="#" (click)="puntuar(1); $event.preventDefault()" [ngClass]="{'selected': puntuacionSeleccionada === 1}">
-      <img src="assets/images/1.png" alt="Puntuación 1" srcset="">
-    </a>
-  </div>
+  <div class="puntuaryguardar">
+    <div class="puntuar">
+      <a href="#" (click)="puntuar(5); $event.preventDefault()" [ngClass]="{'selected': puntuacionSeleccionada === 5}">
+        <img src="assets/images/5.png" alt="Puntuación 5" srcset="">
+      </a>
+      <a href="#" (click)="puntuar(4); $event.preventDefault()" [ngClass]="{'selected': puntuacionSeleccionada === 4}">
+        <img src="assets/images/4.png" alt="Puntuación 4" srcset="">
+      </a>
+      <a href="#" (click)="puntuar(3); $event.preventDefault()" [ngClass]="{'selected': puntuacionSeleccionada === 3}">
+        <img src="assets/images/3.png" alt="Puntuación 3" srcset="">
+      </a>
+      <a href="#" (click)="puntuar(2); $event.preventDefault()" [ngClass]="{'selected': puntuacionSeleccionada === 2}">
+        <img src="assets/images/2.png" alt="Puntuación 2" srcset="">
+      </a>
+      <a href="#" (click)="puntuar(1); $event.preventDefault()" [ngClass]="{'selected': puntuacionSeleccionada === 1}">
+        <img src="assets/images/1.png" alt="Puntuación 1" srcset="">
+      </a>
   
+    </div>
+    <div class="guardar">
+        <a (click)="abrirModalCrearLista()">      
+        <i class="fa-solid fa-bookmark"></i>
+        </a>
+    </div>
+  </div>
+ 
+
   <div class="info-container">
     <a [routerLink]="['/canal', video.canal.id]">
+      
     <div class="info-canal">
       <img *ngIf="!video.canal.user.foto" class="fotodeperfil" src="assets/images/user.png" alt="Logo del canal del usuario" srcset="">
       <img *ngIf="video.canal.user.foto" class="fotodeperfil" [src]="video.canal.user.foto" alt="Logo del canal del usuario" srcset="">
-      <p>{{ video.canal.nombre }}</p>
     </div>
-  </a>
 
+    </a>
+
+    <div class="nombreysubs">
+      <a class="nombrecanal" [routerLink]="['/canal', video.canal.id]">
+        {{ video.canal.nombre }}</a>
+      <p class="suscriptores">
+        {{  numeroDeSuscriptores.numero_suscripciones  }} suscriptores
+      </p>
+    </div>
+ 
+    <div>
+      
+      <button (click)="suscrito ? anularSuscripcion() : suscribirse()">
+        {{ suscrito ? 'Suscrito' : 'Suscribirse' }}
+    </button>
+     
+    </div>
+
+  
     <div class="visitas">
       <p>{{ video.visitas_count }} visualizaciones</p>
     </div>
   </div>
  
-  <div class="descripcion">
+  <div #descripcion class="descripcion" [ngClass]="{ 'expanded': isExpanded }">
     <br>
-    <p class="fechadescripcion">Fecha de subida: {{ video.created_at }}</p>
+    
+    <p class="fechadescripcion">Fecha de subida: {{ video.created_at }} <a href="#" class="toggle-link" (click)="toggleExpand($event)">
+      {{ isExpanded ? 'Leer menos' : 'Leer más' }}
+    </a></p>
     <p>{{ video.descripcion }}</p>
+   
   </div>
-
-
+  
 </div>
 
 <app-comentarios [videoId]="videoId" [usuario]="usuario"></app-comentarios>

@@ -28,6 +28,13 @@ import {VgBufferingModule} from '@videogular/ngx-videogular/buffering';
 import { ReproductorVideoComponent } from './componentes/reproductor-video/reproductor-video.component'
 import { RouterModule } from '@angular/router';
 import { NoEncontradoComponent } from './componentes/no-encontrado/no-encontrado.component';
+import { ListaDeReproduccionComponent } from './componentes/lista-de-reproduccion/lista-de-reproduccion.component';
+import { CrearListaReproduccionComponent } from './componentes/crear-lista-reproduccion/crear-lista-reproduccion.component';
+import { MatFormFieldModule } from '@angular/material/form-field'; 
+import { MatInputModule } from '@angular/material/input'; 
+import { MatSelectModule } from '@angular/material/select';
+import { MatOption } from '@angular/material/select';
+import { ContenidoListaDeReproduccionComponent } from './componentes/contenido-lista-de-reproduccion/contenido-lista-de-reproduccion.component';
 
 
 @NgModule({
@@ -46,6 +53,10 @@ import { NoEncontradoComponent } from './componentes/no-encontrado/no-encontrado
     VerCanalComponent,
     ReproductorVideoComponent,
     NoEncontradoComponent,
+    ListaDeReproduccionComponent,
+    CrearListaReproduccionComponent,
+    ContenidoListaDeReproduccionComponent,
+    
   ],
   imports: [
     BrowserModule,
@@ -62,8 +73,12 @@ import { NoEncontradoComponent } from './componentes/no-encontrado/no-encontrado
     VgCoreModule,
     VgControlsModule,
     VgOverlayPlayModule,
-    VgBufferingModule
-    
+    VgBufferingModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatOption
+
   ],
   exports: [
     VerVideoComponent,
@@ -75,6 +90,6 @@ import { NoEncontradoComponent } from './componentes/no-encontrado/no-encontrado
     provideAnimationsAsync(),
     ComentariosService
   ],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
 })
 export class AppModule { }

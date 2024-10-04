@@ -1,0 +1,45 @@
+<h2 mat-dialog-title>Agregar a lista de reproducción</h2>
+
+<mat-dialog-content>
+  <!-- Mostrar las listas existentes -->
+  <div *ngIf="listas.length > 0">
+    <h3>Mis Listas de Reproducción</h3>
+    <ul>
+      <li *ngFor="let lista of listas">
+        <a href="#" (click)="agregarVideoALista(lista.id); $event.preventDefault()">
+          {{ lista.nombre }}
+        </a>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Mostrar mensaje si no hay listas -->
+  <div *ngIf="listas.length === 0">
+    <p>No tienes listas de reproducción aún. Crea una nueva lista para empezar.</p>
+  </div>
+
+  <!-- Formulario para crear nueva lista de reproducción -->
+  <div class="crear-nueva-lista">
+    <h3>Crear Nueva Lista de Reproducción</h3>
+    <form (ngSubmit)="crearLista()">
+      <mat-form-field appearance="fill">
+        <mat-label>Nombre de la lista</mat-label>
+        <input matInput [(ngModel)]="nombreLista" name="nombreLista" required>
+      </mat-form-field>
+
+      <mat-form-field appearance="fill">
+        <mat-label>Acceso</mat-label>
+        <mat-select [(ngModel)]="acceso" name="acceso" required>
+          <mat-option [value]="true">Pública</mat-option>
+          <mat-option [value]="false">Privada</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <!-- Botón para crear lista -->
+      <mat-dialog-actions>
+        <button mat-button (click)="closeModal()">Cancelar</button>
+        <button mat-button [disabled]="!nombreLista" type="submit">Crear</button>
+      </mat-dialog-actions>
+    </form>
+  </div>
+</mat-dialog-content>

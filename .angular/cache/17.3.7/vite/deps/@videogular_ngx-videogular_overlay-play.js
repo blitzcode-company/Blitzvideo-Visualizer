@@ -4,10 +4,10 @@ import {
   VgCoreModule,
   VgFullscreenApiService,
   VgStates
-} from "./chunk-5LC5HNPH.js";
+} from "./chunk-PS4QCNTM.js";
 import {
   CommonModule
-} from "./chunk-II4BP6BS.js";
+} from "./chunk-UMX244V2.js";
 import {
   Component,
   ElementRef,
@@ -27,8 +27,10 @@ import {
   ɵɵelementEnd,
   ɵɵelementStart,
   ɵɵlistener
-} from "./chunk-5QVVDPJY.js";
-import "./chunk-WSA2QMXP.js";
+} from "./chunk-6H7B67QN.js";
+import "./chunk-SG3BCSKH.js";
+import "./chunk-SAVXX6OM.js";
+import "./chunk-PQ7O3X3G.js";
 import "./chunk-X6JV76XL.js";
 
 // node_modules/@videogular/ngx-videogular/fesm2022/videogular-ngx-videogular-overlay-play.mjs

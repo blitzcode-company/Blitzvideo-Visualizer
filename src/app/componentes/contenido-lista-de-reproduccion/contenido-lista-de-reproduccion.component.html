@@ -1,0 +1,26 @@
+<app-header></app-header>
+<div class="container">
+  <div class="sidebar">
+    <a href="#">Inicio</a>
+    <a [href]="serverIp + '3001' + '/#/misVideos'">Mi canal</a>
+    <a href="">Suscripciones</a>
+    <a href="/playlists">Listas de reproduccion</a>
+  </div>
+<div class="playlist">
+    <h1>{{ playlist.nombre }}</h1>
+    <p>Acceso: {{ playlist.acceso ? 'Público' : 'Privado' }}</p>
+    
+    <div class="video-grid">
+      <div class="video-card" *ngFor="let video of videos">
+        <a [routerLink]="['/video', video.id]" class="video-link" target="_blank">
+          <div class="miniatura-container">
+            <img class="miniatura" [src]="video.miniatura" alt="Miniatura de {{ video.titulo }}">
+          </div>
+          <div class="video-info">
+            <h3>{{ video.titulo }}</h3>
+            <p>{{ video.descripcion }}</p>
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>

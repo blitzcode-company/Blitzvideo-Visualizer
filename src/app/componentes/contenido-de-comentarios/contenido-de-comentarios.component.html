@@ -13,7 +13,7 @@
         <button class="menu-button" (click)="toggleMenu($event)">⋮</button>
         <div *ngIf="showMenu" class="menu-dropdown">
           <button (click)="toggleEdit(comentario)">Editar</button>
-          <button (click)="eliminarComentario(comentario.id!, comentario.user?.id)">Eliminar</button>
+          <button (click)="eliminarComentario(comentario.id!)">Eliminar</button>
         </div>
       </div>
 
@@ -58,7 +58,7 @@
       [videoId]="videoId"
       [usuario]="usuario"
       (nuevoComentario)="nuevoComentario.emit()"
-      (comentarioEliminado)="eliminarComentario($event.id, $event.usuario_id)"
+      (comentarioEliminado)="eliminarComentario($event.id)"
       (comentarioEditado)="editarComentario($event)"
     ></app-contenido-de-comentarios>
   </div>

@@ -80,7 +80,6 @@ export class EditarUsuarioComponent implements OnInit, OnDestroy {
         if (res) {
           console.log('Usuario actualizado correctamente', res);
           this.alerta.push('Usuario actualizado correctamente');
-          // Refrescar la vista del usuario después de la actualización
           this.obtenerUsuario();
         } else {
           console.error('Error al actualizar el usuario');

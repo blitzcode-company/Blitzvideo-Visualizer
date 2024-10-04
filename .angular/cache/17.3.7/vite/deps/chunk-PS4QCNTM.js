@@ -1,6 +1,6 @@
 import {
   CommonModule
-} from "./chunk-II4BP6BS.js";
+} from "./chunk-UMX244V2.js";
 import {
   ChangeDetectorRef,
   Component,
@@ -29,15 +29,17 @@ import {
   ɵɵprojectionDef,
   ɵɵqueryRefresh,
   ɵɵstyleProp
-} from "./chunk-5QVVDPJY.js";
+} from "./chunk-6H7B67QN.js";
+import {
+  fromEvent
+} from "./chunk-SG3BCSKH.js";
 import {
   Observable,
   Subject,
   combineLatest,
-  fromEvent,
   map,
   timer
-} from "./chunk-WSA2QMXP.js";
+} from "./chunk-PQ7O3X3G.js";
 
 // node_modules/@videogular/ngx-videogular/fesm2022/videogular-ngx-videogular-core.mjs
 var _c0 = ["*"];
@@ -1272,4 +1274,4 @@ export {
   VgCoreModule,
   VgMediaElement
 };
-//# sourceMappingURL=chunk-5LC5HNPH.js.map
+//# sourceMappingURL=chunk-PS4QCNTM.js.map

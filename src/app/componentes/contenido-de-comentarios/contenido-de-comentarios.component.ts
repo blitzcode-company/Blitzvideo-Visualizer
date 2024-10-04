@@ -2,6 +2,7 @@ import { Component, EventEmitter, HostListener,Input, OnInit, Output } from '@an
 import { Comentario } from '../../clases/comentario';
 import { ComentariosService } from '../../servicios/comentarios.service';
 import { environment } from '../../../environments/environment';
+import { AuthService } from '../../servicios/auth.service';
 
 @Component({
   selector: 'app-contenido-de-comentarios',
@@ -27,13 +28,38 @@ export class ContenidoDeComentariosComponent implements OnInit{
   editingComentarioId: number | null = null;
   editingComentarioMensaje: string = '';
   serverIp = environment.serverIp
-  constructor(private comentariosService: ComentariosService) {}
+
+  constructor(private comentariosService: ComentariosService, private authService: AuthService) {}
 
   ngOnInit(): void {
     if (this.comentario) {
       this.obtenerEstadosDeMeGusta();
     }
+  }
 
+ 
+  obtenerUsuario(): void {
+    this.authService.usuario$.subscribe(res => {
+      this.usuario = res;
+      console.log('User ID:', this.usuario.id); 
+    });
+    this.authService.mostrarUserLogueado();
+  }
+
+  eliminarComentario(idComentario: number): void {
+    if (!this.usuario || !this.usuario.id) {
+      console.error('Usuario no válido o ID de usuario no definido.');
+      return;
+    }
+
+    this.comentariosService.eliminarComentario(idComentario, this.usuario.id).subscribe(
+      () => {
+        this.comentarioEliminado.emit({ id: idComentario, usuario_id: this.usuario.id });
+      },
+      error => {
+        console.error('Error al eliminar comentario:', error);
+      }
+    );
   }
 
   toggleResponder(comentario: Comentario): void {
@@ -55,22 +81,6 @@ export class ContenidoDeComentariosComponent implements OnInit{
         console.error('Error al responder comentario:', error);
       });
     }
-  }
-
-  eliminarComentario(idComentario: number, usuario_id: number) {
-    if (this.usuario?.id !== usuario_id) {
-      console.error('No tienes permiso para eliminar este comentario.');
-      return;
-    }
-
-    this.comentariosService.eliminarComentario(idComentario, usuario_id).subscribe(
-      () => {
-        this.comentarioEliminado.emit({ id: idComentario, usuario_id }); 
-      },
-      error => {
-        console.error('Error al eliminar comentario:', error);
-      }
-    );
   }
 
   toggleEdit(comentario: Comentario | null): void {
@@ -170,4 +180,3 @@ export class ContenidoDeComentariosComponent implements OnInit{
     comentario.mostrarRespuestas = !comentario.mostrarRespuestas;
   }
 }
-

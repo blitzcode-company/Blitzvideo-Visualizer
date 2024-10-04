@@ -36,7 +36,13 @@ export class ComentariosComponent implements OnInit {
     this.obtenerEstadosDeMeGusta();
   }
 
-  
+  obtenerUsuario() {
+    this.authService.usuario$.subscribe(res => {
+       this.usuario = res;
+     });
+     this.authService.mostrarUserLogueado();
+   }
+ 
   
   traerComentarios(): void {
     this.comentariosService.traerComentariosDelVideo(this.videoId).subscribe(
@@ -203,11 +209,12 @@ export class ComentariosComponent implements OnInit {
   }
   
   
-  onComentarioEliminado(event: { id: number, usuario_id: number }) {
-  this.eliminarComentario(event.id, event.usuario_id);
-}
+  onComentarioEliminado(event: { id: number, usuario_id: number }): void {
+    console.log('Comentario Eliminado:', event);
+  
+  }
 
-onComentarioEditado(comentario: Comentario) {
-  this.actualizarComentario(comentario);
-}
+  onComentarioEditado(comentario: Comentario): void {
+    console.log('Comentario Editado:', comentario);
+  }
 }
