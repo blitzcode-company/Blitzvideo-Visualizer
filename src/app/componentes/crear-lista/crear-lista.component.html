@@ -1,0 +1,18 @@
+<h2 mat-dialog-title>Crear nueva lista de reproducción</h2>
+<div mat-dialog-content>
+  <mat-form-field>
+    <mat-label>Nombre de la lista</mat-label>
+    <input matInput [(ngModel)]="nombreLista" />
+  </mat-form-field>
+  <mat-form-field appearance="fill">
+    <mat-label>Acceso</mat-label>
+    <mat-select [(ngModel)]="acceso" name="acceso" required>
+      <mat-option [value]="true">Pública</mat-option>
+      <mat-option [value]="false">Privada</mat-option>
+    </mat-select>
+  </mat-form-field>
+</div>
+<div mat-dialog-actions>
+  <button mat-button (click)="onNoClick()">Cancelar</button>
+  <button mat-button (click)="crearLista()" cdkFocusInitial>Crear</button>
+</div>

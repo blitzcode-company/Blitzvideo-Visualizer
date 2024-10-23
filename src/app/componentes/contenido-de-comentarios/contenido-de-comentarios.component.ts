@@ -41,14 +41,12 @@ export class ContenidoDeComentariosComponent implements OnInit{
   obtenerUsuario(): void {
     this.authService.usuario$.subscribe(res => {
       this.usuario = res;
-      console.log('User ID:', this.usuario.id); 
     });
     this.authService.mostrarUserLogueado();
   }
 
   eliminarComentario(idComentario: number): void {
     if (!this.usuario || !this.usuario.id) {
-      console.error('Usuario no válido o ID de usuario no definido.');
       return;
     }
 

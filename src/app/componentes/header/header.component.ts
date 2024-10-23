@@ -40,6 +40,8 @@ export class HeaderComponent {
 
   obtenerUsuario() {
     this.api.usuario$.subscribe(user => {
+
+      
       this.usuario = user;
       this.obtenerCanal();
 
@@ -58,16 +60,27 @@ export class HeaderComponent {
     return this.usuario.foto ? this.usuario.foto : '../../../assets/images/user.png';
   }
 
-  obtenerCanal() {
-    this.api.obtenerCanalDelUsuario(this.usuario.id).subscribe((res: any) => {
-      this.canal = res;
-      if (res.canales && res.canales.length > 0) {
-        this.canalId = res.canales[0].id;
-        this.canalNombre = res.canales[0].nombre;
-      } else {
-        console.error('El usuario no tiene canal hecho');
-      }
-    });
+  obtenerCanal(): void {
+    if (this.usuario && this.usuario.id) {
+      this.api.obtenerCanalDelUsuario(this.usuario.id).subscribe(
+        (res: any) => {
+          this.canal = res;
+  
+          if (res.canales && res.canales.length > 0) {
+            this.canalId = res.canales[0].id;
+            this.canalNombre = res.canales[0].nombre;
+          } else {
+            this.canalId = null;
+            console.error('El usuario no tiene canal creado');
+          }
+        },
+        (error) => {
+          console.error('Error al obtener el canal:', error);
+        }
+      );
+    } else {
+      this.canalId = null;
+    }
   }
 
   logout() {
@@ -76,6 +89,10 @@ export class HeaderComponent {
     this.status.isLoggedIn = false;
     this.router.navigate(['/']);
     
+  }
+
+  redirectToLogin() {
+    window.location.href = this.serverIp + '3002/#/';
   }
 
   isDropdownOpen = false;

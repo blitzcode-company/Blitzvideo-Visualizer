@@ -4,6 +4,11 @@ import { AuthService } from '../../servicios/auth.service';
 import { Subscription } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { SuscripcionesService } from '../../servicios/suscripciones.service';
+import { StatusService } from '../../servicios/status.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { ModalEditarlistaComponent } from '../modal-editarlista/modal-editarlista.component';
+import { MatDialog } from '@angular/material/dialog';
+import { Title } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-lista-de-reproduccion',
@@ -18,15 +23,23 @@ export class ListaDeReproduccionComponent implements OnInit, OnDestroy {
   serverIp = environment.serverIp;
   usuario: any;
   canales: any;
+  showMenuIndex: number | null = null; 
 
   constructor(
     private playlistService: PlaylistService,
     private authService: AuthService,
+    private titleService: Title,
+    public status:StatusService,
+    private snackBar: MatSnackBar,
+    private dialog: MatDialog,
+
     private suscripcionService: SuscripcionesService,
   ) {}
 
   ngOnInit() {
     this.obtenerUsuario();
+    this.titleService.setTitle( 'Listas de reproduccion - BlitzVideo');
+
   }
 
   ngOnDestroy() {
@@ -38,18 +51,24 @@ export class ListaDeReproduccionComponent implements OnInit, OnDestroy {
   obtenerUsuario(): void {
     this.authService.usuario$.subscribe(res => {
       this.usuario = res;
-      this.userId = this.usuario.id
-      this.mostrarCanalesSuscritos();
-
-      if (this.userId) {
-        this.obtenerListasDeReproduccion(this.userId); 
-      }
   
+      if (this.usuario) {
+        this.userId = this.usuario.id; 
+        this.mostrarCanalesSuscritos();
+  
+        if (this.userId) {
+          this.obtenerListasDeReproduccion(this.userId); 
+        }
+      } 
     });
   
     this.authService.mostrarUserLogueado().subscribe();
   }
 
+  toggleMenu(index: number): void {
+    this.showMenuIndex = this.showMenuIndex === index ? null : index;
+  }
+  
 
   obtenerListasDeReproduccion(userId: number) {
     this.playlistService.obtenerListasDeReproduccion(userId).subscribe(
@@ -58,10 +77,37 @@ export class ListaDeReproduccionComponent implements OnInit, OnDestroy {
           ...lista,
           imagen: this.obtenerMiniaturaDelUltimoVideo(lista.videos)
         }));
-        console.log(this.listas);
       },
       error => {
         console.error('Error al obtener listas de reproducción', error);
+      }
+    );
+  }
+
+  borrarPlaylist(playlistId: number): void {
+    if (confirm('¿Estás seguro de que deseas borrar esta playlist?')) {
+      this.playlistService.borrarPlaylist(playlistId).subscribe(
+        response => {
+          this.snackBar.open(response.message, 'Cerrar', { duration: 3000 });
+          this.obtenerListasDeReproduccion(this.userId); 
+        },
+        error => {
+          console.error('Error al borrar la playlist:', error);
+          this.snackBar.open('Error al borrar la playlist.', 'Cerrar', { duration: 3000 });
+        }
+      );
+    }
+  }
+
+  modificarPlaylist(playlistId: number, nuevoNombre: string, nuevoAcceso: boolean): void {
+    this.playlistService.modificarPlaylist(playlistId, nuevoNombre, nuevoAcceso).subscribe(
+      response => {
+        this.snackBar.open(response.message, 'Cerrar', { duration: 3000 });
+        this.obtenerListasDeReproduccion(this.userId); 
+      },
+      error => {
+        console.error('Error al modificar la playlist:', error);
+        this.snackBar.open('Error al modificar la playlist.', 'Cerrar', { duration: 3000 });
       }
     );
   }
@@ -70,19 +116,26 @@ export class ListaDeReproduccionComponent implements OnInit, OnDestroy {
     this.suscripcionService.listarSuscripciones(this.userId).subscribe(
       suscripciones => {
         this.canales = suscripciones.map((suscripcion: any) => suscripcion.canal);
-        console.log('Canales suscritos:', this.canales);  
       },
       error => {
         console.error('Error al obtener listas de suscripciones', error);
       }
     );
   }
-  
+  abrirModalEditar(playlist: any): void {
+    const dialogRef = this.dialog.open(ModalEditarlistaComponent, {
+      data: { playlist },
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.obtenerListasDeReproduccion(this.userId); 
+      }
+    });
+  }
 
  
-
   
-
   private obtenerMiniaturaDelUltimoVideo(videos: any[]): string {
     if (videos.length > 0) {
       const ultimoVideo = videos[videos.length - 1];

@@ -1,21 +1,27 @@
   .header {
     background-color: #042234;
     color: white;
-    padding: 1rem 0;
+    height:75px;
     border-bottom: 1px solid #474f57;
+
   }
   
   .container {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    max-width: 1800px;
+    max-width: 1900px;
     margin: 0 auto;
     padding: 0 1rem;
   }
   
+  .navbar-brand {
+    z-index: 2;
+  }
+
   .logo {
     height: 60px;
+    
   }
   
   .nav {
@@ -102,3 +108,32 @@
   .canal {
     color:white;
   }
+
+  .botonLogin {
+    border-radius: 8px;
+    background-color: #042234;
+    gap:5px;
+    color: #fff; 
+    margin-left:10px;
+    padding: 5px 10px;
+    font-size: 16px; 
+    font-weight: bold; 
+    text-align: center; 
+    display: inline-flex; 
+    justify-content: center;
+    align-items: center;
+    border: 1px solid white; 
+    cursor: pointer; 
+    transition: background-color 0.3s ease, transform 0.3s ease; 
+    z-index: 1000000;
+  }
+
+  .botonLogin:hover {
+    background-color: #015fa7; 
+  }
+  
+  .botonLogin:focus {
+    outline: none; 
+    box-shadow: 0 0 0 3px rgba(50, 177, 249, 0.4); 
+  }
+  

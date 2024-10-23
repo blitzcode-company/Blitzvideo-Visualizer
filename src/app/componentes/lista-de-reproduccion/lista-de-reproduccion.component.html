@@ -1,13 +1,13 @@
 <app-header></app-header>
-<div class="container">
+<div class="containerHome">
   <div class="sidebar">
     <a href="#">Inicio</a>
-    <a [href]="serverIp + '3001' + '/#/misVideos'">Mi canal</a>
-    <a href="/playlists">Listas de reproduccion</a>
-    <hr class="lineaSideBar">
-    <a>Suscripciones</a>
+    <a *ngIf="status.isLoggedIn" [href]="serverIp + '3001' + '/#/misVideos'">Mi canal</a>
+    <a *ngIf="status.isLoggedIn" href="/playlists">Listas de reproduccion</a>
+    <hr *ngIf="status.isLoggedIn"class="lineaSideBar">
+    <p *ngIf="status.isLoggedIn" >Suscripciones</p>
     <div class="canalesSuscritos"  *ngFor="let canal of canales">
-      <a [routerLink]="['/canal', canal.id]"> 
+      <a class="canalesLista" [routerLink]="['/canal', canal.id]"> 
         <img *ngIf="!canal.user.foto" class="fotoUserSuscriptores" src="/assets/images/user.png" alt="Foto del canal">
 
         <img *ngIf="canal.user.foto" class="fotoUserSuscriptores" [src]="canal.user.foto" alt="">
@@ -16,17 +16,35 @@
     </div>
   </div>
 
+<div class="playlist">
+  <h1>Listas de reproduccion</h1>
+
   <div class="video-grid">
-    <div class="video-card" *ngFor="let lista of listas">
+    <div class="video-card" *ngFor="let lista of listas;  let i = index">
+      
       <a [routerLink]="['/playlists', lista.id]" class="video-link">
+        
         <div class="miniatura-container">
           <img class="miniatura" [src]="lista.imagen" alt="Miniatura de la lista">
         </div>
         <div class="video-info">
           <h3>{{ lista.nombre }}</h3>
+          
         </div>
+        
         <hr>
+        
       </a>
+      <div class="playlist-actions">
+        <button class="menu-button" (click)="toggleMenu(i)">⋮</button>
+        <div *ngIf="showMenuIndex === i" class="menu-dropdown">
+          <button (click)="abrirModalEditar(lista)">Editar</button>
+          <button (click)="borrarPlaylist(lista.id)">Eliminar</button>
+        </div>
+      </div>
     </div>
+
   </div>
+</div>
+
 </div>

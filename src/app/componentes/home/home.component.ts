@@ -5,6 +5,8 @@ import { Title } from '@angular/platform-browser';
 import { environment } from '../../../environments/environment';
 import { SuscripcionesService } from '../../servicios/suscripciones.service';
 import { AuthService } from '../../servicios/auth.service';
+import { StatusService } from '../../servicios/status.service';
+
 
 @Component({
   selector: 'app-home',
@@ -15,6 +17,8 @@ export class HomeComponent {
 
 constructor(private videoService: VideosService, 
             private titleService: Title,
+            public status:StatusService,
+
             private suscripcionService: SuscripcionesService,
             private authService: AuthService,
           ){}
@@ -35,8 +39,12 @@ ngOnInit() {
 obtenerUsuario(): void {
   this.authService.usuario$.subscribe(res => {
     this.usuario = res;
-    this.userId = this.usuario.id
-    this.mostrarCanalesSuscritos();
+    if (this.usuario) {
+      this.userId = this.usuario.id;
+      this.mostrarCanalesSuscritos();
+    } else {
+      this.userId = null; 
+    }
 
   });
 
@@ -71,7 +79,6 @@ mostrarCanalesSuscritos() {
   this.suscripcionService.listarSuscripciones(this.userId).subscribe(
     suscripciones => {
       this.canales = suscripciones.map((suscripcion: any) => suscripcion.canal);
-      console.log('Canales suscritos:', this.canales);  
     },
     error => {
       console.error('Error al obtener listas de suscripciones', error);

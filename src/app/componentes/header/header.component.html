@@ -1,34 +1,42 @@
 <header class="navbar navbar-expand-lg header">
-
-  <div class="container">
+  <div class="container-fluid">
     <a href="/" class="navbar-brand">
-      <img class="logo" src="assets/images/logo.png" alt="Logo de blitzvideo" srcset="">
+      <img class="logo logo-navbar" src="assets/images/logo.png" alt="Logo de Blitzvideo">
     </a>
-    <nav class="nav">
-    </nav>
+
+    <nav class="nav"></nav>
+
     <div class="search-box">
-      <input type="text" [(ngModel)]="nombre" placeholder="Buscar video" (keyup.enter)="buscarVideos()" class="search-input" aria-label="Search" >
+      <input type="text" [(ngModel)]="nombre" placeholder="Buscar video" (keyup.enter)="buscarVideos()" 
+             class="search-input" aria-label="Buscar video">
     </div>
+
     <div class="dropdown" [class.open]="isDropdownOpen">
-      <button class="dropdown-toggle" (click)="toggleDropdown($event)">
+      <button *ngIf="status.isLoggedIn" class="dropdown-toggle" (click)="toggleDropdown($event)">
         <div class="dropdown-content">
-          <a *ngIf="status.isLoggedIn && usuario?.name" class="dropdown-item canal">{{ usuario?.name }}</a>
-          <img *ngIf="status.isLoggedIn && usuario?.foto" [src]="usuario.foto" alt="mdo" width="32" height="32" class="avatar">
-          <img *ngIf="status.isLoggedIn && !usuario?.foto" src="assets/images/user.png" alt="mdo" height="32" class="avatar">
-          <img *ngIf="!status.isLoggedIn" src="assets/images/user.png" alt="mdo"  height="32" class="avatar">       
+          <a *ngIf="usuario?.name" class="dropdown-item canal">{{ usuario?.name }}</a>
+
+          <img *ngIf="usuario?.foto" [src]="usuario.foto" alt="Foto de perfil" 
+               width="32" height="32" class="avatar">
+
+          <img *ngIf="!usuario?.foto" src="assets/images/user.png" alt="Foto de perfil predeterminada" 
+               height="32" class="avatar">
         </div>
       </button>
-      <div class="dropdown-menu">
-        <a *ngIf="status.isLoggedIn && !canalNombre" [href]="serverIp + '3001' + '/#/crearCanal'" class="dropdown-item">Crear canal</a>
-        <a *ngIf="status.isLoggedIn && canalNombre" [href]="serverIp + '3001' + '/#/misVideos'" class="dropdown-item">Mi canal</a>
-        <a *ngIf="status.isLoggedIn" routerLink="/editarUsuario" class="dropdown-item">Editar mi usuario</a>
-        
 
+      <div class="dropdown-menu" *ngIf="status.isLoggedIn">
+        <a *ngIf="!canalNombre" [href]="serverIp + '3001/#/crearCanal'" class="dropdown-item">Crear canal</a>
+        <a *ngIf="canalNombre" [href]="serverIp + '3001/#/misVideos'" class="dropdown-item">Mi canal</a>
+        <a routerLink="/ajustes/perfil" class="dropdown-item">Configuración</a>
         <hr class="dropdown-divider">
-        <a *ngIf="status.isLoggedIn" routerLink="/#" (click)="logout()" class="dropdown-item">Cerrar sesión</a>
-        <a *ngIf="!status.isLoggedIn" [href]="serverIp +  '3002' + '/#/'" class="dropdown-item">Login</a>
-        <a *ngIf="!status.isLoggedIn" [href]="serverIp +  '3002' + '/#/registro'" class="dropdown-item">Registro</a>
+        <a routerLink="/#" (click)="logout()" class="dropdown-item">Cerrar sesión</a>
       </div>
+
+      <button *ngIf="!status.isLoggedIn" (click)="redirectToLogin()" class="botonLogin">
+        <img *ngIf="!status.isLoggedIn" src="assets/images/user.png" alt="Foto de perfil predeterminada" 
+               height="32" class="avatar">  
+        Acceder
+      </button>
     </div>
   </div>
 </header>

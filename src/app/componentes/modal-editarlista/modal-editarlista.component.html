@@ -1,0 +1,19 @@
+<h2 mat-dialog-title>Editar Lista de Reproducción</h2>
+<div mat-dialog-content>
+  <mat-form-field>
+    <mat-label>Nombre de la lista</mat-label>
+    <input matInput [(ngModel)]="nombreLista" placeholder="Ingresa el nombre">
+  </mat-form-field>
+
+  <mat-form-field>
+    <mat-label>Acceso</mat-label>
+    <mat-select [(ngModel)]="acceso">
+      <mat-option [value]="true">Público</mat-option>
+      <mat-option [value]="false">Privado</mat-option>
+    </mat-select>
+  </mat-form-field>
+</div>
+<div mat-dialog-actions>
+  <button mat-button (click)="onNoClick()">Cancelar</button>
+  <button mat-button (click)="modificarLista()" cdkFocusInitial>Guardar Cambios</button>
+</div>

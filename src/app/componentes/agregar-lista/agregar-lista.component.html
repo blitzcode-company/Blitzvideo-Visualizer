@@ -1,0 +1,17 @@
+<h2 mat-dialog-title>Agregar video a lista de reproducción</h2>
+<div mat-dialog-content>
+  <mat-form-field>
+    <mat-label>Selecciona una lista</mat-label>
+    <mat-select [(ngModel)]="listaSeleccionada">
+      <mat-option *ngFor="let lista of listas" [value]="lista.id">
+        {{ lista.nombre }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+  <br>
+  <button mat-button (click)="abrirCrearListaModal()">Crear Nueva Lista</button> 
+</div>
+<div mat-dialog-actions>
+  <button mat-button (click)="onNoClick()">Cancelar</button>
+  <button mat-button (click)="agregarVideo()" cdkFocusInitial>Agregar</button>
+</div>

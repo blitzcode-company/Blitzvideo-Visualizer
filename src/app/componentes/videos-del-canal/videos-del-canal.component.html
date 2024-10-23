@@ -6,15 +6,34 @@
       <img *ngIf="usuario.foto" [src]="usuario.foto" alt="Foto de perfil" class="profile-pic">
       <div class="profile-info">
         <h1>{{ canalNombre }}</h1>
+        <p class="subscriber-count">{{  numeroDeSuscriptores.numero_suscripciones  }} suscriptores
+          
+        </p>  
+        <div>
+          <button *ngIf="suscrito !== 'propietario'" class="boton" 
+          [ngClass]="{ 'suscrito': suscrito === 'suscrito' }" 
+          (click)="suscrito === 'suscrito' ? anularSuscripcion() : suscribirse()">
+          {{ suscrito === 'suscrito' ? 'Suscrito' : 'Suscribirse' }}
+          </button>
+        </div>
       </div>
     </div>
   </header>
+  
 </div>
 
 <nav>
+  <br>
+  <br>
+  <br>
   <ul>
+    <li>
+     
+    </li>
+
     <li><a [routerLink]="['/canal', canalId]">Inicio</a></li>
     <li><a [routerLink]="['/canal', canalId, 'videos']">Videos</a></li>
+    
   </ul>
 </nav>
 

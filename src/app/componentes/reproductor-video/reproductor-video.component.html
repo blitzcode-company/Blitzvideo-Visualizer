@@ -1,6 +1,6 @@
 <div class="reproductor" [ngClass]="{'cinema-mode': isCinemaMode}">
   <div class="video-container">
-    <video #videoPlayer class="video" (timeupdate)="updateProgressBar()" autoplay>
+    <video #videoPlayer class="video" muted (loadedmetadata)="setDuration()" (timeupdate)="updateProgressBar()" autoplay >
       <source [src]="videoUrl" type="video/mp4">
       Tu navegador no soporta la etiqueta de video.
     </video>
@@ -8,6 +8,9 @@
       <button (click)="togglePlayPause()">
         <i [class]="isPlaying ? 'fas fa-pause' : 'fas fa-play'"></i>
       </button>
+
+      <span>{{ formatTime(currentTime) }}</span> <span> / </span> <span>{{ formatTime(duration) }}</span>
+
       <input type="range" #progressBar class="progress" value="0" min="0" max="100" (input)="seek(progressBar)">
       <button (click)="toggleMute()">
         <i [class]="isMuted ? 'fas fa-volume-mute' : 'fas fa-volume-up'"></i>

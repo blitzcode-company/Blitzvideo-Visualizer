@@ -1,8 +1,10 @@
 <app-header></app-header>
-
-<div class="video-container">
+<div *ngIf="!video">
+  <p>Cargando video...</p>
+</div>
+<div class="video-container" *ngIf="video">
   <div class="tituloyvideo">
-    <h1>{{  video.titulo  }}</h1>
+    <h1>{{  video.titulo  }}</h1> 
   </div>
 
   <div class="reproductor">
@@ -29,15 +31,17 @@
   
     </div>
     <div class="guardar">
-        <a (click)="abrirModalCrearLista()">      
-        <i class="fa-solid fa-bookmark"></i>
+        <a (click)="agregarAVideoALista()">      
+        <i class="fa-solid fa-bookmark custom-icon" ></i>
         </a>
+   
     </div>
+ 
   </div>
  
 
   <div class="info-container">
-    <a [routerLink]="['/canal', video.canal.id]">
+    <a *ngIf="video.canal" [routerLink]="['/canal', video.canal.id]">
       
     <div class="info-canal">
       <img *ngIf="!video.canal.user.foto" class="fotodeperfil" src="assets/images/user.png" alt="Logo del canal del usuario" srcset="">
@@ -47,32 +51,36 @@
     </a>
 
     <div class="nombreysubs">
-      <a class="nombrecanal" [routerLink]="['/canal', video.canal.id]">
+      <a *ngIf="video.canal" class="nombrecanal" [routerLink]="['/canal', video.canal.id]">
         {{ video.canal.nombre }}</a>
-      <p class="suscriptores">
+      <p class="suscriptores" *ngIf="numeroDeSuscriptores">
         {{  numeroDeSuscriptores.numero_suscripciones  }} suscriptores
       </p>
     </div>
  
     <div>
       
-      <button (click)="suscrito ? anularSuscripcion() : suscribirse()">
-        {{ suscrito ? 'Suscrito' : 'Suscribirse' }}
-    </button>
+      <button *ngIf="suscrito !== 'propietario'" class="boton" 
+      [ngClass]="{ 'suscrito': suscrito === 'suscrito' }" 
+      (click)="suscrito === 'suscrito' ? anularSuscripcion() : suscribirse()">
+      {{ suscrito === 'suscrito' ? 'Suscrito' : 'Suscribirse' }}
+      </button>
      
     </div>
 
-  
+    <div class="editarvideo" *ngIf="puedeEditarVideo">
+      <a  [href]="serverIp + '3001' + '/#/editarVideo/' + video.id">Editar video</a>
+    </div>
+
+
     <div class="visitas">
       <p>{{ video.visitas_count }} visualizaciones</p>
     </div>
   </div>
  
   <div #descripcion class="descripcion" [ngClass]="{ 'expanded': isExpanded }">
-    <br>
     
     <p class="fechadescripcion">Fecha de subida: {{ video.created_at }} <a href="#" class="toggle-link" (click)="toggleExpand($event)">
-      {{ isExpanded ? 'Leer menos' : 'Leer más' }}
     </a></p>
     <p>{{ video.descripcion }}</p>
    

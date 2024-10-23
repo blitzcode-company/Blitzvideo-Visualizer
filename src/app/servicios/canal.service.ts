@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { Canal } from '../clases/canal';
 import { CookieService } from 'ngx-cookie-service';
 import { environment } from '../../environments/environment.prod';
+import { Form } from '@angular/forms';
 
 @Injectable({
   providedIn: 'root'
@@ -18,7 +19,6 @@ export class CanalService {
     const url = `${this.apiUrl}api/v1/canal/${canalId}/videos`;
     const httpOptions = {
       headers: new HttpHeaders({
-          'Content-Type' : 'application/json',
           'Authorization' : 'Bearer ' + this.cookie.get('accessToken')
       })
     }
@@ -35,11 +35,23 @@ export class CanalService {
     return this.httpClient.post(url, canal, httpOptions);
   }
 
+  editarCanal(canalId: number, formData: FormData): Observable<any> {
+    const url = `${this.apiUrl}api/v1/canal/${canalId}/canal`;
+    const httpOptions = {
+        headers: new HttpHeaders({
+            'Authorization': 'Bearer ' + this.cookie.get('accessToken'),
+        })
+    };
+
+    return this.httpClient.post(url, formData, httpOptions);
+}
+
+
+
   darDeBajaCanal(canalId: string): Observable<any> {
     const url = `${this.apiUrl}api/v1/canal/${canalId}`;
     const httpOptions = {
       headers: new HttpHeaders({
-          'Content-Type' : 'application/json',
           'Authorization' : 'Bearer ' + this.cookie.get('accessToken') 
       })
     }

@@ -13,6 +13,8 @@ export class ReproductorVideoComponent implements OnInit, AfterViewInit {
 
   isPlaying = false;
   isMuted = false;
+  currentTime: number = 0;
+  duration: number = 0;
   isCinemaMode = false;
 
   constructor(private el: ElementRef) { }
@@ -38,11 +40,25 @@ export class ReproductorVideoComponent implements OnInit, AfterViewInit {
     }
   }
 
+  setDuration() {
+    const video: HTMLVideoElement | undefined = this.videoPlayer?.nativeElement;
+    if (video) {
+      this.duration = video.duration;
+    }
+  }
+
+  formatTime(time: number): string {
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60).toString().padStart(2, '0');
+    return `${minutes}:${seconds}`;
+  }
+
   updateProgressBar() {
     const video: HTMLVideoElement | undefined = this.videoPlayer?.nativeElement;
     const progressBar: HTMLInputElement | undefined = this.progressBar?.nativeElement;
     if (video && progressBar) {
       const progress = (video.currentTime / video.duration) * 100;
+      this.currentTime = video.currentTime; 
       progressBar.value = progress.toString();
     }
   }

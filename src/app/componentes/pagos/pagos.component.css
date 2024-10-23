@@ -1,0 +1,80 @@
+.configuracion {
+
+    display: flex;
+    flex-direction: row;
+  }
+
+  .sidebar a {
+    display: block;
+    padding: 10px;
+    text-decoration: none;
+    color: #495057;
+    min-width: 225px;
+  
+    margin-bottom: 10px;
+    border-width: 0 0 1px;
+    transition: background-color 0.3s;
+  }
+
+  .selected {
+    background-color: #ddd;
+  }
+
+  .sidebar .selected:hover{
+    background-color: #999999;
+
+  }
+
+  .sidebar a:hover {
+    background-color: #ddd;
+  }
+
+  .sidebar {
+    background-color: #fff  ;
+    display: flex;
+    flex-direction: column;
+    min-width: 250px;
+    min-height: 100vh;
+    border-right: 1px solid #dee2e6;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  
+    padding: 15px;
+  }
+
+  .form-group {
+    margin-bottom: 20px;
+  }
+
+  .form-group label {
+    display: block;
+    font-size: 16px;
+    margin-bottom: 5px;
+    color: #495057;
+  }
+
+  .form-control {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    box-sizing: border-box;
+    background-color: #fff;
+  }
+
+  .btn-submit {
+    display: inline-block;
+    padding: 12px 24px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    text-align: center;
+    transition: background-color 0.3s;
+  }
+
+  .btn-submit:hover {
+    background-color: #0056b3;
+  }

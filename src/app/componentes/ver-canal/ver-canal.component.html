@@ -1,30 +1,44 @@
 <app-header></app-header>
+<div *ngIf="cargando">Cargando...</div>
 
-<div class="banner-container" [ngStyle]="{'--profile-banner': 'url(' + canal.portada + ')'}">
+<div *ngIf="!cargando && canal?.portada" class="banner-container" [ngStyle]="{'--profile-banner': 'url(' + canal.portada + ')'}">
   <header>
     <div class="profile">
       <img *ngIf="!usuario.foto" src="assets/images/user.png" alt="Foto de perfil" class="profile-pic">
       <img *ngIf="usuario.foto" [src]="usuario.foto" alt="Foto de perfil" class="profile-pic">
       <div class="profile-info">
         <h1>{{ canalNombre }}</h1>
-      </div>
-      <div>
+        <p class="subscriber-count">{{  numeroDeSuscriptores.numero_suscripciones  }} suscriptores
+          
+        </p> 
+         <div>
+          <button *ngIf="suscrito !== 'propietario'" class="boton" 
+          [ngClass]="{ 'suscrito': suscrito === 'suscrito' }" 
+          (click)="suscrito === 'suscrito' ? anularSuscripcion() : suscribirse()">
+          {{ suscrito === 'suscrito' ? 'Suscrito' : 'Suscribirse' }}
+          </button>
+        </div>
       
-        <button (click)="suscrito ? anularSuscripcion() : suscribirse()">
-          {{ suscrito ? 'Suscrito' : 'Suscribirse' }}
-      </button>
-        
       </div>
+     
     </div>
-   
+  
   </header>
   
 </div>
 
 <nav>
+  <br>
+  <br>
+  <br>
   <ul>
+    <li>
+     
+    </li>
+
     <li><a [routerLink]="['/canal', canalId]">Inicio</a></li>
     <li><a [routerLink]="['/canal', canalId, 'videos']">Videos</a></li>
+    
   </ul>
 </nav>
 

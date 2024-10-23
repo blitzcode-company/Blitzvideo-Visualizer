@@ -17,23 +17,58 @@ header {
   padding: 20px;
   box-sizing: border-box;
   position: absolute;
-  bottom: -65px; 
+  bottom: -125px; 
   width: 300px; 
   max-width: 1200px; 
   left: 0; 
   transform: none; 
   text-align: center; 
 }
+
 .profile {
   display: grid;
   grid-template-columns: 110px auto; 
-  align-items: start; 
+  align-items: center; 
   gap: 15px; 
   max-width: 1000px;
   margin: 0 auto;
   margin-top: 300px;
 }
 
+.boton {
+  border-radius: 8px;
+  background-color: #32b1f9; 
+  color: #fff; 
+  margin-top:-100px;
+  padding: 5px 10px;
+  font-size: 16px; 
+  font-weight: bold; 
+  text-align: center; 
+  display: inline-flex; 
+  justify-content: center;
+  align-items: center;
+  border: none;
+  cursor: pointer; 
+  transition: background-color 0.3s ease, transform 0.3s ease; 
+}
+
+.boton:hover {
+  background-color: #0282e5; 
+  transform: scale(1.05); 
+}
+
+.boton.suscrito {
+  background-color: #0282e5;  
+  color: white;
+}
+
+.boton.suscrito:hover {
+  background-color: #008bf5; 
+}
+
+.boton.suscrito:active {
+  background-color: #008bf5; 
+}
 .profile-pic {
   width: 120px; 
   height: 120px; 

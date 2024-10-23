@@ -48,7 +48,6 @@ export class ComentariosComponent implements OnInit {
     this.comentariosService.traerComentariosDelVideo(this.videoId).subscribe(
       (res: any[]) => { 
         this.comentarios = this.organizarComentarios(res);
-        console.log(this.comentarios);
       },
       (error) => {
         console.error('Error al obtener comentarios:', error);
@@ -107,7 +106,6 @@ export class ComentariosComponent implements OnInit {
 
     this.comentariosService.eliminarComentario(idComentario, usuario_id).subscribe(
       response => {
-        console.log('Comentario eliminado:', response);
         this.traerComentarios();  
       },
       error => {
@@ -186,7 +184,6 @@ export class ComentariosComponent implements OnInit {
 
     this.comentariosService.darMeGusta(comentarioId, this.usuario.id).subscribe(
       () => {
-        console.log('Me Gusta dado al comentario.');
         this.traerComentarios();  
       },
       error => {
@@ -199,7 +196,6 @@ export class ComentariosComponent implements OnInit {
     
     this.comentariosService.quitarMeGusta(meGustaId, this.usuario.id).subscribe(
       () => {
-        console.log('Me Gusta quitado del comentario.');
         this.traerComentarios(); 
       },
       error => {

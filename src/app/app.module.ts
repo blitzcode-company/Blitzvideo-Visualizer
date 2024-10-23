@@ -29,12 +29,20 @@ import { ReproductorVideoComponent } from './componentes/reproductor-video/repro
 import { RouterModule } from '@angular/router';
 import { NoEncontradoComponent } from './componentes/no-encontrado/no-encontrado.component';
 import { ListaDeReproduccionComponent } from './componentes/lista-de-reproduccion/lista-de-reproduccion.component';
-import { CrearListaReproduccionComponent } from './componentes/crear-lista-reproduccion/crear-lista-reproduccion.component';
 import { MatFormFieldModule } from '@angular/material/form-field'; 
 import { MatInputModule } from '@angular/material/input'; 
 import { MatSelectModule } from '@angular/material/select';
 import { MatOption } from '@angular/material/select';
 import { ContenidoListaDeReproduccionComponent } from './componentes/contenido-lista-de-reproduccion/contenido-lista-de-reproduccion.component';
+import { ConfirmacionDesuscribirModalComponent } from './componentes/confirmacion-desuscribir-modal/confirmacion-desuscribir-modal.component';
+import { AgregarListaComponent } from './componentes/agregar-lista/agregar-lista.component';
+import { CrearListaComponent } from './componentes/crear-lista/crear-lista.component';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { ModalEditarlistaComponent } from './componentes/modal-editarlista/modal-editarlista.component';
+import { PagosComponent } from './componentes/pagos/pagos.component';
+import { ConfiguracionDePerfilComponent } from './componentes/configuracion-de-perfil/configuracion-de-perfil.component';
+import { GraciasModalComponent } from './componentes/gracias-modal/gracias-modal.component';
+
 
 
 @NgModule({
@@ -54,8 +62,14 @@ import { ContenidoListaDeReproduccionComponent } from './componentes/contenido-l
     ReproductorVideoComponent,
     NoEncontradoComponent,
     ListaDeReproduccionComponent,
-    CrearListaReproduccionComponent,
     ContenidoListaDeReproduccionComponent,
+    ConfirmacionDesuscribirModalComponent,
+    AgregarListaComponent,
+    CrearListaComponent,
+    ModalEditarlistaComponent,
+    PagosComponent,
+    ConfiguracionDePerfilComponent,
+    GraciasModalComponent,
     
   ],
   imports: [
@@ -77,7 +91,9 @@ import { ContenidoListaDeReproduccionComponent } from './componentes/contenido-l
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
-    MatOption
+    MatOption,
+    MatSnackBarModule
+
 
   ],
   exports: [

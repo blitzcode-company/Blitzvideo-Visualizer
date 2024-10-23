@@ -1,0 +1,79 @@
+<app-header></app-header>
+
+<div class="configuracion">
+    <div class="sidebar">
+        <a class="selected" href="/ajustes/perfil">Perfil</a>
+        <a href="/ajustes/pagos">Pagos</a>
+    </div>
+    <div class="containerConfig container">
+        <div class="header">
+            <h2>Editar Perfil de Usuario</h2>
+            <hr />
+        </div>
+
+        <div class="form-container">
+            <form #formUsuario="ngForm" (ngSubmit)="onSubmitUsuario(formUsuario)">
+                <div class="form-group">
+                    <label for="userName">Nombre de perfil</label>
+                    <input type="text" id="userName" class="form-control" [(ngModel)]="usuario.name" name="name" required />
+                </div>
+                <div class="form-group">
+                  <label for="fechaNac">Fecha de nacimiento</label>
+                  <input type="date" id="fecha_de_nacimiento" class="form-control" [(ngModel)]="usuario.fecha_de_nacimiento" name="fecha_de_nacimiento" required />
+              </div>
+
+                <div class="photo-upload">
+                    <img class="user-photo" *ngIf="usuario.foto" [src]="usuario.foto" alt="Foto de perfil" />
+                    <label for="userPhoto" class="upload-button">
+                        <i class="fas fa-upload"></i> Subir nueva foto
+                    </label>
+                    <input type="file" id="userPhoto" class="file-input" (change)="onFileSelected($event)" />
+                </div>
+
+                <button type="submit" class="btn-submit">Guardar Cambios</button>
+            </form>
+
+            <div class="alert-container" *ngIf="alertMessageUser">
+                <div class="alert alert-info">{{ alertMessageUser }}</div>
+            </div>
+        </div>
+
+        <div class="header">
+            <h2>Editar Canal</h2>
+            <hr />
+        </div>
+
+        <div class="form-container" *ngIf="tieneCanal; else noCanalTemplate">
+            <form #formCanal="ngForm" (ngSubmit)="onSubmitCanal(formCanal)">
+                <div class="form-group">
+                    <label for="canalNombre">Nombre del canal</label>
+                    <input type="text" id="canalNombre" class="form-control" [(ngModel)]="canal.nombre" name="nombre" placeholder="Nombre del canal" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="canalDescripcion">Descripción del canal</label>
+                    <textarea id="canalDescripcion" class="form-control" [(ngModel)]="canal.descripcion" name="descripcion" placeholder="Descripción del canal" required></textarea>
+                </div>
+
+                <div class="photo-upload">
+                    <img class="channel-cover" *ngIf="canal.portadaPreview" [src]="canal.portadaPreview" alt="Portada del canal" />
+                    <label for="portadaImage" class="upload-button">
+                        <i class="fas fa-upload"></i> Subir portada
+                    </label>
+                    <input type="file" id="portadaImage" class="file-input" (change)="onFileSelectedPortada($event)" style="display: none;" />
+                </div>
+                <br />
+                <button type="submit" class="btn-submit">Guardar Cambios</button>
+            </form>
+            <div class="alert-container" *ngIf="alertMessageCanal">
+                <div class="alert alert-info">{{ alertMessageCanal }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<ng-template #noCanalTemplate>
+    <div class="alert alert-warning">
+        No tienes un canal creado. <a [href]="serverIp + '3001' + '/#/crearCanal'">Da click aquí para crear uno</a>.
+    </div>
+</ng-template>

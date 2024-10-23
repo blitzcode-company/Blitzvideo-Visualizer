@@ -36,7 +36,7 @@ anularSuscripcion(userId: number, canalId: number): Observable<any> {
 }
 
 verificarSuscripcion(userId: number, canalId: number): Observable<any> {
-  const url = `${this.apiUrl}api/v1/canal/${canalId}/suscripcion`; 
+  const url = `${this.apiUrl}api/v1/canal/${canalId}/usuario/${userId}/suscripcion`; 
   const httpOptions = {
     headers: new HttpHeaders({
       'Authorization': 'Bearer ' + this.cookie.get('accessToken')

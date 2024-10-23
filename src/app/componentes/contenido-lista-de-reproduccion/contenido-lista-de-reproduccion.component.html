@@ -1,12 +1,24 @@
 <app-header></app-header>
-<div class="container">
+<div class="containerHome">
   <div class="sidebar">
     <a href="#">Inicio</a>
-    <a [href]="serverIp + '3001' + '/#/misVideos'">Mi canal</a>
-    <a href="">Suscripciones</a>
-    <a href="/playlists">Listas de reproduccion</a>
+    <a *ngIf="status.isLoggedIn" [href]="serverIp + '3001' + '/#/misVideos'">Mi canal</a>
+    <a *ngIf="status.isLoggedIn" href="/playlists">Listas de reproduccion</a>
+    <hr *ngIf="status.isLoggedIn"class="lineaSideBar">
+    <p *ngIf="status.isLoggedIn" >Suscripciones</p>
+    <div class="canalesSuscritos"  *ngFor="let canal of canales">
+      <a class="canalesLista" [routerLink]="['/canal', canal.id]"> 
+        <img *ngIf="!canal.user.foto" class="fotoUserSuscriptores" src="/assets/images/user.png" alt="Foto del canal">
+
+        <img *ngIf="canal.user.foto" class="fotoUserSuscriptores" [src]="canal.user.foto" alt="">
+        {{ canal.nombre }}
+      </a>
+    </div>
   </div>
-<div class="playlist">
+  <div *ngIf="!playlist">
+    <p>Cargando...</p>
+  </div>
+<div class="playlist" *ngIf="playlist">
     <h1>{{ playlist.nombre }}</h1>
     <p>Acceso: {{ playlist.acceso ? 'Público' : 'Privado' }}</p>
     
@@ -19,6 +31,8 @@
           <div class="video-info">
             <h3>{{ video.titulo }}</h3>
             <p>{{ video.descripcion }}</p>
+            <button class="btn btn-danger" (click)="quitarVideo(playlist.id, video.id)">Quitar Video</button>
+
           </div>
         </a>
       </div>

@@ -9,8 +9,10 @@ import { Observable } from 'rxjs';
 import { Videos } from '../../clases/videos';
 import { environment } from '../../../environments/environment';
 import { MatDialog } from '@angular/material/dialog';
-import { CrearListaReproduccionComponent } from '../crear-lista-reproduccion/crear-lista-reproduccion.component';
+import { CrearListaComponent } from '../crear-lista/crear-lista.component';
 import { SuscripcionesService } from '../../servicios/suscripciones.service';
+import { ConfirmacionDesuscribirModalComponent } from '../confirmacion-desuscribir-modal/confirmacion-desuscribir-modal.component';
+import { AgregarListaComponent } from '../agregar-lista/agregar-lista.component';
 
 
 @Component({
@@ -24,7 +26,7 @@ export class VerVideoComponent implements OnInit, AfterViewInit, AfterViewChecke
   canalId: any;
   userId: any;
   videos = new Videos();
-  video: any;
+  video: any = {}; 
   comentario: any;
   usuario: any;
   visitaRealizada: boolean = false;
@@ -36,8 +38,12 @@ export class VerVideoComponent implements OnInit, AfterViewInit, AfterViewChecke
   isExpanded = false;
   isContentOverflowing = false;
   isCinemaMode = false;
-  public suscrito: boolean = false;
-  mensaje: string = '';
+  public suscrito: string = '';
+    mensaje: string = '';
+  idDelCanalDelUsuario:any
+  usuarioConCanal: any;
+  puedeEditarVideo: boolean = false;
+
   numeroDeSuscriptores: any;
 
   @ViewChild('descripcion', { static: true }) descripcionElement: ElementRef | undefined;
@@ -55,6 +61,7 @@ export class VerVideoComponent implements OnInit, AfterViewInit, AfterViewChecke
 
   ngOnInit(): void {
     this.videoId = this.route.snapshot.params['id'];
+    this.obtenerUsuarioConCanal();
     this.mostrarVideo();
     this.obtenerUsuario();
     this.visitar();
@@ -76,16 +83,19 @@ export class VerVideoComponent implements OnInit, AfterViewInit, AfterViewChecke
   obtenerUsuario(): void {
     this.authService.usuario$.subscribe(res => {
       this.usuario = res;
-      this.userId = this.usuario.id
-      this.obtenerPuntuacionActual();  
-      this.verificarSuscripcion();
-
+  
+      if (this.usuario) {
+        this.userId = this.usuario.id;
+        this.obtenerUsuarioConCanal();
+        this.obtenerPuntuacionActual();
+        this.verificarSuscripcion();
+      }
     });
-
+  
     this.authService.mostrarUserLogueado().subscribe();
   }
 
-
+ 
   toggleCinemaMode() {
     this.isCinemaMode = !this.isCinemaMode;
   }
@@ -104,27 +114,56 @@ export class VerVideoComponent implements OnInit, AfterViewInit, AfterViewChecke
     }
   }
 
+  obtenerUsuarioConCanal(): void {
+    this.authService.obtenerCanalDelUsuario(this.userId).subscribe(
+      (res: any) => {
+        this.usuarioConCanal = res; 
+
+        if (this.usuarioConCanal && this.usuarioConCanal.canales && this.usuarioConCanal.canales.length > 0) {
+          this.idDelCanalDelUsuario = this.usuarioConCanal.canales[0].id; 
+        } else {
+          this.puedeEditarVideo = false; 
+        }
+     
+        this.mostrarVideo()
+      },
+      
+    );
+  }
+  
+
   mostrarVideo(): void {
     this.videoService.obtenerInformacionVideo(this.videoId).subscribe(res => {
       this.video = res;
-      console.log(this.video)
+  
       if (this.video && this.video.created_at) {
         const fecha = new Date(this.video.created_at);
         if (!isNaN(fecha.getTime())) {
           this.video.created_at = this.convertirFechaALineaDeTexto(fecha);
         }
       }
-
+  
       if (this.video && this.video.titulo) {
         this.titleService.setTitle(this.video.titulo + ' - BlitzVideo');
       }
-      
+  
       this.videoId = this.video.id;
-      this.canalId = this.video.canal_id
+      this.canalId = this.video.canal_id;
 
+      if (this.canalId && this.idDelCanalDelUsuario) {
+        this.puedeEditarVideo = this.canalId === this.idDelCanalDelUsuario;
+      } else {
+        this.puedeEditarVideo = false;
+      }
+  
       this.listarNumeroDeSuscriptores();
+    }, error => {
+      console.error('Error al obtener información del video:', error);
     });
   }
+
+
+
 
   puntuar(valora: number): void {
     if (!this.usuario || !this.usuario.id) {
@@ -211,7 +250,6 @@ export class VerVideoComponent implements OnInit, AfterViewInit, AfterViewChecke
 
       visitaObservable.subscribe(
         response => {
-          console.log(response.message);
         },
         error => {
           console.error('Error al contar visita:', error);
@@ -233,25 +271,13 @@ export class VerVideoComponent implements OnInit, AfterViewInit, AfterViewChecke
     return `${dia} de ${mes} de ${año}`;
   }
 
-  abrirModalCrearLista(): void {
-    const dialogRef = this.dialog.open(CrearListaReproduccionComponent, {
-      width: '500px',
-      data: { videoId: this.videoId } 
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        console.log('Lista creada o video agregado');
-      }
-    });
-  }
   
   
   suscribirse(): void {
     this.suscripcionService.suscribirse(this.userId, this.canalId).subscribe(
       response => {
         this.mensaje = 'Suscripción exitosa';
-        this.suscrito = true; 
+        this.suscrito = 'suscrito'; 
       },
       error => this.handleError(error)
     );
@@ -260,22 +286,49 @@ export class VerVideoComponent implements OnInit, AfterViewInit, AfterViewChecke
   listarNumeroDeSuscriptores() {
     this.suscripcionService.listarNumeroDeSuscriptores(this.canalId).subscribe(res => {
       this.numeroDeSuscriptores = res;
-      console.log(this.numeroDeSuscriptores)
     });
   }
   
 
   anularSuscripcion(): void {
-    this.suscripcionService.anularSuscripcion(this.userId, this.canalId).subscribe(
-      () => {
-        this.mensaje = 'Suscripción anulada';
-        this.suscrito = false; 
-      },
-      error => this.handleError(error)
-    );
-  }
+    const dialogRef = this.dialog.open(ConfirmacionDesuscribirModalComponent);
+    dialogRef.afterClosed().subscribe(result => {
+        if (result) {
+            this.suscripcionService.anularSuscripcion(this.userId, this.canalId).subscribe(
+                () => {
+                    this.mensaje = 'Suscripción anulada';
+                    this.suscrito = 'desuscrito'; 
+                },
+                error => this.handleError(error)
+            );
+        }
+    });
+}
 
   
+  agregarAVideoALista(): void {
+    const dialogRef = this.dialog.open(AgregarListaComponent, {
+      data: { videoId: this.videoId }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+      }
+    });
+  }
+
+
+
+  crearLista(): void {
+    const dialogRef = this.dialog.open(CrearListaComponent);
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.agregarAVideoALista();
+      }
+    });
+  }
+
   toggleSuscripcion(): void {
     if (this.suscrito) {
       this.anularSuscripcion(); 
@@ -284,22 +337,48 @@ export class VerVideoComponent implements OnInit, AfterViewInit, AfterViewChecke
     }
   }
 
+  
   verificarSuscripcion(): void {
+    if (!this.userId || !this.canalId) {
+      return; 
+    }
+
     this.suscripcionService.verificarSuscripcion(this.userId, this.canalId).subscribe(
       response => {
-        this.suscrito = response.suscrito; 
+        const estado: 'propietario' | 'suscrito' | 'desuscrito' = response.estado;
+
+        const acciones: {
+          propietario: () => void;
+          suscrito: () => void;
+          desuscrito: () => void;
+        } = {
+          propietario: () => {
+            this.suscrito = 'propietario';
+          },
+          suscrito: () => {
+            this.suscrito = 'suscrito';
+          },
+          desuscrito: () => {
+            this.suscrito = 'desuscrito'; 
+          }
+        };
+
+        (acciones[estado] || (() => {
+          console.warn('Estado desconocido:', estado);
+        }))();
+
       },
       error => {
         if (error.status === 404) {
-          this.suscrito = false; 
-          console.warn('El usuario no está suscrito a este canal.');
+          console.warn('No se encontró la suscripción.');
+          this.suscrito = 'desuscrito';
         } else {
           console.error('Error al verificar la suscripción:', error);
         }
       }
     );
-  }
-  
+}
+
   private handleError(error: any): void {
     if (error.status === 409) {
       this.mensaje = 'Ya estás suscrito a este canal.';

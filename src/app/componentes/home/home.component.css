@@ -3,13 +3,21 @@ a {
   color: black;
 }
 
-.container {
+.containerHome {
   display: flex;
-  max-width: fit-content;
+  flex-direction: row;
+
 }
 
 .sidebar {
-  width: 20%;
+  background-color: #fff  ;
+  display: flex;
+  flex-direction: column;
+  min-width: 250px;
+  min-height: 100vh;
+  border-right: 1px solid #dee2e6;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
   padding: 15px;
 }
 
@@ -17,14 +25,30 @@ a {
   display: block;
   padding: 10px;
   text-decoration: none;
-  color: #000;
+  color: #495057;
+  min-width: 225px;
+
   margin-bottom: 10px;
-  border-radius: 5px;
+  border-width: 0 0 1px;
   transition: background-color 0.3s;
+}
+
+p {
+  padding: 10px;
+  text-decoration: none;
+  margin-bottom: 10px;
+  border-width: 0 0 1px;
+  
 }
 
 .sidebar a:hover {
   background-color: #ddd;
+}
+
+.duracionVideo {
+  background-color: #000000;
+  color:white;
+  opacity: 0.5;
 }
 
 .video-grid {
@@ -107,17 +131,18 @@ a {
   display: flex;
   align-items: center;
   text-decoration: none;
+
 }
 
 .canal-link:hover {
-  text-decoration: underline;
+  text-decoration: none;
 }
 
 .canalesSuscritos {
   color: #4b4b4b;
   display: flex;
-
 }
+
 
 .fotoUser {
   border-radius: 25px;

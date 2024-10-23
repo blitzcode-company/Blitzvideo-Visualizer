@@ -10,6 +10,8 @@ import { VideosDelCanalComponent } from './componentes/videos-del-canal/videos-d
 import { NoEncontradoComponent } from './componentes/no-encontrado/no-encontrado.component';
 import { ListaDeReproduccionComponent } from './componentes/lista-de-reproduccion/lista-de-reproduccion.component';
 import { ContenidoListaDeReproduccionComponent } from './componentes/contenido-lista-de-reproduccion/contenido-lista-de-reproduccion.component';
+import { PagosComponent } from './componentes/pagos/pagos.component';
+import { ConfiguracionDePerfilComponent } from './componentes/configuracion-de-perfil/configuracion-de-perfil.component';
 
 const routes: Routes = [
   {path: '', component: HomeComponent},
@@ -20,6 +22,8 @@ const routes: Routes = [
   { path: 'canal/:id/videos', component: VideosDelCanalComponent},
   { path: 'playlists', component: ListaDeReproduccionComponent},
   { path: 'playlists/:id', component: ContenidoListaDeReproduccionComponent},
+  {path: 'ajustes/pagos', component: PagosComponent},
+  {path: 'ajustes/perfil', component: ConfiguracionDePerfilComponent},
 
   { path: '**', component: NoEncontradoComponent }, 
 ];
