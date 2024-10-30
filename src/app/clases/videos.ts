@@ -6,5 +6,6 @@ descripcion:any;
 created_at:any;
 duracion:any;
 link:any;
+[key: string]: any; 
 ultimoVideo: Videos | null = null;
 }

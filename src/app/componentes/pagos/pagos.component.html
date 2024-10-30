@@ -1,14 +1,3 @@
-<app-header></app-header>
-<div class="configuracion">
-  <div class="sidebar">
-    <a href="/ajustes/perfil">Perfil</a>
-    <a class="selected" href="/ajustes/pagos">Pagos</a>
-  </div>
-  <div class="container">
-    <div class="container">
-      <h2 *ngIf="!planUsuario">Pagar Suscripción Premium</h2>
-      <hr *ngIf="!planUsuario">
-    </div>
 
     <form *ngIf="!planUsuario" (submit)="pagar()">
       <div class="form-group">
@@ -40,15 +29,3 @@
       <button type="submit" class="btn-submit">Pagar</button>
     </form>
 
-    <div *ngIf="planUsuario">
-      <h2>Detalles del Plan</h2>
-      <hr>
-      <p><strong>Plan:</strong> {{ planUsuario.plan }}</p>
-      <p><strong>Método de Pago:</strong> {{ planUsuario.metodo_de_pago }}</p>
-      <p><strong>Fecha de Inicio:</strong> {{ planUsuario.fecha_inicio | date }}</p>
-      <p><strong>ID de Suscripción:</strong> {{ planUsuario.suscripcion_id }}</p>
-      <button (click)="bajaPlan()" class="btn btn-danger">Dar de baja el plan Premium</button> 
-
-    </div>
-  </div>
-</div>

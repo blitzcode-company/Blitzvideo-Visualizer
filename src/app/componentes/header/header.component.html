@@ -13,7 +13,9 @@
 
     <div class="dropdown" [class.open]="isDropdownOpen">
       <button *ngIf="status.isLoggedIn" class="dropdown-toggle" (click)="toggleDropdown($event)">
+
         <div class="dropdown-content">
+
           <a *ngIf="usuario?.name" class="dropdown-item canal">{{ usuario?.name }}</a>
 
           <img *ngIf="usuario?.foto" [src]="usuario.foto" alt="Foto de perfil" 
@@ -21,7 +23,9 @@
 
           <img *ngIf="!usuario?.foto" src="assets/images/user.png" alt="Foto de perfil predeterminada" 
                height="32" class="avatar">
+
         </div>
+
       </button>
 
       <div class="dropdown-menu" *ngIf="status.isLoggedIn">

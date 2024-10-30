@@ -8,7 +8,11 @@
         <div *ngIf="videos.length > 0" class="results-container">
       <div class="video-search-result" *ngFor="let video of videos">
         <a [routerLink]="['/video', video.id]">
-          <img class="thumbnail" [src]="video.miniatura" alt="Miniatura del video">
+          <div class="miniatura-container">
+            <img class="thumbnail" [src]="video.miniatura" alt="Miniatura del video">
+            <p class="duracionVideo"> {{  video.duracionFormateada  }}</p>
+          </div>
+    
           <div class="video-info">
             <h3 class="title">{{ video.titulo }}</h3>
             <p class="description">{{ video.descripcion }}</p>

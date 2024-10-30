@@ -1,7 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { HomeComponent } from './componentes/home/home.component';
-
 import { VerVideoComponent } from './componentes/ver-video/ver-video.component';
 import { EditarUsuarioComponent } from './componentes/editar-usuario/editar-usuario.component';
 import { ResultadoDeBusquedaComponent } from './componentes/resultado-de-busqueda/resultado-de-busqueda.component';
@@ -12,18 +11,22 @@ import { ListaDeReproduccionComponent } from './componentes/lista-de-reproduccio
 import { ContenidoListaDeReproduccionComponent } from './componentes/contenido-lista-de-reproduccion/contenido-lista-de-reproduccion.component';
 import { PagosComponent } from './componentes/pagos/pagos.component';
 import { ConfiguracionDePerfilComponent } from './componentes/configuracion-de-perfil/configuracion-de-perfil.component';
+import { SuscripcionPaypalComponent } from './componentes/suscripcion-paypal/suscripcion-paypal.component';
+import { SeleccionPagoComponent } from './componentes/seleccion-pago/seleccion-pago.component';
+import { autenticacionGuard } from './guards/autenticacion.guard';
 
 const routes: Routes = [
   {path: '', component: HomeComponent},
   {path: 'video/:id', component: VerVideoComponent},
-  {path: 'editarUsuario', component: EditarUsuarioComponent},
-  { path: 'buscar/:nombre', component: ResultadoDeBusquedaComponent }, 
+  {path: 'editarUsuario', component: EditarUsuarioComponent, canActivate: [autenticacionGuard]},
+  { path: 'buscar/:nombre', component: ResultadoDeBusquedaComponent,  }, 
   { path: 'canal/:id', component: VerCanalComponent},
   { path: 'canal/:id/videos', component: VideosDelCanalComponent},
-  { path: 'playlists', component: ListaDeReproduccionComponent},
-  { path: 'playlists/:id', component: ContenidoListaDeReproduccionComponent},
-  {path: 'ajustes/pagos', component: PagosComponent},
-  {path: 'ajustes/perfil', component: ConfiguracionDePerfilComponent},
+  { path: 'playlists', component: ListaDeReproduccionComponent, canActivate: [autenticacionGuard]},
+  { path: 'playlists/:id', component: ContenidoListaDeReproduccionComponent, canActivate: [autenticacionGuard]},
+  {path: 'ajustes/pagos', component: SeleccionPagoComponent, canActivate: [autenticacionGuard]},
+  {path: 'ajustes/perfil', component: ConfiguracionDePerfilComponent, canActivate: [autenticacionGuard]},
+  
 
   { path: '**', component: NoEncontradoComponent }, 
 ];

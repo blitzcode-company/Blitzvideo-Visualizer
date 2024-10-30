@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { VideosService } from '../../servicios/videos.service';
 import { TiempoService } from '../../servicios/tiempo.service';
+import { Title } from '@angular/platform-browser';
 import  moment from 'moment';
 import 'moment/locale/es';
 
@@ -19,6 +20,7 @@ export class ResultadoDeBusquedaComponent implements OnInit{
 
   constructor(private videoService: VideosService,
               private route: ActivatedRoute,
+              private titleService: Title,
               private tiempo: TiempoService) {
                 moment.locale('es'); 
               }
@@ -29,6 +31,8 @@ export class ResultadoDeBusquedaComponent implements OnInit{
       if (this.nombre) {
         this.listarVideosPorNombre(this.nombre);
       }
+      this.titleService.setTitle(this.nombre + ' - BlitzVideo');
+
     });
   }
 
@@ -39,7 +43,9 @@ export class ResultadoDeBusquedaComponent implements OnInit{
         this.videos = res.map(videoData => {
           return {
             ...videoData,
-            created_at: this.tiempoTranscurrido(videoData.created_at)
+            created_at: this.tiempoTranscurrido(videoData.created_at),
+            duracionFormateada: this.convertirDuracion(videoData.duracion)
+
           };
         });
         console.log(this.videos);
@@ -48,6 +54,14 @@ export class ResultadoDeBusquedaComponent implements OnInit{
         console.error('Error al obtener videos:', error);
       }
     );
+  }
+
+
+  convertirDuracion (segundos:number): string {
+    const minutos = Math.floor(segundos/ 60);
+    const segundosRestantes = segundos % 60;
+    const segundosFormateados = segundosRestantes < 10 ? '0' + segundosRestantes : segundosRestantes;
+    return `${minutos}:${segundosFormateados}`
   }
 
   tiempoTranscurrido(fecha: Date | string): string {

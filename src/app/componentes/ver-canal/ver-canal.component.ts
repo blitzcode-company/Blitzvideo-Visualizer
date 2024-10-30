@@ -103,16 +103,26 @@ export class VerCanalComponent implements OnInit {
           this.canal = res[0].canal;
           this.canalNombre = this.canal.nombre;
           this.usuario = this.canal.user;
-          this.videosGeneral = res;
-          this.videos = res.slice(0, 3);
+          
+          this.videosGeneral =  res.map((videoData: any) => {
+            return {
+              ...videoData,
+              duracionFormateada: this.convertirDuracion(videoData.duracion)
+            };
+          });
+  
+          this.videos = this.videosGeneral.slice(0, 3);
           this.userId = this.canal.user_id;
           this.cargando = false;
-          this.ultimoVideo = this.videosGeneral.reduce((prev: any, current: any) => (prev.id > current.id) ? prev : current);
-
+  
+          this.ultimoVideo = this.videosGeneral.reduce((prev: any, current: any) => 
+            (prev.id > current.id) ? prev : current
+          );
+  
           if (this.ultimoVideo) {
             this.ultimoVideo.indice = this.videos.findIndex(video => video.id === this.ultimoVideo.id) + 1;
           }
-
+  
           this.setTitle(this.canal.nombre);
         } else {
           console.error('No se encontraron videos para este canal');
@@ -125,6 +135,7 @@ export class VerCanalComponent implements OnInit {
     );
   }
 
+  
   listarNumeroDeSuscriptores() {
     this.suscripcionService.listarNumeroDeSuscriptores(this.canalId).subscribe(res => {
       this.numeroDeSuscriptores = res;

@@ -1,0 +1,22 @@
+.subscription-container {
+    max-width: 600px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+#paypal-button-container {
+    margin: 20px 0;
+}
+
+.unsubscribe-button {
+    background-color: #f44336;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.unsubscribe-button:hover {
+    background-color: #d32f2f;
+}

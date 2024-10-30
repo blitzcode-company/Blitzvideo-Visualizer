@@ -1,0 +1,51 @@
+  .configuracion {
+
+      display: flex;
+      flex-direction: row;
+    }
+  .container {
+    padding: 10px 10px;
+  }
+
+  .plandelusuario {
+
+    padding: 10px 10px;
+
+  }
+
+  .sidebar a {
+    display: block;
+    padding: 10px;
+    text-decoration: none;
+    color: #495057;
+    min-width: 225px;
+  
+    margin-bottom: 10px;
+    border-width: 0 0 1px;
+    transition: background-color 0.3s;
+  }
+
+  .selected {
+    background-color: #ddd;
+  }
+
+  .sidebar .selected:hover{
+    background-color: #999999;
+
+  }
+
+  .sidebar a:hover {
+    background-color: #ddd;
+  }
+
+  .sidebar {
+    background-color: #fff  ;
+    display: flex;
+    flex-direction: column;
+    min-width: 250px;
+    min-height: 100vh;
+    border-right: 1px solid #dee2e6;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  
+    padding: 15px;
+  }

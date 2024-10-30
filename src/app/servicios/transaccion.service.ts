@@ -11,7 +11,7 @@ import { CookieService } from 'ngx-cookie-service';
 export class TransaccionService {
 
   private apiUrl = environment.apiUrl;
-
+  private pagosApiUrl = environment.pagosApi
 
   constructor(private http: HttpClient, private cookie:CookieService) { }
 
@@ -41,12 +41,39 @@ export class TransaccionService {
     return this.http.get(`${this.apiUrl}api/v1/transaccion/plan/usuario/${userId}`, httpOptions);
   }
 
+  cancelarSuscripcionPayPal(subscriptionId: string): Observable<any> {
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Authorization': 'Bearer ' + this.cookie.get('accessToken'),
+      }),
+    };
+
+    return this.http.post(`${this.pagosApiUrl}api/v1/paypal/cancel-subscription`, 
+      { subscription_id: subscriptionId }, 
+      httpOptions 
+    );
+  }
+
+  cancelarSuscripcionStripe(subscriptionId: string): Observable<any> {
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Authorization': 'Bearer ' + this.cookie.get('accessToken'),
+      }),
+    };
+
+    return this.http.post(`${this.pagosApiUrl}api/v1/stripe/cancelar-suscripcion`, 
+      { subscription_id: subscriptionId }, 
+      httpOptions 
+    );
+  }
+
   bajaPlan(userId: number): Observable<any> {
     const httpOptions = {
       headers: new HttpHeaders({
         'Authorization': 'Bearer ' + this.cookie.get('accessToken'),
       })
     };
+  
     return this.http.delete(`${this.apiUrl}api/v1/transaccion/plan/usuario/${userId}`, httpOptions);
   }
 

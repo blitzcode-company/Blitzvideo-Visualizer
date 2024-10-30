@@ -1,6 +1,6 @@
 <div class="reproductor" [ngClass]="{'cinema-mode': isCinemaMode}">
-  <div class="video-container">
-    <video #videoPlayer class="video" muted (loadedmetadata)="setDuration()" (timeupdate)="updateProgressBar()" autoplay >
+  <div class="video-container" >
+    <video #videoPlayer class="video" [src]="videoUrl" muted (loadedmetadata)="setDuration()" (timeupdate)="updateProgressBar()" autoplay >
       <source [src]="videoUrl" type="video/mp4">
       Tu navegador no soporta la etiqueta de video.
     </video>

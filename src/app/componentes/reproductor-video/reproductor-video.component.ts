@@ -16,6 +16,8 @@ export class ReproductorVideoComponent implements OnInit, AfterViewInit {
   currentTime: number = 0;
   duration: number = 0;
   isCinemaMode = false;
+  isFullscreen = false;
+
 
   constructor(private el: ElementRef) { }
 
@@ -91,13 +93,16 @@ export class ReproductorVideoComponent implements OnInit, AfterViewInit {
     if (video) {
       if (!document.fullscreenElement) {
         video.requestFullscreen().catch(err => {
-          alert(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+          console.error(`Error al activar pantalla completa: ${err.message} (${err.name})`);
         });
+        this.isFullscreen = true;
       } else {
         document.exitFullscreen();
+        this.isFullscreen = false;
       }
     }
   }
+
 
   toggleCinemaMode() {
     this.isCinemaMode = !this.isCinemaMode;

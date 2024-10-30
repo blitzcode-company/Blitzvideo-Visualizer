@@ -41,7 +41,13 @@ export class VideosDelCanalComponent {
           this.canal = res[0].canal;
           this.canalNombre = this.canal.nombre;
           this.usuario = this.canal.user;  
-          this.videos = res; 
+          this.videos = res.map((videoData: any) => {
+            return {
+              ...videoData,
+              duracionFormateada: this.convertirDuracion(videoData.duracion)
+            };
+          });
+
           this.userId = this.canal.user_id;  
           console.log(this.canal);
           console.log(this.usuario);
@@ -54,6 +60,13 @@ export class VideosDelCanalComponent {
         console.error('Error al obtener el canal:', error);
       }
     );
+  }
+
+  convertirDuracion(segundos: number): string {
+    const minutos = Math.floor(segundos / 60);
+    const segundosRestantes = segundos % 60;
+    const segundosFormateados = segundosRestantes < 10 ? '0' + segundosRestantes : segundosRestantes;
+    return `${minutos}:${segundosFormateados}`;
   }
 
   toggleSuscripcion(): void {

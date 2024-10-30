@@ -47,7 +47,10 @@
     <h2>Último Video Subido</h2>
     <div class="ultimo-video-card">
       <a [routerLink]="['/video', ultimoVideo.id]">
-        <img [src]="ultimoVideo.miniatura" alt="{{ultimoVideo.titulo}}" class="ultimo-video-miniatura">
+        <div class="miniatura-container">
+          <img [src]="ultimoVideo.miniatura" alt="{{ultimoVideo.titulo}}" class="ultimo-video-miniatura">
+          <p class="duracionVideo"> {{  ultimoVideo.duracionFormateada  }}</p>
+        </div>
         <div class="ultimo-video-info">
           <h3>{{ ultimoVideo.titulo }}</h3>
           <p>{{ ultimoVideo.visitas_count }} vistas • {{ ultimoVideo.created_at | date:'short' }}</p>
@@ -59,7 +62,11 @@
     <div *ngFor="let chunk of videos | chunkPipe: 4" class="video-row">
       <div *ngFor="let video of chunk" class="video-card">
         <a [routerLink]="['/video', video.id]">
-          <img [src]="video.miniatura" alt="Miniatura del video">
+          <div class="miniatura-container">
+            <img [src]="video.miniatura" alt="Miniatura del video">
+            <p class="duracionVideo"> {{  video.duracionFormateada  }}</p>
+          </div>
+        
           <div class="video-info">
             <h3>{{ video.titulo }}</h3>
             <p>{{ video.visitas_count }} vistas • {{ video.created_at | date:'short' }}</p>

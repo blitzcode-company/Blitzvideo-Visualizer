@@ -8,11 +8,24 @@ import { Title } from '@angular/platform-browser';
 import { Subscription } from 'rxjs';
 import { Canal } from '../../clases/canal';
 import { environment } from '../../../environments/environment';
+import { trigger, transition, style, animate } from '@angular/animations';
+
 
 @Component({
   selector: 'app-configuracion-de-perfil',
   templateUrl: './configuracion-de-perfil.component.html',
-  styleUrl: './configuracion-de-perfil.component.css'
+  styleUrl: './configuracion-de-perfil.component.css',
+  animations: [
+    trigger('fadeInOut', [
+      transition(':enter', [
+        style({ opacity: 0 }),
+        animate('300ms ease-in', style({ opacity: 1 })) 
+      ]),
+      transition(':leave', [
+        animate('300ms ease-out', style({ opacity: 0 })) 
+      ])
+    ])
+  ]
 })
 export class ConfiguracionDePerfilComponent {
   usuario: any;
@@ -26,6 +39,9 @@ export class ConfiguracionDePerfilComponent {
   portada: File | undefined = undefined;
   serverIp = environment.serverIp
   tieneCanal: boolean = false;  
+  mostrarPerfil: boolean = false; 
+  mostrarCanal: boolean = false; 
+
 
   constructor(
     private router: Router,
@@ -109,7 +125,19 @@ export class ConfiguracionDePerfilComponent {
         }
     );
 }
+  togglePerfil() {
+    this.mostrarPerfil = !this.mostrarPerfil; 
+    if (this.mostrarCanal) {
+      this.mostrarCanal = false; 
+    }
+  }
 
+  toggleCanal() {
+    this.mostrarCanal = !this.mostrarCanal; 
+    if (this.mostrarPerfil) {
+      this.mostrarPerfil = false; 
+    }
+  }
 
   editarUsuario(): void {
     const userId = this.usuario.id;

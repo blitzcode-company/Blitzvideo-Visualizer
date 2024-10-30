@@ -23,12 +23,18 @@ constructor(private videoService: VideosService,
             private authService: AuthService,
           ){}
 
-videos:any;
+videos: any[] = [];
+videosPaginados: any[] = [];
+paginaActual: number = 1;
+videosPorPagina: number = 8;
 serverIp = environment.serverIp;
 canales: any[] = [];
 userId:any;
 duracionVideo: any;
 usuario:any;
+totalPaginas: number = 1;
+usuarioConCanal:any;
+idCanal:any;
 
 ngOnInit() {
   this.mostrarTodosLosVideos();
@@ -41,6 +47,7 @@ obtenerUsuario(): void {
     this.usuario = res;
     if (this.usuario) {
       this.userId = this.usuario.id;
+      this.obtenerUsuarioConCanal()
       this.mostrarCanalesSuscritos();
     } else {
       this.userId = null; 
@@ -51,21 +58,60 @@ obtenerUsuario(): void {
   this.authService.mostrarUserLogueado().subscribe();
 }
 
+
+obtenerUsuarioConCanal(): void {
+  this.authService.obtenerCanalDelUsuario(this.userId).subscribe(
+    (res: any) => {
+      this.usuarioConCanal = res; 
+      console.log(this.usuarioConCanal)
+      this.idCanal = this.usuarioConCanal.canales[0].id
+    },
+    
+  );
+}
+
 onImageError(event: any) {
   event.target.src = 'assets/images/video-default.png';
 }
 
 mostrarTodosLosVideos() {
   this.videoService.listarVideos().subscribe(res => {
-    this.videos = res.map((video: any) => {
-      console.log(video.duracion); 
-      return {
-        ...video,
-        duracionFormateada: this.convertirDuracion(video.duracion)
-      };
-    });
+    this.videos = res
+      .map((video: any) => {
+        return {
+          ...video,
+          duracionFormateada: this.convertirDuracion(video.duracion)
+        };
+      })
+      .sort(() => Math.random() - 0.5);
+    
+    this.totalPaginas = Math.ceil(this.videos.length / this.videosPorPagina);
+    this.paginaActual = 1; 
+    this.actualizarVideosPaginados();
   });
 }
+
+actualizarVideosPaginados() {
+  const inicio = (this.paginaActual - 1) * this.videosPorPagina;
+  const fin = inicio + this.videosPorPagina;
+  this.videosPaginados = this.videos.slice(inicio, fin);
+}
+
+
+irAPaginaAnterior() {
+  if (this.paginaActual > 1) {
+    this.paginaActual--;
+    this.actualizarVideosPaginados();
+  }
+}
+
+irAPaginaSiguiente() {
+  if (this.paginaActual < this.totalPaginas) {
+    this.paginaActual++;
+    this.actualizarVideosPaginados();
+  }
+}
+
 convertirDuracion (segundos:number): string {
   const minutos = Math.floor(segundos/ 60);
   const segundosRestantes = segundos % 60;

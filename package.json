@@ -36,6 +36,7 @@
     "mirax-player": "^7.0.1",
     "moment": "^2.30.1",
     "ngx-cookie-service": "^17.1.0",
+    "ngx-paypal": "^11.0.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "xgplayer": "^3.0.18",

@@ -148,21 +148,6 @@ export class PagosComponent implements OnInit {
     });
   }
 
-  bajaPlan(): void {
-    this.transaccionService.bajaPlan(this.userId).subscribe({
-      next: response => {
-        if (response.success) {
-          this.planUsuario = null; 
-          alert('Plan dado de baja exitosamente.');
-        } else {
-          alert('Error al dar de baja el plan: ' + response.message);
-        }
-      },
-      error: err => {
-        alert('Error en el servidor: ' + err.message);
-      }
-    });
-  }
 
   mostrarModalGracias() {
     this.dialog.open(GraciasModalComponent);

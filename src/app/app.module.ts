@@ -42,6 +42,8 @@ import { ModalEditarlistaComponent } from './componentes/modal-editarlista/modal
 import { PagosComponent } from './componentes/pagos/pagos.component';
 import { ConfiguracionDePerfilComponent } from './componentes/configuracion-de-perfil/configuracion-de-perfil.component';
 import { GraciasModalComponent } from './componentes/gracias-modal/gracias-modal.component';
+import { SuscripcionPaypalComponent } from './componentes/suscripcion-paypal/suscripcion-paypal.component';
+import { SeleccionPagoComponent } from './componentes/seleccion-pago/seleccion-pago.component';
 
 
 
@@ -70,6 +72,8 @@ import { GraciasModalComponent } from './componentes/gracias-modal/gracias-modal
     PagosComponent,
     ConfiguracionDePerfilComponent,
     GraciasModalComponent,
+    SuscripcionPaypalComponent,
+    SeleccionPagoComponent,
     
   ],
   imports: [

@@ -43,7 +43,6 @@ export class VerVideoComponent implements OnInit, AfterViewInit, AfterViewChecke
   idDelCanalDelUsuario:any
   usuarioConCanal: any;
   puedeEditarVideo: boolean = false;
-
   numeroDeSuscriptores: any;
 
   @ViewChild('descripcion', { static: true }) descripcionElement: ElementRef | undefined;
@@ -135,7 +134,8 @@ export class VerVideoComponent implements OnInit, AfterViewInit, AfterViewChecke
   mostrarVideo(): void {
     this.videoService.obtenerInformacionVideo(this.videoId).subscribe(res => {
       this.video = res;
-  
+      console.log(this.video)
+
       if (this.video && this.video.created_at) {
         const fecha = new Date(this.video.created_at);
         if (!isNaN(fecha.getTime())) {
@@ -167,7 +167,7 @@ export class VerVideoComponent implements OnInit, AfterViewInit, AfterViewChecke
 
   puntuar(valora: number): void {
     if (!this.usuario || !this.usuario.id) {
-      window.location.href = `${this.serverIp}:3002/#/`; 
+      window.location.href = `${this.serverIp}3002/#/`; 
     }
 
     if (this.puntuacionSeleccionada === valora) {
@@ -274,8 +274,14 @@ export class VerVideoComponent implements OnInit, AfterViewInit, AfterViewChecke
   
   
   suscribirse(): void {
+    if (!this.usuario || !this.usuario.id) {
+      window.location.href = `${this.serverIp}3002/#/`;
+      return;
+    }
+    
     this.suscripcionService.suscribirse(this.userId, this.canalId).subscribe(
       response => {
+        
         this.mensaje = 'Suscripción exitosa';
         this.suscrito = 'suscrito'; 
       },
@@ -330,6 +336,9 @@ export class VerVideoComponent implements OnInit, AfterViewInit, AfterViewChecke
   }
 
   toggleSuscripcion(): void {
+
+    
+
     if (this.suscrito) {
       this.anularSuscripcion(); 
     } else {

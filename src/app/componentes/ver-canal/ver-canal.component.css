@@ -99,6 +99,36 @@ header {
   text-overflow: ellipsis; 
 }
 
+.miniatura-container {
+  width: 100%; 
+  height: auto; 
+  aspect-ratio: 16 / 9; 
+  overflow: hidden;
+  position: relative;
+}
+
+.miniatura {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; 
+  transition: transform 0.3s ease; 
+}
+
+.miniatura-container p  {
+  position:absolute;
+  bottom: 0px;
+  right: 15px;
+  
+}
+
+.duracionVideo {
+  background-color: #000000;
+  color:white;
+  opacity: 0.5;
+  padding: 5px 8px;
+}
+
+
 nav {
   background-color: #fff;
   border-bottom: 1px solid #e0e0e0;

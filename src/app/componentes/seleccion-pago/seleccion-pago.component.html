@@ -1,0 +1,55 @@
+<app-header></app-header>
+<div class="configuracion">
+  <div class="sidebar">
+    <a href="/ajustes/perfil">Perfil</a>
+    <a class="selected" href="/ajustes/pagos">Pagos</a>
+  </div>
+  <div class="container" *ngIf="!planUsuario">
+    <div>
+      <h2>Selecciona un Método de Pago</h2>
+      
+      <div>
+        <label>
+          <input 
+            type="radio" 
+            name="paymentMethod" 
+            value="paypal" 
+            checked 
+            (change)="cambiarMetodoPago('paypal')" 
+          />
+          PayPal
+        </label>
+        <br>        
+        <label>
+          <input 
+            type="radio" 
+            name="paymentMethod" 
+            value="stripe" 
+            (change)="cambiarMetodoPago('stripe')" 
+          />
+          Tarjeta de credito o debito
+        </label>
+      </div>
+    
+      <div *ngIf="selectedPaymentMethod === 'paypal'">
+        <app-suscripcion-paypal></app-suscripcion-paypal>
+      </div>
+      
+      <div *ngIf="selectedPaymentMethod === 'stripe'">
+        <app-pagos></app-pagos>
+      </div>
+
+      
+    </div>
+  </div>
+  <div *ngIf="planUsuario" class="plandelusuario">
+    <h2>Detalles del Plan</h2>
+    <hr>
+    <p><strong>Plan:</strong> {{ planUsuario.plan }}</p>
+    <p><strong>Método de Pago:</strong> {{ planUsuario.metodo_de_pago }}</p>
+    <p><strong>Fecha de Inicio:</strong> {{ planUsuario.fecha_inicio | date }}</p>
+    <p><strong>ID de Suscripción:</strong> {{ planUsuario.suscripcion_id }}</p>
+    <button (click)="bajaPlan()" class="btn btn-danger">Dar de baja el plan Premium</button>
+  </div>
+</div>
+

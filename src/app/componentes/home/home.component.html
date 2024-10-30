@@ -2,7 +2,7 @@
 <div class="containerHome">
     <div class="sidebar">
       <a href="#">Inicio</a>
-      <a *ngIf="status.isLoggedIn" [href]="serverIp + '3001' + '/#/misVideos'">Mi canal</a>
+      <a *ngIf="status.isLoggedIn && usuarioConCanal.canales[0]?.id"  [routerLink]="['/canal', idCanal]">Mi canal</a>
       <a *ngIf="status.isLoggedIn" href="/playlists">Listas de reproduccion</a>
       <hr *ngIf="status.isLoggedIn"class="lineaSideBar">
       <p *ngIf="status.isLoggedIn" >Suscripciones</p>
@@ -17,8 +17,8 @@
     </div>
 
     <div class="video-grid">
-      <div class="video-card" *ngFor="let video of videos">
-        <a [routerLink]="['/video', video.id]" class="video-link">
+      <div class="video-card" *ngFor="let video of videosPaginados">
+        <a [routerLink]="['/video', video.id]" class="video-link" [title]="video.titulo" >
           <div class="miniatura-container">
             <img class="miniatura" [src]="video.miniatura ? video.miniatura : 'assets/images/video-default.png'" alt="Miniatura del video">
             <p class="duracionVideo"> {{  video.duracionFormateada  }}</p>
@@ -26,16 +26,30 @@
           <div class="video-info">
             <h3>{{ video.titulo }}</h3>
             <p>{{ video.visitas_count }} vistas • {{ video.created_at | date:'short' }}</p>
-          </div>
-          <hr>
-          <div class="canalNombre">
-            <a [routerLink]="['/canal', video.canal.id]" class="canal-link">
+            <hr>
+             <div class="canalNombre">
+            <a [routerLink]="['/canal', video.canal.id]" [title]="video.canal.nombre" class="canal-link">
               <img *ngIf="video.canal.user.foto" class="fotoUser" [src]="video.canal.user.foto" alt="Foto del canal">
               <img *ngIf="!video.canal.user.foto" class="fotoUserDefault" src="/assets/images/user.png" alt="Foto del canal">
               {{ video.canal.nombre }}
             </a>
           </div>
+          </div>
+          <hr>
+         
         </a>
+        
+      </div>
+      <div class="pagination-controls">
+        <button (click)="irAPaginaAnterior()" [disabled]="paginaActual === 1">
+          <i class="fas fa-chevron-left"></i> Anterior
+        </button>
+        <span>Página {{ paginaActual }} de {{ totalPaginas }}</span>
+        <button (click)="irAPaginaSiguiente()" [disabled]="paginaActual === totalPaginas">
+          Siguiente <i class="fas fa-chevron-right"></i>
+        </button>
       </div>
     </div>
+
+    
 </div>

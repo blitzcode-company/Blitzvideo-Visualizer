@@ -15,6 +15,7 @@ export class GraciasModalComponent {
   
   cerrar(): void {
     this.dialogRef.close();  
+    location.reload();
   }
 
 
