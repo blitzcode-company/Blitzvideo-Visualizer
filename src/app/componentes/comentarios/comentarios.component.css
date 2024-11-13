@@ -10,6 +10,12 @@
 
 }
 
+.mensaje-bloqueado {
+  color: red;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
 .comentarios-container {
   margin-top: -120px;
 }

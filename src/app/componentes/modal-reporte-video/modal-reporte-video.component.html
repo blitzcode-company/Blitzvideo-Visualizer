@@ -1,0 +1,48 @@
+<div mat-dialog-content>
+<h2>Reportar Video</h2>
+<form (ngSubmit)="enviarReporteVideo(reportForm.value)" #reportForm="ngForm">
+ 
+
+  <label>
+    <input type="checkbox" name="contenido_inapropiado" ngModel>
+    Contenido inapropiado
+  </label>
+  <br>
+  <label>
+    <input type="checkbox" name="spam" ngModel>
+    Spam
+  </label>
+  <br>
+  <label>
+    <input type="checkbox" name="contenido_enganoso" ngModel>
+    Contenido engañoso
+  </label>
+  <br>
+  <label>
+    <input type="checkbox" name="violacion_derechos_autor" ngModel>
+    Violación de derechos de autor
+  </label>
+  <br>
+  <label>
+    <input type="checkbox" name="incitacion_al_odio" ngModel>
+    Incitación al odio
+  </label>
+  <br>
+  <label>
+    <input type="checkbox" name="violencia_grafica" ngModel>
+    Violencia gráfica
+  </label>
+  <br>
+  <label>
+    <input type="checkbox" name="otros" ngModel>
+    Otros
+  </label>
+  <br>
+  <label for="detalle">Detalle:</label>
+  <br>
+  <textarea id="detalle" name="detalle" ngModel></textarea>
+  <br><br>
+
+  <button type="submit" [disabled]="reportForm.invalid">Enviar Reporte</button>
+</form>
+</div>

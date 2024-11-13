@@ -1,30 +1,27 @@
 <app-header></app-header>
-<div *ngIf="cargando">Cargando...</div>
 
-<div *ngIf="!cargando && canal?.portada" class="banner-container" [ngStyle]="{'--profile-banner': 'url(' + canal.portada + ')'}">
+<div  class="banner-container" [ngStyle]="{'--profile-banner': 'url(' + canal.portada + ')'}">
   <header>
     <div class="profile">
       <img *ngIf="!usuario.foto" src="assets/images/user.png" alt="Foto de perfil" class="profile-pic">
       <img *ngIf="usuario.foto" [src]="usuario.foto" alt="Foto de perfil" class="profile-pic">
       <div class="profile-info">
         <h1>{{ canalNombre }}</h1>
-        <p class="subscriber-count">{{  numeroDeSuscriptores.numero_suscripciones  }} suscriptores
-          
-        </p> 
-         <div>
+        <p class="subscriber-count">{{ numeroDeSuscriptores.numero_suscripciones }} suscriptores</p> 
+        <div class="suscribirse">
           <button *ngIf="suscrito !== 'propietario'" class="boton" 
           [ngClass]="{ 'suscrito': suscrito === 'suscrito' }" 
           (click)="suscrito === 'suscrito' ? anularSuscripcion() : suscribirse()">
           {{ suscrito === 'suscrito' ? 'Suscrito' : 'Suscribirse' }}
           </button>
+          <span *ngIf="usuario?.id !== canal?.user_id" (click)="openReportModal()" class="botonreportar" title="Reportar" [class.disabled]="!usuario || !canal?.user_id">
+            <i class="fa-solid fa-flag"></i>
+          </span>
         </div>
-      
+        
       </div>
-     
     </div>
-  
   </header>
-  
 </div>
 
 <nav>
@@ -32,13 +29,8 @@
   <br>
   <br>
   <ul>
-    <li>
-     
-    </li>
-
     <li><a [routerLink]="['/canal', canalId]">Inicio</a></li>
     <li><a [routerLink]="['/canal', canalId, 'videos']">Videos</a></li>
-    
   </ul>
 </nav>
 
@@ -49,7 +41,7 @@
       <a [routerLink]="['/video', ultimoVideo.id]">
         <div class="miniatura-container">
           <img [src]="ultimoVideo.miniatura" alt="{{ultimoVideo.titulo}}" class="ultimo-video-miniatura">
-          <p class="duracionVideo"> {{  ultimoVideo.duracionFormateada  }}</p>
+          <p class="duracionVideo">{{ ultimoVideo.duracionFormateada }}</p>
         </div>
         <div class="ultimo-video-info">
           <h3>{{ ultimoVideo.titulo }}</h3>
@@ -58,15 +50,15 @@
       </a>
     </div>
   </section>
+
   <section class="video-grid">
     <div *ngFor="let chunk of videos | chunkPipe: 4" class="video-row">
       <div *ngFor="let video of chunk" class="video-card">
         <a [routerLink]="['/video', video.id]">
           <div class="miniatura-container">
             <img [src]="video.miniatura" alt="Miniatura del video">
-            <p class="duracionVideo"> {{  video.duracionFormateada  }}</p>
+            <p class="duracionVideo">{{ video.duracionFormateada }}</p>
           </div>
-        
           <div class="video-info">
             <h3>{{ video.titulo }}</h3>
             <p>{{ video.visitas_count }} vistas • {{ video.created_at | date:'short' }}</p>

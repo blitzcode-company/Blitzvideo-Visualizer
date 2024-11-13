@@ -2,6 +2,9 @@ import { Component, OnInit} from '@angular/core';
 import { CanalService } from '../../servicios/canal.service';
 import { ActivatedRoute } from '@angular/router';
 import { SuscripcionesService } from '../../servicios/suscripciones.service';
+import { AuthService } from '../../servicios/auth.service';
+import { MatDialog } from '@angular/material/dialog';
+import { ModalReportarUsuarioComponent } from '../modal-reportar-usuario/modal-reportar-usuario.component';
 
 @Component({
   selector: 'app-videos-del-canal',
@@ -15,6 +18,7 @@ export class VideosDelCanalComponent {
   canalId:any;
   mensaje: string = '';
   public suscrito: string = '';
+  cargando: boolean = true;
 
   videos:any;
   canalNombre:any
@@ -26,17 +30,33 @@ export class VideosDelCanalComponent {
     this.canalId = this.route.snapshot.params['id'];
     this.obtenerCanal();
     this.listarNumeroDeSuscriptores(); 
-
+    this.obtenerUsuario();
 
   }
   constructor(private canalService: CanalService, 
               private route: ActivatedRoute,
-              private suscripcionService: SuscripcionesService
+              private authService:AuthService,
+              private suscripcionService: SuscripcionesService,
+              public dialog: MatDialog,
   ){}
+
+  obtenerUsuario(): void {
+    this.authService.usuario$.subscribe(res => {
+      this.usuario = res;
+      if (this.usuario) { 
+        this.userId = this.usuario.id;
+        this.verificarSuscripcion();
+      } 
+    });
+  
+    this.authService.mostrarUserLogueado().subscribe();
+  }
 
   obtenerCanal() {
     this.canalService.listarVideosDeCanal(this.canalId).subscribe(
       (res: any) => {
+        console.log('Datos del canal:', res); 
+
         if (res.length > 0) {
           this.canal = res[0].canal;
           this.canalNombre = this.canal.nombre;
@@ -49,6 +69,7 @@ export class VideosDelCanalComponent {
           });
 
           this.userId = this.canal.user_id;  
+
           console.log(this.canal);
           console.log(this.usuario);
           console.log(this.videos);
@@ -60,6 +81,27 @@ export class VideosDelCanalComponent {
         console.error('Error al obtener el canal:', error);
       }
     );
+  }
+
+  openReportModal() {
+    const dialogRef = this.dialog.open(ModalReportarUsuarioComponent, {
+      width: '400px',
+      data: {
+        id_reportado: this.canal.user_id , 
+        id_reportante: this.usuario.id 
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(response => {
+      if (response) {
+        this.handleReportSubmitted(response);
+      }
+    });
+  }
+
+  handleReportSubmitted(response: any) {
+    console.log('Reporte enviado exitosamente:', response);
+    this.dialog.closeAll(); 
   }
 
   convertirDuracion(segundos: number): string {
@@ -75,7 +117,7 @@ export class VideosDelCanalComponent {
   }
 
   suscribirse(): void {
-    this.suscripcionService.suscribirse(this.userId, this.canalId).subscribe(
+    this.suscripcionService.suscribirse(this.usuario.id, this.canalId).subscribe(
       () => {
         this.mensaje = 'Suscripción exitosa';
         this.suscrito = 'suscrito'; 
@@ -85,7 +127,7 @@ export class VideosDelCanalComponent {
   }
 
   anularSuscripcion(): void {
-    this.suscripcionService.anularSuscripcion(this.userId, this.canalId).subscribe(
+    this.suscripcionService.anularSuscripcion(this.usuario.id, this.canalId).subscribe(
       () => {
         this.mensaje = 'Suscripción anulada';
         this.suscrito = 'desuscrito'; 
@@ -95,9 +137,10 @@ export class VideosDelCanalComponent {
   }
 
   verificarSuscripcion(): void {
-    this.suscripcionService.verificarSuscripcion(this.userId, this.canalId).subscribe(
+    this.suscripcionService.verificarSuscripcion(this.usuario.id, this.canalId).subscribe(
       response => {
         this.suscrito = response.estado;
+        console.log(response.estado)
       },
       error => {
         if (error.status === 404) {

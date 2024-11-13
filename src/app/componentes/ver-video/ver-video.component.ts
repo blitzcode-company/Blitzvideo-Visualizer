@@ -1,4 +1,4 @@
-import { Component, OnInit, ElementRef, ViewChild, AfterViewInit, AfterViewChecked } from '@angular/core';
+import { Component, HostListener ,OnInit, ElementRef, ViewChild, AfterViewInit, AfterViewChecked } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { VideosService } from '../../servicios/videos.service';
 import { AuthService } from '../../servicios/auth.service';
@@ -13,7 +13,8 @@ import { CrearListaComponent } from '../crear-lista/crear-lista.component';
 import { SuscripcionesService } from '../../servicios/suscripciones.service';
 import { ConfirmacionDesuscribirModalComponent } from '../confirmacion-desuscribir-modal/confirmacion-desuscribir-modal.component';
 import { AgregarListaComponent } from '../agregar-lista/agregar-lista.component';
-
+import { ReportesService } from '../../servicios/reportes.service';
+import { ModalReporteVideoComponent } from '../modal-reporte-video/modal-reporte-video.component';
 
 @Component({
   selector: 'app-ver-video',
@@ -44,6 +45,12 @@ export class VerVideoComponent implements OnInit, AfterViewInit, AfterViewChecke
   usuarioConCanal: any;
   puedeEditarVideo: boolean = false;
   numeroDeSuscriptores: any;
+  errorMessage: string = '';
+  isBlocked: boolean = false;
+  dropdownVisible: boolean = false;
+
+
+
 
   @ViewChild('descripcion', { static: true }) descripcionElement: ElementRef | undefined;
 
@@ -55,7 +62,8 @@ export class VerVideoComponent implements OnInit, AfterViewInit, AfterViewChecke
     private titleService: Title,
     private puntuarService: PuntuacionesService,
     public status: StatusService,
-    public dialog: MatDialog
+    public dialog: MatDialog,
+    private reporteService: ReportesService
   ) {}
 
   ngOnInit(): void {
@@ -118,8 +126,8 @@ export class VerVideoComponent implements OnInit, AfterViewInit, AfterViewChecke
       (res: any) => {
         this.usuarioConCanal = res; 
 
-        if (this.usuarioConCanal && this.usuarioConCanal.canales && this.usuarioConCanal.canales.length > 0) {
-          this.idDelCanalDelUsuario = this.usuarioConCanal.canales[0].id; 
+        if (this.usuarioConCanal && this.usuarioConCanal.canales) {
+          this.idDelCanalDelUsuario = this.usuarioConCanal.canales.id; 
         } else {
           this.puedeEditarVideo = false; 
         }
@@ -129,39 +137,109 @@ export class VerVideoComponent implements OnInit, AfterViewInit, AfterViewChecke
       
     );
   }
-  
 
-  mostrarVideo(): void {
-    this.videoService.obtenerInformacionVideo(this.videoId).subscribe(res => {
-      this.video = res;
-      console.log(this.video)
 
-      if (this.video && this.video.created_at) {
-        const fecha = new Date(this.video.created_at);
-        if (!isNaN(fecha.getTime())) {
-          this.video.created_at = this.convertirFechaALineaDeTexto(fecha);
-        }
-      }
-  
-      if (this.video && this.video.titulo) {
-        this.titleService.setTitle(this.video.titulo + ' - BlitzVideo');
-      }
-  
-      this.videoId = this.video.id;
-      this.canalId = this.video.canal_id;
-
-      if (this.canalId && this.idDelCanalDelUsuario) {
-        this.puedeEditarVideo = this.canalId === this.idDelCanalDelUsuario;
-      } else {
-        this.puedeEditarVideo = false;
-      }
-  
-      this.listarNumeroDeSuscriptores();
-    }, error => {
-      console.error('Error al obtener información del video:', error);
-    });
+  toggleDropdown() {
+    this.dropdownVisible = !this.dropdownVisible;
   }
 
+  @HostListener('document:click', ['$event'])
+  onClickOutside(event: MouseEvent) {
+    const target = event.target as HTMLElement;
+
+    if (!target.closest('.options')) {
+      this.dropdownVisible = false;
+    }
+  }
+  
+  envioReportar(formData: any) {
+    this.reporteService.crearReporteVideo(formData).subscribe(
+      response => {
+        console.log('Reporte enviado exitosamente:', response);
+      },
+      error => {
+        console.error('Error al enviar el reporte:', error);
+      }
+    );
+  }
+
+
+  
+  openReportModal() {
+    const dialogRef = this.dialog.open(ModalReporteVideoComponent, {
+      width: '400px',
+      data: {
+        videoId: this.videoId,
+        userId: this.userId
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(response => {
+      if (response) {
+        this.handleReportSubmitted(response);
+      }
+    });
+    this.dropdownVisible = false; 
+  }
+
+  handleReportSubmitted(response: any) {
+    console.log('Reporte enviado exitosamente:', response);
+    this.dialog.closeAll(); 
+  }
+
+  mostrarVideo(): void {
+    this.videoService.obtenerInformacionVideo(this.videoId).subscribe(
+      res => {
+        this.video = res;
+        this.errorMessage = ''; 
+  
+        if (this.video?.error?.code === 403) {
+          this.isBlocked = true;
+          this.errorMessage = 'Este video ha sido bloqueado y no se puede acceder.';
+          console.error(this.errorMessage);
+          return; 
+        }
+  
+        this.isBlocked = false;
+        this.procesarFechaDeCreacion();
+        this.actualizarTituloDePagina();
+        this.obtenerDatosDelCanal();
+  
+        this.listarNumeroDeSuscriptores();
+      },
+      error => {
+        this.isBlocked = false; 
+        this.errorMessage = this.obtenerMensajeDeError(error);
+        console.error('Error al obtener información del video:', error);
+      }
+    );
+  }
+  
+  private procesarFechaDeCreacion(): void {
+    if (this.video?.created_at) {
+      const fecha = new Date(this.video.created_at);
+      if (!isNaN(fecha.getTime())) {
+        this.video.created_at = this.convertirFechaALineaDeTexto(fecha);
+      }
+    }
+  }
+  
+  private actualizarTituloDePagina(): void {
+    if (this.video?.titulo) {
+      this.titleService.setTitle(this.video.titulo + ' - BlitzVideo');
+    }
+  }
+  
+  private obtenerDatosDelCanal(): void {
+    this.videoId = this.video.id;
+    this.canalId = this.video.canal_id;
+  
+    this.puedeEditarVideo = this.canalId === this.idDelCanalDelUsuario;
+  }
+  
+  private obtenerMensajeDeError(error: any): string {
+    return error?.error?.message || error?.message || 'Error desconocido: ' + JSON.stringify(error);
+  }
 
 
 
@@ -321,6 +399,9 @@ export class VerVideoComponent implements OnInit, AfterViewInit, AfterViewChecke
       if (result) {
       }
     });
+
+    this.dropdownVisible = false; 
+
   }
 
 

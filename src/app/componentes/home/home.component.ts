@@ -63,8 +63,7 @@ obtenerUsuarioConCanal(): void {
   this.authService.obtenerCanalDelUsuario(this.userId).subscribe(
     (res: any) => {
       this.usuarioConCanal = res; 
-      console.log(this.usuarioConCanal)
-      this.idCanal = this.usuarioConCanal.canales[0].id
+      this.idCanal = this.usuarioConCanal.canales.id
     },
     
   );
@@ -133,7 +132,6 @@ mostrarCanalesSuscritos() {
 }
 
 }
-
 
 
 

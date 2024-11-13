@@ -1,0 +1,20 @@
+<div mat-dialog-content>
+  <h2>Reportar Comentario</h2>
+  <form (ngSubmit)="enviarReporteComentario(reportForm.value)" #reportForm="ngForm">
+    <label for="detalle">Detalle:</label>
+    <br>
+    <textarea id="detalle" name="detalle" ngModel required></textarea>
+    
+    <div>
+      <label><input type="checkbox" name="lenguaje_ofensivo" ngModel> Lenguaje ofensivo</label>
+      <label><input type="checkbox" name="spam" ngModel> Spam</label>
+      <label><input type="checkbox" name="contenido_enganoso" ngModel> Contenido engañoso</label>
+      <label><input type="checkbox" name="incitacion_al_odio" ngModel> Incitación al odio</label>
+      <label><input type="checkbox" name="acoso" ngModel> Acoso</label>
+      <label><input type="checkbox" name="contenido_sexual" ngModel> Contenido sexual</label>
+      <label><input type="checkbox" name="otros" ngModel> Otros</label>
+    </div>
+    
+    <button type="submit" [disabled]="reportForm.invalid">Enviar Reporte</button>
+  </form>
+</div>

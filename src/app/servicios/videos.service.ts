@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Videos } from '../clases/videos';
 import { CookieService } from 'ngx-cookie-service';
@@ -30,7 +31,15 @@ export class VideosService {
       })
     }
     const url = `${this.apiUrl}api/v1/videos/${idVideo}`;
-    return this.httpClient.get(url, httpOptions);
+    return this.httpClient.get(url, httpOptions).pipe(
+      catchError(error => {
+        if (error.status === 403) {
+          return throwError('El video está bloqueado y no se puede acceder.');
+        }
+        return throwError(error);
+      })
+    );
+  
   }
 
   listarVideosPorNombre(nombre:any): Observable<any> {

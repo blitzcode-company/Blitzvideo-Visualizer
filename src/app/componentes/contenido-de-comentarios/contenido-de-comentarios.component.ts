@@ -3,6 +3,12 @@ import { Comentario } from '../../clases/comentario';
 import { ComentariosService } from '../../servicios/comentarios.service';
 import { environment } from '../../../environments/environment';
 import { AuthService } from '../../servicios/auth.service';
+import { ModalReporteComentarioComponent } from '../modal-reporte-comentario/modal-reporte-comentario.component';
+import { MatDialog } from '@angular/material/dialog';
+
+
+
+
 
 @Component({
   selector: 'app-contenido-de-comentarios',
@@ -28,8 +34,14 @@ export class ContenidoDeComentariosComponent implements OnInit{
   editingComentarioId: number | null = null;
   editingComentarioMensaje: string = '';
   serverIp = environment.serverIp
+  userId:any
+  usuarioBloqueado = false;
+  mensaje = '';
 
-  constructor(private comentariosService: ComentariosService, private authService: AuthService) {}
+  @Output() reportar = new EventEmitter<void>();
+
+  constructor(private comentariosService: ComentariosService, private authService: AuthService,     public dialog: MatDialog,
+  ) {}
 
   ngOnInit(): void {
     if (this.comentario) {
@@ -38,10 +50,22 @@ export class ContenidoDeComentariosComponent implements OnInit{
   }
 
  
-  obtenerUsuario(): void {
+  obtenerUsuario() {
     this.authService.usuario$.subscribe(res => {
       this.usuario = res;
+      if (this.usuario) {
+        this.userId = this.usuario.id;
+        console.log("User ID obtenido:", this.userId);
+        
+        if (this.usuario.bloqueado) {
+          this.usuarioBloqueado = true;  
+          this.mensaje = 'Tu cuenta está bloqueada, no puedes comentar.';
+        } else {
+          this.usuarioBloqueado = false;  
+        }
+      }
     });
+  
     this.authService.mostrarUserLogueado();
   }
 
@@ -80,6 +104,9 @@ export class ContenidoDeComentariosComponent implements OnInit{
       });
     }
   }
+
+ 
+
 
   toggleEdit(comentario: Comentario | null): void {
     if (comentario) {
@@ -157,6 +184,18 @@ export class ContenidoDeComentariosComponent implements OnInit{
       this.respondingTo = '';
       this.respuestaComentario.mensaje = '';
     }
+  }
+
+  reportarComentario(comentarioId: number) {
+    const dialogRef = this.dialog.open(ModalReporteComentarioComponent, {
+      width: '400px',
+      data: { comentarioId: comentarioId, userId: this.usuario.id }
+    });
+  
+  
+    dialogRef.afterClosed().subscribe(result => {
+      console.log('El modal fue cerrado. Resultado:', result);
+    });
   }
 
 

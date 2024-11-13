@@ -6,6 +6,9 @@ import { Videos } from '../../clases/videos';
 import { Title } from '@angular/platform-browser';
 import { environment } from '../../../environments/environment';
 import { SuscripcionesService } from '../../servicios/suscripciones.service';
+import { MatDialog } from '@angular/material/dialog';
+import { ModalReportarUsuarioComponent } from '../modal-reportar-usuario/modal-reportar-usuario.component';
+
 
 @Component({
   selector: 'app-ver-canal',
@@ -33,7 +36,9 @@ export class VerCanalComponent implements OnInit {
     private route: ActivatedRoute, 
     private titleService: Title,
     private suscripcionService: SuscripcionesService,
-    private authService: AuthService
+    private authService: AuthService,
+    public dialog: MatDialog,
+
   ) {}
 
   ngOnInit() {
@@ -61,7 +66,7 @@ export class VerCanalComponent implements OnInit {
   }
 
   suscribirse(): void {
-    this.suscripcionService.suscribirse(this.userId, this.canalId).subscribe(
+    this.suscripcionService.suscribirse(this.usuario.id, this.canalId).subscribe(
       () => {
         this.mensaje = 'Suscripción exitosa';
         this.suscrito = 'suscrito'; 
@@ -71,7 +76,7 @@ export class VerCanalComponent implements OnInit {
   }
 
   anularSuscripcion(): void {
-    this.suscripcionService.anularSuscripcion(this.userId, this.canalId).subscribe(
+    this.suscripcionService.anularSuscripcion(this.usuario.id, this.canalId).subscribe(
       () => {
         this.mensaje = 'Suscripción anulada';
         this.suscrito = 'desuscrito'; 
@@ -81,9 +86,10 @@ export class VerCanalComponent implements OnInit {
   }
 
   verificarSuscripcion(): void {
-    this.suscripcionService.verificarSuscripcion(this.userId, this.canalId).subscribe(
+    this.suscripcionService.verificarSuscripcion(this.usuario.id, this.canalId).subscribe(
       response => {
         this.suscrito = response.estado;
+        console.log(response.estado)
       },
       error => {
         if (error.status === 404) {
@@ -99,11 +105,15 @@ export class VerCanalComponent implements OnInit {
   obtenerCanal() {
     this.canalService.listarVideosDeCanal(this.canalId).subscribe(
       (res: any) => {
+        console.log('Datos del canal:', res); 
         if (res.length > 0) {
           this.canal = res[0].canal;
           this.canalNombre = this.canal.nombre;
           this.usuario = this.canal.user;
           
+          console.log('Canal:', this.canal);
+          console.log('Usuario:', this.usuario);
+
           this.videosGeneral =  res.map((videoData: any) => {
             return {
               ...videoData,
@@ -112,8 +122,6 @@ export class VerCanalComponent implements OnInit {
           });
   
           this.videos = this.videosGeneral.slice(0, 3);
-          this.userId = this.canal.user_id;
-          this.cargando = false;
   
           this.ultimoVideo = this.videosGeneral.reduce((prev: any, current: any) => 
             (prev.id > current.id) ? prev : current
@@ -135,6 +143,27 @@ export class VerCanalComponent implements OnInit {
     );
   }
 
+  openReportModal() {
+    const dialogRef = this.dialog.open(ModalReportarUsuarioComponent, {
+      width: '400px',
+      data: {
+        id_reportado: this.canal.user_id , 
+        id_reportante: this.usuario.id 
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(response => {
+      if (response) {
+        this.handleReportSubmitted(response);
+      }
+    });
+  }
+
+  handleReportSubmitted(response: any) {
+    console.log('Reporte enviado exitosamente:', response);
+    this.dialog.closeAll(); 
+  }
+  
   
   listarNumeroDeSuscriptores() {
     this.suscripcionService.listarNumeroDeSuscriptores(this.canalId).subscribe(res => {

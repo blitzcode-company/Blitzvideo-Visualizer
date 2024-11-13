@@ -1,5 +1,6 @@
 <app-header></app-header>
-<div class="banner-container" [ngStyle]="{'--profile-banner': 'url(' + canal.portada + ')'}">
+
+<div   class="banner-container" [ngStyle]="{'--profile-banner': 'url(' + canal.portada + ')'}">
   <header>
     <div class="profile">
       <img *ngIf="!usuario.foto" src="assets/images/user.png" alt="Foto de perfil" class="profile-pic">
@@ -9,12 +10,15 @@
         <p class="subscriber-count">{{  numeroDeSuscriptores.numero_suscripciones  }} suscriptores
           
         </p>  
-        <div>
+        <div class="suscribirse">
           <button *ngIf="suscrito !== 'propietario'" class="boton" 
           [ngClass]="{ 'suscrito': suscrito === 'suscrito' }" 
           (click)="suscrito === 'suscrito' ? anularSuscripcion() : suscribirse()">
           {{ suscrito === 'suscrito' ? 'Suscrito' : 'Suscribirse' }}
           </button>
+          <span *ngIf="usuario?.id !== canal?.user_id" (click)="openReportModal()" class="botonreportar" title="Reportar" [class.disabled]="!usuario || !canal?.user_id">
+            <i class="fa-solid fa-flag"></i>
+          </span>
         </div>
       </div>
     </div>

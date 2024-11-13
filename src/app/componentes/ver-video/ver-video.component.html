@@ -1,8 +1,15 @@
 <app-header></app-header>
+<div *ngIf="isBlocked || errorMessage" class="error-message">
+  <mat-card>
+    <mat-card-title>{{ isBlocked ? 'Video Bloqueado' : 'Error' }}</mat-card-title>
+    <mat-card-content>{{ isBlocked ? 'Este video ha sido bloqueado y no se puede acceder.' : errorMessage }}</mat-card-content>
+  </mat-card>
+</div>
+
 <div *ngIf="!video">
   <p>Cargando video...</p>
 </div>
-<div class="video-container" *ngIf="video">
+<div class="video-container" *ngIf="!isBlocked && !errorMessage && video">
   <div class="tituloyvideo">
     <h1>{{  video.titulo  }}</h1> 
   </div>
@@ -30,14 +37,16 @@
       </a>
   
     </div>
-    <div class="guardar">
-        <a (click)="agregarAVideoALista()">      
-        <i class="fa-solid fa-bookmark custom-icon" ></i>
-        </a>
-   
+    <div class="options">
+      <i class="fa-solid fa-ellipsis-vertical botonTresPuntos" (click)="toggleDropdown()" aria-hidden="true"></i>
+    
+      <div *ngIf="dropdownVisible" class="dropdown-menu">
+        <a (click)="agregarAVideoALista()">Guardar Video</a>
+        <a (click)="openReportModal()">Reportar Video</a>
+      </div>
     </div>
- 
-  </div>
+
+</div>
  
 
   <div class="info-container">
@@ -88,4 +97,4 @@
   
 </div>
 
-<app-comentarios [videoId]="videoId" [usuario]="usuario"></app-comentarios>
+<app-comentarios [videoId]="videoId" [usuario]="usuario" *ngIf="!isBlocked && !errorMessage"></app-comentarios>

@@ -74,8 +74,8 @@ export class ConfiguracionDePerfilComponent {
   obtenerCanal(): void {
     this.canalService.obtenerUsuarioPorId(this.usuario.id).subscribe({
       next: (canal) => {
-        if (canal && canal.canales.length > 0) {
-          this.canal = canal.canales[0]; 
+        if (canal && canal.canales) {
+          this.canal = canal.canales; 
           this.tieneCanal = true;
           if (typeof this.canal.portada === 'string') {
             this.canal.portadaPreview = this.canal.portada; 

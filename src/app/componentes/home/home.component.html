@@ -2,7 +2,7 @@
 <div class="containerHome">
     <div class="sidebar">
       <a href="#">Inicio</a>
-      <a *ngIf="status.isLoggedIn && usuarioConCanal.canales[0]?.id"  [routerLink]="['/canal', idCanal]">Mi canal</a>
+      <a *ngIf="status.isLoggedIn && usuarioConCanal.canales?.id"  [routerLink]="['/canal', idCanal]">Mi canal</a>
       <a *ngIf="status.isLoggedIn" href="/playlists">Listas de reproduccion</a>
       <hr *ngIf="status.isLoggedIn"class="lineaSideBar">
       <p *ngIf="status.isLoggedIn" >Suscripciones</p>

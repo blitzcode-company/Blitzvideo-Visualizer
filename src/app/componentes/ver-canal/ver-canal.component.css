@@ -26,6 +26,12 @@ header {
   text-align: center; 
 }
 
+.suscribirse {
+  display: flex;
+
+  gap:10px
+}
+
 .profile {
   display: grid;
   grid-template-columns: 110px auto; 
@@ -35,12 +41,14 @@ header {
   margin: 0 auto;
   margin-top: 300px;
 }
+.botonreportar {
+  cursor:pointer
+}
 
 .boton {
   border-radius: 8px;
   background-color: #32b1f9; 
   color: #fff; 
-  margin-top:-100px;
   padding: 5px 10px;
   font-size: 16px; 
   font-weight: bold; 

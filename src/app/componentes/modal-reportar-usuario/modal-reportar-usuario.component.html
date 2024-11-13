@@ -1,0 +1,44 @@
+<div mat-dialog-content>
+    <h2>Reportar usuario</h2>
+    <form (ngSubmit)="enviarReporteUsuario(reportForm.value)" #reportForm="ngForm">
+     
+ 
+      <label>
+        <input type="checkbox" name="ciberacoso" ngModel>
+        Ciberacoso 
+      </label>
+      <br>
+      <label>
+        <input type="checkbox" name="privacidad" ngModel>
+        Privacidad
+      </label>
+      <br>
+      <label>
+        <input type="checkbox" name="suplantacion_identidad" ngModel>
+        Suplantacion de identidad   
+      </label>
+      <br>
+      <label>
+        <input type="checkbox" name="amenazas" ngModel>
+        Amenazas
+      </label>
+      <br>
+      <label>
+        <input type="checkbox" name="incitacion_odio" ngModel>
+        Incitación al odio
+      </label>
+      <br>
+      <label>
+        <input type="checkbox" name="otros" ngModel>
+        Otros
+      </label>
+      <br>
+      <label for="detalle">Detalle:</label>
+      <br>
+      <textarea id="detalle" name="detalle" ngModel></textarea>
+      <br><br>
+
+      <button type="submit" [disabled]="reportForm.invalid">Enviar Reporte</button>
+
+    </form>
+    </div>

@@ -9,11 +9,16 @@
         <span class="date"> {{ comentario.created_at }}</span>
       </div>
 
-      <div class="comentario-actions-menu" *ngIf="comentario.user?.id === usuario?.id">
+      <div class="comentario-actions-menu">
         <button class="menu-button" (click)="toggleMenu($event)">⋮</button>
         <div *ngIf="showMenu" class="menu-dropdown">
-          <button (click)="toggleEdit(comentario)">Editar</button>
-          <button (click)="eliminarComentario(comentario.id!)">Eliminar</button>
+          <ng-container *ngIf="comentario.user?.id === usuario?.id; else reportarMenu">
+            <button (click)="toggleEdit(comentario)">Editar</button>
+            <button (click)="eliminarComentario(comentario.id!)">Eliminar</button>
+          </ng-container>
+          <ng-template #reportarMenu>
+            <button (click)="reportarComentario(comentario.id!)">Reportar</button>
+          </ng-template>
         </div>
       </div>
 
@@ -26,12 +31,13 @@
     
       <p *ngIf="editingComentarioId !== comentario.id">{{ comentario.mensaje }}</p>
     
-      <a href="#" (click)="toggleResponder(comentario); $event.preventDefault()">Responder</a>
+      <a href="#" *ngIf="!usuarioBloqueado" (click)="toggleResponder(comentario); $event.preventDefault()">Responder</a>
 
-      <button (click)="darMeGusta()" *ngIf="!comentario.likedByUser" class="botonLike" aria-label="Dar Me Gusta">
+      <button *ngIf="!usuarioBloqueado && !comentario.likedByUser" (click)="darMeGusta()" class="botonLike" aria-label="Dar Me Gusta">
         <i class="fas fa-thumbs-up"></i>
       </button>
-      <button (click)="quitarMeGusta()" *ngIf="comentario.likedByUser" class="botonLike" aria-label="Quitar Me Gusta">
+      
+      <button *ngIf="!usuarioBloqueado && comentario.likedByUser" (click)="quitarMeGusta()" class="botonLike" aria-label="Quitar Me Gusta">
         <i class="fas fa-thumbs-up liked"></i>
       </button>
     </div>
@@ -60,6 +66,7 @@
       (nuevoComentario)="nuevoComentario.emit()"
       (comentarioEliminado)="eliminarComentario($event.id)"
       (comentarioEditado)="editarComentario($event)"
+      
     ></app-contenido-de-comentarios>
   </div>
 </div>

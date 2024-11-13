@@ -1,10 +1,13 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, input, Input, OnInit } from '@angular/core';
 import { Comentario } from '../../clases/comentario';
 import { ComentariosService } from '../../servicios/comentarios.service';
 import { StatusService } from '../../servicios/status.service';
 import { AuthService } from '../../servicios/auth.service';
 import moment from 'moment';
 import { environment } from '../../../environments/environment';
+import { MatDialog } from '@angular/material/dialog';
+import { ModalReporteComentarioComponent } from '../modal-reporte-comentario/modal-reporte-comentario.component';
+
 
 @Component({
   selector: 'app-comentarios',
@@ -28,22 +31,43 @@ export class ComentariosComponent implements OnInit {
   editingComentarioId: number | null = null;  
   editingComentarioMensaje: string = '';  
   serverIp = environment.serverIp
+  userId: any;
+  comentarioId : any;
+  usuarioBloqueado = false;
+  mensaje = '';
 
-  constructor(private comentariosService: ComentariosService, public status: StatusService, private authService: AuthService) {}
+  constructor(private comentariosService: ComentariosService, public status: StatusService, private authService: AuthService, public dialog: MatDialog,) {}
 
   ngOnInit(): void {
     this.traerComentarios();
     this.obtenerEstadosDeMeGusta();
+    this.obtenerUsuario();
   }
 
   obtenerUsuario() {
     this.authService.usuario$.subscribe(res => {
-       this.usuario = res;
-     });
-     this.authService.mostrarUserLogueado();
-   }
- 
+      this.usuario = res;
+      if (this.usuario) {
+        this.userId = this.usuario.id;
+        console.log("User ID obtenido:", this.userId);
+        
+        if (this.usuario.bloqueado) {
+          this.usuarioBloqueado = true;  
+          this.mensaje = 'Tu cuenta está bloqueada, no puedes comentar.';
+        } else {
+          this.usuarioBloqueado = false;  
+        }
   
+        if (this.selectedComentarioId) {
+          this.abrirModalReporte(this.selectedComentarioId);
+        }
+      }
+    });
+  
+    this.authService.mostrarUserLogueado();
+  }
+
+
   traerComentarios(): void {
     this.comentariosService.traerComentariosDelVideo(this.videoId).subscribe(
       (res: any[]) => { 
@@ -56,6 +80,12 @@ export class ComentariosComponent implements OnInit {
   }
 
   crearComentario(): void {
+
+    if (this.usuarioBloqueado) {
+      console.log('El usuario está bloqueado, no puede comentar.');
+      return;  
+    }
+
     if (!this.nuevoComentario.mensaje.trim()) {
       console.error('El campo mensaje no puede estar vacío.');
       return;
@@ -64,6 +94,7 @@ export class ComentariosComponent implements OnInit {
     if (!this.usuario || !this.usuario.id) {
       window.location.href = `${this.serverIp}:3002/#/`; 
     }
+
 
     this.nuevoComentario.usuario_id = this.usuario.id; 
 
@@ -204,6 +235,27 @@ export class ComentariosComponent implements OnInit {
     );
   }
   
+  abrirModalReporte(comentarioId: number | undefined) {
+    // Verifica si el userId está disponible
+    if (!this.userId) {
+      console.error("User ID no está definido. Asegúrate de que el usuario esté logueado.");
+      this.obtenerUsuario();  // Llama a obtenerUsuario para obtener el usuario
+      return;
+    }
+  
+    // Si el userId ya está disponible, abrimos el modal
+    const dialogRef = this.dialog.open(ModalReporteComentarioComponent, {
+      data: {
+        userId: this.usuario.id,  // Usamos el valor de userId disponible
+        comentarioId: comentarioId,
+      }
+    });
+  
+    dialogRef.afterClosed().subscribe(result => {
+      console.log('El modal fue cerrado. Resultado:', result);
+    });
+  }
+
   
   onComentarioEliminado(event: { id: number, usuario_id: number }): void {
     console.log('Comentario Eliminado:', event);

@@ -64,6 +64,8 @@ export class CrearListaComponent {
             duration: 3000,
         });
         this.dialogRef.close();
+        window.location.reload(); 
+
       },
       error => {
         console.error('Error al agregar video a la lista:', error);

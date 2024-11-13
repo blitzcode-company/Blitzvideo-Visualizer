@@ -44,8 +44,11 @@ import { ConfiguracionDePerfilComponent } from './componentes/configuracion-de-p
 import { GraciasModalComponent } from './componentes/gracias-modal/gracias-modal.component';
 import { SuscripcionPaypalComponent } from './componentes/suscripcion-paypal/suscripcion-paypal.component';
 import { SeleccionPagoComponent } from './componentes/seleccion-pago/seleccion-pago.component';
-
-
+import { ModalReporteVideoComponent } from './componentes/modal-reporte-video/modal-reporte-video.component';
+import { ReportesService } from './servicios/reportes.service';
+import { ModalReporteComentarioComponent } from './componentes/modal-reporte-comentario/modal-reporte-comentario.component';
+import { ModalReportarUsuarioComponent } from './componentes/modal-reportar-usuario/modal-reportar-usuario.component';
+import { MatCardModule } from '@angular/material/card';
 
 @NgModule({
   declarations: [
@@ -74,6 +77,9 @@ import { SeleccionPagoComponent } from './componentes/seleccion-pago/seleccion-p
     GraciasModalComponent,
     SuscripcionPaypalComponent,
     SeleccionPagoComponent,
+    ModalReporteVideoComponent,
+    ModalReporteComentarioComponent,
+    ModalReportarUsuarioComponent,
     
   ],
   imports: [
@@ -81,6 +87,7 @@ import { SeleccionPagoComponent } from './componentes/seleccion-pago/seleccion-p
     AppRoutingModule,
     HttpClientModule,
     FormsModule,
+    MatCardModule,
     RouterModule.forRoot([
       { path: 'video/:id', component: VerVideoComponent },
     ]),
@@ -94,6 +101,7 @@ import { SeleccionPagoComponent } from './componentes/seleccion-pago/seleccion-p
     VgBufferingModule,
     MatFormFieldModule,
     MatInputModule,
+  
     MatSelectModule,
     MatOption,
     MatSnackBarModule
@@ -108,7 +116,8 @@ import { SeleccionPagoComponent } from './componentes/seleccion-pago/seleccion-p
   providers: [
     CookieService, 
     provideAnimationsAsync(),
-    ComentariosService
+    ComentariosService, 
+    ReportesService
   ],
   bootstrap: [AppComponent],
 })
