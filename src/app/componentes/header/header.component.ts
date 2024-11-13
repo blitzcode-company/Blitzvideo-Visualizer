@@ -7,6 +7,7 @@ import { Canal } from '../../clases/canal';
 import { CanalService } from '../../servicios/canal.service';
 import { environment } from '../../../environments/environment';
 
+
 @Component({
   selector: 'app-header',
   templateUrl: './header.component.html',

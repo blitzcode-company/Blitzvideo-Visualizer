@@ -5,7 +5,7 @@ import { environment } from '../../../environments/environment';
 import { AuthService } from '../../servicios/auth.service';
 import { ModalReporteComentarioComponent } from '../modal-reporte-comentario/modal-reporte-comentario.component';
 import { MatDialog } from '@angular/material/dialog';
-
+import { ModalReportarUsuarioComponent } from '../modal-reportar-usuario/modal-reportar-usuario.component';
 
 
 
@@ -83,6 +83,8 @@ export class ContenidoDeComentariosComponent implements OnInit{
       }
     );
   }
+
+  
 
   toggleResponder(comentario: Comentario): void {
     this.selectedComentarioId = comentario.id ?? null;
@@ -196,6 +198,27 @@ export class ContenidoDeComentariosComponent implements OnInit{
     dialogRef.afterClosed().subscribe(result => {
       console.log('El modal fue cerrado. Resultado:', result);
     });
+  }
+
+  reportarUsuario(comentarioUserId: number) {
+    const dialogRef = this.dialog.open(ModalReportarUsuarioComponent, {
+      width: '400px',
+      data: {
+        id_reportado: this.comentario.usuario_id , 
+        id_reportante: this.usuario.id 
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(response => {
+      if (response) {
+        this.handleReportSubmitted(response);
+      }
+    });
+  }
+
+  handleReportSubmitted(response: any) {
+    console.log('Reporte enviado exitosamente:', response);
+    this.dialog.closeAll(); 
   }
 
 

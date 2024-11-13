@@ -122,20 +122,30 @@ export class VerVideoComponent implements OnInit, AfterViewInit, AfterViewChecke
   }
 
   obtenerUsuarioConCanal(): void {
-    this.authService.obtenerCanalDelUsuario(this.userId).subscribe(
-      (res: any) => {
-        this.usuarioConCanal = res; 
-
-        if (this.usuarioConCanal && this.usuarioConCanal.canales) {
-          this.idDelCanalDelUsuario = this.usuarioConCanal.canales.id; 
-        } else {
-          this.puedeEditarVideo = false; 
+    if (this.userId !== undefined) {
+      this.authService.obtenerCanalDelUsuario(this.userId).subscribe(
+        (res: any) => {
+          this.usuarioConCanal = res; 
+  
+          if (this.usuarioConCanal && this.usuarioConCanal.canales) {
+            this.idDelCanalDelUsuario = this.usuarioConCanal.canales.id;
+            this.puedeEditarVideo = true;  
+          } else {
+            this.puedeEditarVideo = false; 
+          }
+  
+          this.mostrarVideo();
+        },
+        (error) => {
+          console.error('Error al obtener el canal del usuario:', error);
+          this.puedeEditarVideo = false;
+          this.mostrarVideo(); 
         }
-     
-        this.mostrarVideo()
-      },
-      
-    );
+      );
+    } else {
+      this.puedeEditarVideo = false; 
+      this.mostrarVideo();
+    }
   }
 
 

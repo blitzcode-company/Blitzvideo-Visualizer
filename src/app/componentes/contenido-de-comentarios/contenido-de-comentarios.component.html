@@ -17,7 +17,9 @@
             <button (click)="eliminarComentario(comentario.id!)">Eliminar</button>
           </ng-container>
           <ng-template #reportarMenu>
-            <button (click)="reportarComentario(comentario.id!)">Reportar</button>
+            <button (click)="reportarComentario(comentario.id!)">Reportar comentario</button>
+            <button (click)="reportarUsuario(comentario.usuario_id)">Reportar usuario</button>
+
           </ng-template>
         </div>
       </div>

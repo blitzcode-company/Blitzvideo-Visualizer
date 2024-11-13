@@ -1,6 +1,7 @@
 import { Component, Inject, Input } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { ReportesService } from '../../servicios/reportes.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-modal-reportar-usuario',
@@ -13,6 +14,7 @@ export class ModalReportarUsuarioComponent {
   constructor(
     public dialogRef: MatDialogRef<ModalReportarUsuarioComponent>,
     private reportesService: ReportesService,
+    private snackBar: MatSnackBar,
     @Inject(MAT_DIALOG_DATA) public data: { id_reportado: any; id_reportante: any}
   ) { 
     console.log(data)
@@ -36,9 +38,15 @@ export class ModalReportarUsuarioComponent {
     this.reportesService.crearReporteUsuario(reportData).subscribe(
       response => {
         this.dialogRef.close(response);
+        this.snackBar.open('Reporte enviado con éxito', 'Cerrar', {
+          duration: 3000, 
+        });
       },
       error => {
         console.error('Error al enviar el reporte:', error);
+        this.snackBar.open('Error al enviar el reporte. Intenta nuevamente', 'Cerrar', {
+          duration: 3000,
+        });
       }
     );
   }

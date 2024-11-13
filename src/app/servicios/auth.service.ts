@@ -21,25 +21,40 @@ export class AuthService {
   public usuario$: Observable<any> = this.usuarioSubject.asObservable();
 
   constructor(private http: HttpClient, private cookie: CookieService, private dialog: MatDialog) { }
-
+  
   mostrarUserLogueado() {
-    const url = `${this.authApiUrl}api/v1/validate`
+    const token = this.cookie.get('accessToken');
+    
+    if (!token) {
+      // Si no hay token, simplemente retornamos un observable con null
+      console.warn('No se encontró un token de acceso');
+      return of(null); // O también podrías retornar un observable vacío si lo prefieres
+    }
+  
+    const url = `${this.authApiUrl}api/v1/validate`;
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + this.cookie.get('accessToken')
+        'Authorization': 'Bearer ' + token
       })
     };
+  
     return this.http.get(url, httpOptions).pipe(
-      tap(user => this.usuarioSubject.next(user))
+      tap(user => this.usuarioSubject.next(user)),
+      catchError(error => {
+        if (error.status === 401) {
+          console.warn('Usuario no autenticado');
+        }
+        return of(null); // Retorna null si ocurre un error 401
+      })
     );
   }
-  mostrarUserConCanal(id:number): Observable<any> {
-    const url = `${this.apiUrl}api/v1/usuario/${id}`
-    return this.http.get<Usuario>(url)
-  }
+
+  
 
   obtenerCanalDelUsuario(id:number) {
+
+    
     const url = `${this.apiUrl}api/v1/usuario/${id}`
     const httpOptions = {
       headers: new HttpHeaders({

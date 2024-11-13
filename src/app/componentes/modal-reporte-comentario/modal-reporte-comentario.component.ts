@@ -1,21 +1,21 @@
-import { Component, EventEmitter, Input, Output, Inject} from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';  
 import { ReportesService } from '../../servicios/reportes.service';
 
 @Component({
   selector: 'app-modal-reporte-comentario',
   templateUrl: './modal-reporte-comentario.component.html',
-  styleUrl: './modal-reporte-comentario.component.css'
+  styleUrls: ['./modal-reporte-comentario.component.css']
 })
 export class ModalReporteComentarioComponent {
-  
 
   constructor(
     public dialogRef: MatDialogRef<ModalReporteComentarioComponent>,
     private reportesService: ReportesService,
+    private snackBar: MatSnackBar,  
     @Inject(MAT_DIALOG_DATA) public data: { comentarioId: any; userId: any }
-  ) { 
-    }
+  ) { }
 
   enviarReporteComentario(formData: any) {
     const reportData = {
@@ -36,9 +36,15 @@ export class ModalReporteComentarioComponent {
       response => {
         console.log('Reporte enviado exitosamente:', response);
         this.dialogRef.close(response);
+        this.snackBar.open('Reporte enviado exitosamente', 'Cerrar', {
+          duration: 3000, 
+        });
       },
       error => {
         console.error('Error al enviar el reporte:', error);
+        this.snackBar.open('Error al enviar el reporte. Intenta nuevamente', 'Cerrar', {
+          duration: 3000, 
+        });
       }
     );
   }

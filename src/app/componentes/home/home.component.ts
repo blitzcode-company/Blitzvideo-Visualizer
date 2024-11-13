@@ -60,13 +60,19 @@ obtenerUsuario(): void {
 
 
 obtenerUsuarioConCanal(): void {
-  this.authService.obtenerCanalDelUsuario(this.userId).subscribe(
-    (res: any) => {
-      this.usuarioConCanal = res; 
-      this.idCanal = this.usuarioConCanal.canales.id
-    },
-    
-  );
+  if (this.userId !== undefined) {
+    this.authService.obtenerCanalDelUsuario(this.userId).subscribe(
+      (res: any) => {
+        this.usuarioConCanal = res;
+        this.idCanal = this.usuarioConCanal.canales.id;
+      },
+      (error) => {
+        console.error('Error al obtener el canal del usuario', error);
+      }
+    );
+  } else {
+    console.error('El userId no está definido');
+  }
 }
 
 onImageError(event: any) {

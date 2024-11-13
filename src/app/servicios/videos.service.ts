@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
-import { Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { Observable, throwError, of} from 'rxjs';
+import { catchError, delay, retryWhen, take } from 'rxjs/operators';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Videos } from '../clases/videos';
 import { CookieService } from 'ngx-cookie-service';
 import { environment } from '../../environments/environment';
+
 
 @Injectable({
   providedIn: 'root'
@@ -56,22 +57,50 @@ export class VideosService {
   contarVisita(idVideo: any, userId: any): Observable<any> {
     const httpOptions = {
       headers: new HttpHeaders({
-          'Content-Type' : 'application/json',
-          'Authorization' : 'Bearer ' + this.cookie.get('accessToken') 
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + this.cookie.get('accessToken') 
       })
-    }
+    };
     const url = `${this.apiUrl}api/v1/usuario/${userId}/visita/${idVideo}`;
-    return this.httpClient.get(url, httpOptions);
+  
+    return this.httpClient.get(url, httpOptions).pipe(
+      retryWhen(errors =>
+        errors.pipe(
+          delay(1000),
+          take(3) 
+        )
+      ),
+      catchError(error => {
+        if (error.status === 429) {
+          console.error('Demasiadas solicitudes. Intenta más tarde.');
+        }
+        return of(null);
+      })
+    );
   }
 
   contarVisitaInvitado(idVideo: any): Observable<any> {
     const httpOptions = {
       headers: new HttpHeaders({
-          'Content-Type' : 'application/json',
+        'Content-Type': 'application/json',
       })
-    }
+    };
     const url = `${this.apiUrl}api/v1/invitado/visita/${idVideo}`;
-    return this.httpClient.get(url, httpOptions);
+  
+    return this.httpClient.get(url, httpOptions).pipe(
+      retryWhen(errors =>
+        errors.pipe(
+          delay(1000),
+          take(3)
+        )
+      ),
+      catchError(error => {
+        if (error.status === 429) {
+          console.error('Demasiadas solicitudes. Intenta más tarde.');
+        }
+        return of(null);
+      })
+    );
   }
 
 }

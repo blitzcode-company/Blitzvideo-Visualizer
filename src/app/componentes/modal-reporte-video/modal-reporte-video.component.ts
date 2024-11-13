@@ -1,12 +1,12 @@
-import { Component, Inject, Input} from '@angular/core';
+import { Component, Inject, Input } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';  
 import { ReportesService } from '../../servicios/reportes.service';
-
 
 @Component({
   selector: 'app-modal-reporte-video',
   templateUrl: './modal-reporte-video.component.html',
-  styleUrl: './modal-reporte-video.component.css'
+  styleUrls: ['./modal-reporte-video.component.css']
 })
 export class ModalReporteVideoComponent {
   @Input() videoId: any; 
@@ -15,7 +15,8 @@ export class ModalReporteVideoComponent {
   constructor(
     public dialogRef: MatDialogRef<ModalReporteVideoComponent>,
     private reportesService: ReportesService,
-    @Inject(MAT_DIALOG_DATA) public data: { videoId: any; userId: any}
+    private snackBar: MatSnackBar,  
+    @Inject(MAT_DIALOG_DATA) public data: { videoId: any; userId: any }
   ) { }
 
   enviarReporteVideo(formData: any) {
@@ -30,18 +31,22 @@ export class ModalReporteVideoComponent {
       incitacion_al_odio: formData.incitacion_al_odio ? 1 : 0,
       violencia_grafica: formData.violencia_grafica ? 1 : 0,
       otros: formData.otros ? 1 : 0
-  };
+    };
 
-  
     this.reportesService.crearReporteVideo(reportData).subscribe(
       response => {
         console.log('Reporte enviado exitosamente:', response);
         this.dialogRef.close(response);
+        this.snackBar.open('Reporte enviado exitosamente', 'Cerrar', {
+          duration: 3000, 
+        });
       },
       error => {
         console.error('Error al enviar el reporte:', error);
+        this.snackBar.open('Error al enviar el reporte. Intenta nuevamente', 'Cerrar', {
+          duration: 3000,
+        });
       }
     );
   }
-
 }

@@ -9,7 +9,7 @@ export class Comentario {
     respuesta_id?: any;
     mensaje: any;
     created_at:any;
-
+    bloqueado: boolean = false;
     respuestas?: Comentario[] = [];
     mostrarRespuestas: boolean = false; 
     likedByUser: boolean = false;  

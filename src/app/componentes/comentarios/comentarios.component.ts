@@ -71,7 +71,7 @@ export class ComentariosComponent implements OnInit {
   traerComentarios(): void {
     this.comentariosService.traerComentariosDelVideo(this.videoId).subscribe(
       (res: any[]) => { 
-        this.comentarios = this.organizarComentarios(res);
+        this.comentarios = this.organizarComentarios(res).filter(comentario => !comentario.bloqueado);
       },
       (error) => {
         console.error('Error al obtener comentarios:', error);
