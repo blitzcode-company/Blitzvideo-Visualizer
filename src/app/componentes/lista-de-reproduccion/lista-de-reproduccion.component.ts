@@ -24,6 +24,8 @@ export class ListaDeReproduccionComponent implements OnInit, OnDestroy {
   usuario: any;
   canales: any;
   showMenuIndex: number | null = null; 
+  usuarioConCanal:any;
+  idCanal:any;
 
   constructor(
     private playlistService: PlaylistService,
@@ -54,6 +56,8 @@ export class ListaDeReproduccionComponent implements OnInit, OnDestroy {
   
       if (this.usuario) {
         this.userId = this.usuario.id; 
+        this.obtenerUsuarioConCanal()
+
         this.mostrarCanalesSuscritos();
   
         if (this.userId) {
@@ -82,6 +86,22 @@ export class ListaDeReproduccionComponent implements OnInit, OnDestroy {
         console.error('Error al obtener listas de reproducción', error);
       }
     );
+  }
+
+  obtenerUsuarioConCanal(): void {
+    if (this.userId !== undefined) {
+      this.authService.obtenerCanalDelUsuario(this.userId).subscribe(
+        (res: any) => {
+          this.usuarioConCanal = res;
+          this.idCanal = this.usuarioConCanal.canales.id;
+        },
+        (error) => {
+          console.error('Error al obtener el canal del usuario', error);
+        }
+      );
+    } else {
+      console.error('El userId no está definido');
+    }
   }
 
   borrarPlaylist(playlistId: number): void {
@@ -115,7 +135,7 @@ export class ListaDeReproduccionComponent implements OnInit, OnDestroy {
   mostrarCanalesSuscritos() {
     this.suscripcionService.listarSuscripciones(this.userId).subscribe(
       suscripciones => {
-        this.canales = suscripciones.map((suscripcion: any) => suscripcion.canal);
+        this.canales = suscripciones; 
       },
       error => {
         console.error('Error al obtener listas de suscripciones', error);

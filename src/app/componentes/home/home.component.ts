@@ -6,7 +6,9 @@ import { environment } from '../../../environments/environment';
 import { SuscripcionesService } from '../../servicios/suscripciones.service';
 import { AuthService } from '../../servicios/auth.service';
 import { StatusService } from '../../servicios/status.service';
-
+import { NotificacionesService } from '../../servicios/notificaciones.service';
+import { Notificacion } from '../../clases/notificacion';
+import { StreamService } from '../../servicios/stream.service';
 
 @Component({
   selector: 'app-home',
@@ -18,28 +20,38 @@ export class HomeComponent {
 constructor(private videoService: VideosService, 
             private titleService: Title,
             public status:StatusService,
-
+            private notificacionesService: NotificacionesService,
+            private streamService: StreamService,
             private suscripcionService: SuscripcionesService,
             private authService: AuthService,
           ){}
 
 videos: any[] = [];
-videosPaginados: any[] = [];
-paginaActual: number = 1;
-videosPorPagina: number = 8;
+
 serverIp = environment.serverIp;
 canales: any[] = [];
 userId:any;
 duracionVideo: any;
 usuario:any;
-totalPaginas: number = 1;
 usuarioConCanal:any;
 idCanal:any;
+notificaciones: Notificacion[] = [];
+mostrarNotificaciones: boolean = false; 
+contadorNotificaciones: number = 0;
+streams: any[] = []; 
+errorStreams: boolean = false;
+
 
 ngOnInit() {
-  this.mostrarTodosLosVideos();
-  this.titleService.setTitle('Pagina principal - BlitzVideo');
-  this.obtenerUsuario();
+  this.mostrarVideos();
+  this.obtenerUsuario(); 
+  this.cargarStreams();
+  this.notificacionesService.notificaciones$.subscribe(cantidad => {
+    const titulo = cantidad > 0
+      ? `(${cantidad}) BlitzVideo`
+      : 'BlitzVideo';
+    this.titleService.setTitle(titulo);
+  });
 }
 
 obtenerUsuario(): void {
@@ -49,6 +61,8 @@ obtenerUsuario(): void {
       this.userId = this.usuario.id;
       this.obtenerUsuarioConCanal()
       this.mostrarCanalesSuscritos();
+      this.mostrarVideos();
+      this.notificacionesService.actualizarCantidadDesdeApi(this.userId);
     } else {
       this.userId = null; 
     }
@@ -73,49 +87,56 @@ obtenerUsuarioConCanal(): void {
   } else {
     console.error('El userId no está definido');
   }
-}
-
+}       
 onImageError(event: any) {
   event.target.src = 'assets/images/video-default.png';
 }
 
-mostrarTodosLosVideos() {
-  this.videoService.listarVideos().subscribe(res => {
-    this.videos = res
-      .map((video: any) => {
-        return {
-          ...video,
-          duracionFormateada: this.convertirDuracion(video.duracion)
-        };
-      })
-      .sort(() => Math.random() - 0.5);
-    
-    this.totalPaginas = Math.ceil(this.videos.length / this.videosPorPagina);
-    this.paginaActual = 1; 
-    this.actualizarVideosPaginados();
-  });
-}
+mostrarVideos() {
+  if (this.userId) {
+    this.videoService.listarVideosPersonalizados(this.userId).subscribe(res => {
+      console.log('Videos personalizados:', res); 
 
-actualizarVideosPaginados() {
-  const inicio = (this.paginaActual - 1) * this.videosPorPagina;
-  const fin = inicio + this.videosPorPagina;
-  this.videosPaginados = this.videos.slice(inicio, fin);
-}
-
-
-irAPaginaAnterior() {
-  if (this.paginaActual > 1) {
-    this.paginaActual--;
-    this.actualizarVideosPaginados();
+      this.videos = res
+        .map((video: any) => {
+          return {
+            ...video,
+            duracionFormateada: this.convertirDuracion(video.duracion)
+          };
+        })
+        .sort(() => Math.random() - 0.5);
+    });
+  } else {
+    this.videoService.listarVideos().subscribe(res => {
+      this.videos = res
+        .map((video: any) => {
+          return {
+            ...video,
+            duracionFormateada: this.convertirDuracion(video.duracion)
+          };
+        })
+        .sort(() => Math.random() - 0.5);
+      
+    });
   }
 }
 
-irAPaginaSiguiente() {
-  if (this.paginaActual < this.totalPaginas) {
-    this.paginaActual++;
-    this.actualizarVideosPaginados();
-  }
+cargarStreams(): void {
+  this.streamService.listarStreams().subscribe(
+    res => {
+      console.log(res)
+      this.streams = res.map((stream: any) => ({
+        ...stream,
+      }));
+      this.errorStreams = false;
+    },
+    error => {
+      console.error('Error al cargar los streams:', error);
+      this.errorStreams = true;
+    }
+  );
 }
+
 
 convertirDuracion (segundos:number): string {
   const minutos = Math.floor(segundos/ 60);
@@ -125,11 +146,10 @@ convertirDuracion (segundos:number): string {
 }
 
 
-
 mostrarCanalesSuscritos() {
   this.suscripcionService.listarSuscripciones(this.userId).subscribe(
     suscripciones => {
-      this.canales = suscripciones.map((suscripcion: any) => suscripcion.canal);
+      this.canales = suscripciones; 
     },
     error => {
       console.error('Error al obtener listas de suscripciones', error);

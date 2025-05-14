@@ -1,4 +1,5 @@
-import { Component, HostListener } from '@angular/core';
+import { Component, HostListener,  Output, EventEmitter } from '@angular/core';
+
 import { Router } from '@angular/router';
 import { StatusService } from '../../servicios/status.service';
 import { CookieService } from 'ngx-cookie-service';
@@ -6,6 +7,8 @@ import { AuthService } from '../../servicios/auth.service';
 import { Canal } from '../../clases/canal';
 import { CanalService } from '../../servicios/canal.service';
 import { environment } from '../../../environments/environment';
+import { NotificacionesService } from '../../servicios/notificaciones.service';
+import { Notificacion } from '../../clases/notificacion';
 
 
 @Component({
@@ -20,7 +23,8 @@ export class HeaderComponent {
     public status:StatusService,
     private cookie:CookieService,
     private api:AuthService,
-    private canalService: CanalService
+    private canalService: CanalService,
+    private notificacionesService: NotificacionesService,
 ){}    
 
   serverIp = environment.serverIp;
@@ -29,6 +33,7 @@ export class HeaderComponent {
 
     ngOnInit() {
       this.obtenerUsuario();
+      this.obtenerNotificacionesDelMes();
     }
 
   usuario:any;
@@ -37,18 +42,73 @@ export class HeaderComponent {
   canalId:any;
   canalNombre:any
   nombre: string = '';
+  notificaciones: Notificacion[] = [];
+  mostrarNotificaciones: boolean = false; 
+  contadorNotificaciones: number = 0;
+  sidebarVisible: boolean = true;
 
 
+  @Output() toggleSidebar = new EventEmitter<void>();
+
+  onMenuClick() {
+    this.toggleSidebar.emit();
+  }
+  
   obtenerUsuario() {
     this.api.usuario$.subscribe(user => {
-
-      
       this.usuario = user;
       this.obtenerCanal();
+      this.obtenerNotificacionesDelMes();
 
     });
     this.api.mostrarUserLogueado().subscribe();
   }
+
+  alternarNotificaciones(): void {
+    this.mostrarNotificaciones = !this.mostrarNotificaciones;
+  }
+
+  obtenerNotificacionesDelMes(): void {
+    this.notificacionesService.listarNotificaciones(this.usuario.id).subscribe({
+      next: (response) => {
+        if (response?.notificaciones) {
+          this.notificaciones = response.notificaciones.map((notificacion: any) => ({
+            id: notificacion.id,
+            mensaje: notificacion.mensaje,
+            referencia_id: notificacion.referencia_id,
+            referencia_tipo: notificacion.referencia_tipo,
+            fecha_creacion: notificacion.fecha_creacion,
+            leido: notificacion.leido,
+          }));
+
+
+          const notificacionesNoLeidas = this.notificaciones.filter(notificacion => notificacion.leido === 0);
+          this.contadorNotificaciones = notificacionesNoLeidas.length; 
+
+        } else {
+          console.warn('No se encontraron notificaciones.');
+        }
+      },
+      error: (err) => {
+        console.error('Error al cargar las notificaciones:', err);
+      },
+    });
+  }
+  
+  marcarComoVista(notificacionId: number): void {
+    this.notificacionesService.marcarNotificacionComoVista(notificacionId, this.usuario.id).subscribe({
+      next: () => {
+        console.log(`Notificación ${notificacionId} marcada como vista.`);
+        this.notificaciones = this.notificaciones.map((notificacion) =>
+          notificacion.id === notificacionId ? { ...notificacion, leido: 1 } : notificacion
+        );
+      },
+      error: (err) => {
+        console.error('Error al marcar la notificación como vista:', err);
+      },
+    });
+  }
+
 
   buscarVideos(): void {
     if (this.nombre.trim()) {

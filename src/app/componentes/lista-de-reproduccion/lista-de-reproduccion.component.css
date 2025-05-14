@@ -6,7 +6,8 @@ a {
   .containerHome {
     display: flex;
     flex-direction: row;
-  
+    margin-top: 75px;
+
   }
   
   .menu-button {
@@ -20,6 +21,11 @@ a {
     bottom:0px
   }
   
+.playlist {
+  margin-left: 300px;
+
+}
+
   .playlist-actions {
     position: relative;
 

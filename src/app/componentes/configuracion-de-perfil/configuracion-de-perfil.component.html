@@ -4,6 +4,8 @@
     <div class="sidebar">
         <a class="selected" href="/ajustes/perfil">Perfil</a>
         <a href="/ajustes/pagos">Pagos</a>
+        <a href="/ajustes/streams">Streams</a>
+
     </div>
 
     <div class="containerConfig container">
@@ -73,6 +75,6 @@
         
         <ng-template #noCanalTemplate>
             <div class="alert alert-warning" *ngIf="!tieneCanal">
-                No tienes un canal creado. <a [href]="serverIp + '3001' + '/#/crearCanal'">Da click aquí para crear uno</a>.
+                No tienes un canal creado. <a [href]="serverIp + '3001' + '/#/crearCanal'">Haz click aquí para crear uno</a>.
             </div>
         </ng-template>

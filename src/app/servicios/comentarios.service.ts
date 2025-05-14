@@ -55,13 +55,13 @@ export class ComentariosService {
   }
 
   eliminarComentario(idComentario: number, usuario_id: number): Observable<any> {
-    const url = `${this.apiUrl}api/v1/videos/comentarios/${idComentario}`;  // URL para eliminar comentario por ID
+    const url = `${this.apiUrl}api/v1/videos/comentarios/${idComentario}`; 
     const httpOptions = {
       headers: new HttpHeaders({
         'Authorization': 'Bearer ' + this.cookie.get('accessToken'),
         'Content-Type': 'application/json'
       }),
-      body: { usuario_id }  // Pasar usuario_id en el cuerpo de la solicitud
+      body: { usuario_id } 
     };
     return this.http.delete(url, httpOptions).pipe(
       catchError(error => {
@@ -92,6 +92,16 @@ export class ComentariosService {
     };
     const body = { usuario_id: usuarioId };
     return this.http.post(url, body, httpOptions);
+  }
+
+  contadorMeGustaDeComentario(idComentario:number): Observable<any> {
+    const url = `${this.apiUrl}api/v1/videos/comentarios/${idComentario}/contar-me-gusta`;
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json'
+      })
+    };
+    return this.http.get(url, httpOptions);
   }
   
   quitarMeGusta(idMeGusta: number, usuarioId: number): Observable<any> {

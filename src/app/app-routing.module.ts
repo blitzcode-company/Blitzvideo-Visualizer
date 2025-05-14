@@ -14,10 +14,12 @@ import { ConfiguracionDePerfilComponent } from './componentes/configuracion-de-p
 import { SuscripcionPaypalComponent } from './componentes/suscripcion-paypal/suscripcion-paypal.component';
 import { SeleccionPagoComponent } from './componentes/seleccion-pago/seleccion-pago.component';
 import { autenticacionGuard } from './guards/autenticacion.guard';
+import { VerStreamComponent } from './componentes/ver-stream/ver-stream.component';
+import { ConfiguracionStreamComponent } from './componentes/configuracion-stream/configuracion-stream.component';
 
 const routes: Routes = [
   {path: '', component: HomeComponent},
-  {path: 'video/:id', component: VerVideoComponent},
+  {path: 'video/:id', component: VerVideoComponent, },
   {path: 'editarUsuario', component: EditarUsuarioComponent, canActivate: [autenticacionGuard]},
   { path: 'buscar/:nombre', component: ResultadoDeBusquedaComponent,  }, 
   { path: 'canal/:id', component: VerCanalComponent},
@@ -26,8 +28,10 @@ const routes: Routes = [
   { path: 'playlists/:id', component: ContenidoListaDeReproduccionComponent, canActivate: [autenticacionGuard]},
   {path: 'ajustes/pagos', component: SeleccionPagoComponent, canActivate: [autenticacionGuard]},
   {path: 'ajustes/perfil', component: ConfiguracionDePerfilComponent, canActivate: [autenticacionGuard]},
-  
+  {path: 'ajustes/streams', component: ConfiguracionStreamComponent, canActivate: [autenticacionGuard]},
 
+  {path: 'stream/:id', component: VerStreamComponent},
+  
   { path: '**', component: NoEncontradoComponent }, 
 ];
 

@@ -31,18 +31,24 @@
 
       </div>
     
-      <p *ngIf="editingComentarioId !== comentario.id">{{ comentario.mensaje }}</p>
+      <p *ngIf="editingComentarioId !== comentario.id">{{ comentario.mensaje }} </p>
     
-      <a href="#" *ngIf="!usuarioBloqueado" (click)="toggleResponder(comentario); $event.preventDefault()">Responder</a>
 
-      <button *ngIf="!usuarioBloqueado && !comentario.likedByUser" (click)="darMeGusta()" class="botonLike" aria-label="Dar Me Gusta">
-        <i class="fas fa-thumbs-up"></i>
-      </button>
-      
-      <button *ngIf="!usuarioBloqueado && comentario.likedByUser" (click)="quitarMeGusta()" class="botonLike" aria-label="Quitar Me Gusta">
-        <i class="fas fa-thumbs-up liked"></i>
-      </button>
+      <div class="megustas">
+        <a href="#" *ngIf="!usuarioBloqueado" (click)="toggleResponder(comentario); $event.preventDefault()">Responder</a>
+
+        <button *ngIf="!usuarioBloqueado && !comentario.likedByUser" (click)="darMeGusta()" class="botonLike" aria-label="Dar Me Gusta">
+          <i class="fas fa-thumbs-up"></i>
+        </button>
+        
+        <button *ngIf="!usuarioBloqueado && comentario.likedByUser" (click)="quitarMeGusta()" class="botonLike" aria-label="Quitar Me Gusta">
+          <i class="fas fa-thumbs-up liked"></i>
+          
+        </button>
+        <p class="contador">{{ comentario.contadorMeGusta || 0 }}</p>
+      </div>
     </div>
+      
   </div>
 
   <div class="comentario-footer">

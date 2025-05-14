@@ -8,6 +8,7 @@ import { environment } from '../../../environments/environment';
 import { SuscripcionesService } from '../../servicios/suscripciones.service';
 import { MatDialog } from '@angular/material/dialog';
 import { ModalReportarUsuarioComponent } from '../modal-reportar-usuario/modal-reportar-usuario.component';
+import { NotificacionesService } from '../../servicios/notificaciones.service';
 
 
 @Component({
@@ -29,7 +30,10 @@ export class VerCanalComponent implements OnInit {
   numeroDeSuscriptores: any;
   ultimoVideo: any;
   videosGeneral: any;
+  notificacionesActivas: boolean = false;
   serverIp = environment.serverIp;
+  cargandoNotificacion: boolean = false;
+
 
   constructor(
     private canalService: CanalService,
@@ -37,6 +41,7 @@ export class VerCanalComponent implements OnInit {
     private titleService: Title,
     private suscripcionService: SuscripcionesService,
     private authService: AuthService,
+    private notificacionesService: NotificacionesService,
     public dialog: MatDialog,
 
   ) {}
@@ -48,11 +53,32 @@ export class VerCanalComponent implements OnInit {
     this.listarNumeroDeSuscriptores(); 
   }
 
+  obtenerEstadoDeNotificaciones() {
+    this.notificacionesService.obtenerEstado(this.canalId, this.userId).subscribe({
+      next: (res: any) => this.notificacionesActivas = res.notificaciones,
+      error: () => this.notificacionesActivas = false 
+    });
+  
+  }
+  
+  toggleNotificaciones(): void {
+    this.cargandoNotificacion = true;
+    this.notificacionesService.cambiarEstado(this.canalId, this.userId, !this.notificacionesActivas).subscribe({
+      next: () => {
+        this.notificacionesActivas = !this.notificacionesActivas;
+        this.cargandoNotificacion = false;
+      },
+      error: () => this.cargandoNotificacion = false
+    });
+  }
+
   obtenerUsuario(): void {
     this.authService.usuario$.subscribe(res => {
       this.usuario = res;
       if (this.usuario) { 
         this.userId = this.usuario.id;
+        this.obtenerEstadoDeNotificaciones();
+
         this.verificarSuscripcion();
       } 
     });
@@ -70,6 +96,9 @@ export class VerCanalComponent implements OnInit {
       () => {
         this.mensaje = 'Suscripción exitosa';
         this.suscrito = 'suscrito'; 
+        this.notificacionesService.cambiarEstado(this.canalId, this.usuario.id, true).subscribe(() => {
+          this.notificacionesActivas = true;
+        });
       },
       error => this.handleError(error)
     );
@@ -80,6 +109,9 @@ export class VerCanalComponent implements OnInit {
       () => {
         this.mensaje = 'Suscripción anulada';
         this.suscrito = 'desuscrito'; 
+        this.notificacionesService.cambiarEstado(this.canalId, this.usuario.id, false).subscribe(() => {
+          this.notificacionesActivas = false;
+        });
       },
       error => this.handleError(error)
     );
@@ -89,12 +121,21 @@ export class VerCanalComponent implements OnInit {
     this.suscripcionService.verificarSuscripcion(this.usuario.id, this.canalId).subscribe(
       response => {
         this.suscrito = response.estado;
-        console.log(response.estado)
+        console.log(response.estado);
+  
+        if (this.suscrito === 'suscrito') {
+          this.notificacionesService.cambiarEstado(this.canalId, this.usuario.id, true).subscribe(() => {
+            this.notificacionesActivas = true;
+          });
+        } else {
+          this.notificacionesActivas = false;
+        }
       },
       error => {
         if (error.status === 404) {
           console.warn('No se encontró la suscripción.');
           this.suscrito = 'desuscrito';
+          this.notificacionesActivas = false;
         } else {
           console.error('Error al verificar la suscripción:', error);
         }
@@ -106,11 +147,14 @@ export class VerCanalComponent implements OnInit {
     this.canalService.listarVideosDeCanal(this.canalId).subscribe(
       (res: any) => {
         console.log('Datos del canal:', res); 
-        if (res.length > 0) {
+
+         if (res.length > 0) {
           this.canal = res[0].canal;
           this.canalNombre = this.canal.nombre;
           this.usuario = this.canal.user;
-          
+          this.canalId = this.canal.id
+          this.obtenerEstadoDeNotificaciones();
+
           console.log('Canal:', this.canal);
           console.log('Usuario:', this.usuario);
 

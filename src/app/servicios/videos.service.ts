@@ -25,6 +25,19 @@ export class VideosService {
     return this.httpClient.get<Videos>(url, httpOptions);
   }
 
+  listarVideosPersonalizados(userId:any):Observable<any> {
+    const httpOptions = {
+      headers: new HttpHeaders({
+          'Content-Type' : 'application/json',
+          'Authorization': 'Bearer ' + this.cookie.get('accessToken') 
+
+      })
+    }
+    const url = `${this.apiUrl}api/v1/videos/usuario/${userId}`;
+    return this.httpClient.get<Videos>(url, httpOptions);
+  }
+
+
   obtenerInformacionVideo(idVideo: any): Observable<any> {
     const httpOptions = {
       headers: new HttpHeaders({
@@ -53,6 +66,19 @@ export class VideosService {
     return this.httpClient.get<any[]>(url, httpOptions);
   }
 
+  listarVideosRelacionados(idVideo: any) {
+    const url = `${this.apiUrl}api/v1/videos/${idVideo}/relacionados`;
+
+
+    return this.httpClient.get<any[]>(url);
+
+}
+
+
+  obtenerPublicidad(): Observable<any> {
+    return this.httpClient.get(`${this.apiUrl}api/v1/publicidad/`);
+  }
+
   
   contarVisita(idVideo: any, userId: any): Observable<any> {
     const httpOptions = {
@@ -78,6 +104,8 @@ export class VideosService {
       })
     );
   }
+
+
 
   contarVisitaInvitado(idVideo: any): Observable<any> {
     const httpOptions = {

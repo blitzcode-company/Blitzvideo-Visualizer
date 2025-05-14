@@ -1,5 +1,5 @@
-import { Component, HostListener ,OnInit, ElementRef, ViewChild, AfterViewInit, AfterViewChecked } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { Component, HostListener ,OnInit, OnDestroy, ElementRef, ViewChild, AfterViewInit, AfterViewChecked, ChangeDetectorRef } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { VideosService } from '../../servicios/videos.service';
 import { AuthService } from '../../servicios/auth.service';
 import { Title } from '@angular/platform-browser';
@@ -15,13 +15,16 @@ import { ConfirmacionDesuscribirModalComponent } from '../confirmacion-desuscrib
 import { AgregarListaComponent } from '../agregar-lista/agregar-lista.component';
 import { ReportesService } from '../../servicios/reportes.service';
 import { ModalReporteVideoComponent } from '../modal-reporte-video/modal-reporte-video.component';
+import { PlaylistService } from '../../servicios/playlist.service';
+import { NotificacionesService } from '../../servicios/notificaciones.service';
 
 @Component({
   selector: 'app-ver-video',
   templateUrl: './ver-video.component.html',
   styleUrls: ['./ver-video.component.css']
 })
-export class VerVideoComponent implements OnInit, AfterViewInit, AfterViewChecked {
+export class VerVideoComponent implements OnInit, OnDestroy, AfterViewInit, AfterViewChecked {
+  
   puntuacionSeleccionada: number | null = null;
   videoId: any;
   canalId: any;
@@ -37,22 +40,43 @@ export class VerVideoComponent implements OnInit, AfterViewInit, AfterViewChecke
   valorPuntuacion: number | null = null; 
   serverIp = environment.serverIp;
   isExpanded = false;
+  showToggleLink = false;
   isContentOverflowing = false;
-  isCinemaMode = false;
+  public isCinemaMode = false; 
   public suscrito: string = '';
-    mensaje: string = '';
+  mensaje: string = '';
   idDelCanalDelUsuario:any
   usuarioConCanal: any;
+  idCanal:any;
+  canales: any;
+
   puedeEditarVideo: boolean = false;
   numeroDeSuscriptores: any;
   errorMessage: string = '';
   isBlocked: boolean = false;
   dropdownVisible: boolean = false;
+  publicidad: any = null; 
+  reproduciendoPublicidad: boolean = false; 
+  contadorVideos: number = 0;
+  videoUrl: any;
+  publicidadDuracionRestante!: number; 
+  mostrarBotonSaltar: boolean = false; 
+  nombrePublicidad: any;
+  videosDePlaylist: any[] = [];
+  playlistId:any;
+  fromPlaylist: boolean = false; 
+  videoIdPlaylist:any 
+  videoUrlPlaylist:any
+  notificacionesActivas: boolean = false;
+  cargando: boolean = false;
+  public videoPublicidadUrl: string | null = null;
+  sidebarVisible: boolean = false;
+  videosRecomendados: any[] = [];
 
 
 
+  @ViewChild('descripcion') descripcionElement!: ElementRef; 
 
-  @ViewChild('descripcion', { static: true }) descripcionElement: ElementRef | undefined;
 
   constructor(
     private route: ActivatedRoute,
@@ -60,42 +84,121 @@ export class VerVideoComponent implements OnInit, AfterViewInit, AfterViewChecke
     private suscripcionService: SuscripcionesService,
     private authService: AuthService,
     private titleService: Title,
+    private router: Router,
     private puntuarService: PuntuacionesService,
+    private playlistService: PlaylistService,
     public status: StatusService,
     public dialog: MatDialog,
-    private reporteService: ReportesService
+    private cdr: ChangeDetectorRef,
+    private reporteService: ReportesService,
+    private notificacionesService: NotificacionesService
   ) {}
 
   ngOnInit(): void {
-    this.videoId = this.route.snapshot.params['id'];
+    this.route.params.subscribe(params => {
+      this.videoId = params['id'];
+      this.mostrarVideo();
+    });  
+    this.obtenerEstadoDeNotificaciones();
+    this.obtenerIdDePlaylist();
+    this.mostrarCanalesSuscritos();
     this.obtenerUsuarioConCanal();
-    this.mostrarVideo();
     this.obtenerUsuario();
     this.visitar();
-    this.verificarSuscripcion();
+    this.checkDescriptionHeight();
+    this.cdr.detectChanges();
+    setTimeout(() => {
+      this.verificarSuscripcion();
+    }, 100);
     this.listarNumeroDeSuscriptores();
-
   }
 
   ngAfterViewInit(): void {
     setTimeout(() => {
       this.checkContentOverflow();
+      this.cdr.detectChanges();
     }, 0);
+    this.checkDescriptionHeight();
   }
 
   ngAfterViewChecked(): void {
     this.checkContentOverflow();
   }
 
+  ngOnChanges() {
+    if (this.video?.descripcion) {
+      setTimeout(() => {
+        this.checkDescriptionHeight();
+        this.cdr.detectChanges();
+      }, 200);
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.fromPlaylist = false;
+  }
+
+
+obtenerEstadoDeNotificaciones() {
+  this.notificacionesService.obtenerEstado(this.canalId, this.userId).subscribe({
+    next: (res: any) => this.notificacionesActivas = res.notificaciones,
+    error: () => this.notificacionesActivas = false 
+  });
+
+}
+
+mostrarCanalesSuscritos() {
+  this.suscripcionService.listarSuscripciones(this.userId).subscribe(
+    suscripciones => {
+      this.canales = suscripciones; 
+    },
+    error => {
+      console.error('Error al obtener listas de suscripciones', error);
+    }
+  );
+}
+
+toggleNotificaciones(): void {
+  this.cargando = true;
+  this.notificacionesService.cambiarEstado(this.canalId, this.userId, !this.notificacionesActivas).subscribe({
+    next: () => {
+      this.notificacionesActivas = !this.notificacionesActivas;
+      this.cargando = false;
+    },
+    error: () => this.cargando = false
+  });
+}
+
+  obtenerIdDePlaylist() {
+    const state = history.state as { playlistId: number };
+    if (state && state.playlistId) {
+      this.playlistId = state.playlistId;
+      this.fromPlaylist = true;
+      console.log('playlistId recibido desde history.state:', this.playlistId);
+    } else {
+      this.fromPlaylist = false; 
+      console.log('No se pasó el estado a la navegación');
+    }
+
+    if (this.playlistId === undefined) {
+      console.error('playlistId sigue siendo undefined');
+    }
+  }
+  
+
+  
   obtenerUsuario(): void {
     this.authService.usuario$.subscribe(res => {
       this.usuario = res;
   
       if (this.usuario) {
         this.userId = this.usuario.id;
+        this.obtenerEstadoDeNotificaciones();
         this.obtenerUsuarioConCanal();
         this.obtenerPuntuacionActual();
+        this.mostrarCanalesSuscritos();
         this.verificarSuscripcion();
+       
       }
     });
   
@@ -103,22 +206,48 @@ export class VerVideoComponent implements OnInit, AfterViewInit, AfterViewChecke
   }
 
  
-  toggleCinemaMode() {
-    this.isCinemaMode = !this.isCinemaMode;
-  }
-
-  toggleExpand(event: MouseEvent) {
+  toggleExpand(event: Event) {
     event.preventDefault();
     this.isExpanded = !this.isExpanded;
-    setTimeout(() => this.checkContentOverflow(), 0);
+    this.cdr.detectChanges();
   }
 
+  checkDescriptionHeight() {
+    if (this.descripcionElement && this.video?.descripcion) {
+      const descripcion = this.descripcionElement.nativeElement;
+      const maxHeight = 150; 
+      const scrollHeight = descripcion.scrollHeight;
+      this.showToggleLink = scrollHeight > maxHeight + 20;
+      if (!this.showToggleLink) {
+        this.isExpanded = true;
+      }
+    } else {
+      console.log('checkDescriptionHeight: Element or description not ready', {
+        hasElement: !!this.descripcionElement,
+        hasDescription: !!this.video?.descripcion
+      });
+      this.showToggleLink = false;
+    }
+    this.cdr.detectChanges();
+  }
 
   checkContentOverflow() {
     if (this.descripcionElement) {
       const element = this.descripcionElement.nativeElement;
       this.isContentOverflowing = element.scrollHeight > element.clientHeight;
     }
+  }
+
+  obtenerVideosRelacionados() {
+    this.videoService.listarVideosRelacionados(this.videoId).subscribe(
+      (res: any) => {
+        console.log(res)
+        this.videosRecomendados = res; 
+      },
+      error => {
+        console.error('Error al obtener videos relacionados:', error);
+      }
+    );
   }
 
   obtenerUsuarioConCanal(): void {
@@ -173,8 +302,54 @@ export class VerVideoComponent implements OnInit, AfterViewInit, AfterViewChecke
     );
   }
 
+  cargarPublicidad(): void {
+    this.videoService.obtenerPublicidad().subscribe(
+      (data) => {
+        this.publicidad = data;
+        this.reproduciendoPublicidad = true;
+        this.videoPublicidadUrl = this.publicidad.link;
+        this.publicidadDuracionRestante = this.publicidad.duracion;
+        this.nombrePublicidad = this.publicidad.titulo
+        this.mostrarBotonSaltar = false;
+  
+        setTimeout(() => {
+          this.mostrarBotonSaltar = true;
+        }, 5000);
+  
+        const intervalo = setInterval(() => {
+          if (this.publicidadDuracionRestante > 0) {
+            this.publicidadDuracionRestante--;
+          } else {
+            clearInterval(intervalo); 
+            this.reproduciendoPublicidad = false;
+            this.finalizarPublicidad();
+          }
+        }, 1000);
+      },
+      (error) => {
+        console.error('Error al cargar publicidad:', error);
+      }
+    );
+  }
+
+  finalizarPublicidad(): void {
+    this.reproduciendoPublicidad = false; 
+    this.videoPublicidadUrl = null; 
+
+    this.mostrarVideo(); 
+  }
+
+  handleCinemaMode(isCinema: boolean): void {
+    this.isCinemaMode = isCinema;  
+  }
 
   
+  saltarPublicidad(): void {
+    this.reproduciendoPublicidad = false;
+    this.mostrarBotonSaltar = false;
+    this.finalizarPublicidad();
+  }
+
   openReportModal() {
     const dialogRef = this.dialog.open(ModalReporteVideoComponent, {
       width: '400px',
@@ -199,9 +374,10 @@ export class VerVideoComponent implements OnInit, AfterViewInit, AfterViewChecke
 
   mostrarVideo(): void {
     this.videoService.obtenerInformacionVideo(this.videoId).subscribe(
-      res => {
+      (res) => {
         this.video = res;
         this.errorMessage = ''; 
+        this.canalId = this.video.canal_id; 
   
         if (this.video?.error?.code === 403) {
           this.isBlocked = true;
@@ -210,14 +386,24 @@ export class VerVideoComponent implements OnInit, AfterViewInit, AfterViewChecke
           return; 
         }
   
+        if (this.playlistId) {
+          console.log(this.playlistId)
+          this.obtenerVideosDePlaylist();
+        }
+
         this.isBlocked = false;
+        this.videoUrl = this.video.link; 
         this.procesarFechaDeCreacion();
         this.actualizarTituloDePagina();
         this.obtenerDatosDelCanal();
-  
+        this.obtenerVideosRelacionados()
         this.listarNumeroDeSuscriptores();
+
+        if (this.canalId) {
+          this.obtenerEstadoDeNotificaciones();
+        }
       },
-      error => {
+      (error) => {
         this.isBlocked = false; 
         this.errorMessage = this.obtenerMensajeDeError(error);
         console.error('Error al obtener información del video:', error);
@@ -225,6 +411,41 @@ export class VerVideoComponent implements OnInit, AfterViewInit, AfterViewChecke
     );
   }
   
+  obtenerVideosDePlaylist(): void {
+    this.playlistService.obtenerPlaylistConVideos(this.playlistId, this.videoId, true).subscribe(
+      (response) => {
+        this.videosDePlaylist = response.videos;
+        this.videoIdPlaylist = this.videosDePlaylist[0]?.id; 
+        console.log('Videos de la playlist:', this.videosDePlaylist);
+      },
+      (error) => {
+        console.error('Error al obtener los videos de la playlist:', error);
+      }
+    );
+  }
+
+  siguienteVideo(): void {
+    const indiceActual = this.videosDePlaylist.findIndex((video: Videos) => video.id === this.videoId);
+    console.log('Índice actual:', indiceActual);
+  
+    if (indiceActual >= 0 && indiceActual < this.videosDePlaylist.length - 1) {
+      const siguienteVideo = this.videosDePlaylist[indiceActual + 1];
+      console.log('Siguiente video:', siguienteVideo);  
+  
+      if (siguienteVideo) {
+        this.videoIdPlaylist = siguienteVideo.id; 
+        console.log('Cargando siguiente video con id:', this.videoIdPlaylist);
+  
+        this.router.navigate(['/video', this.videoIdPlaylist], {
+          state: { playlistId: this.playlistId }  
+        });
+      }
+    } else {
+      console.log('No hay más videos en la lista'); 
+    }
+  }
+
+
   private procesarFechaDeCreacion(): void {
     if (this.video?.created_at) {
       const fecha = new Date(this.video.created_at);
@@ -320,9 +541,14 @@ export class VerVideoComponent implements OnInit, AfterViewInit, AfterViewChecke
 
   visitar(): void {
     const esInvitado = !this.usuario;
+    const contadorClave = esInvitado ? 'contadorVideosInvitado' : `contadorVideos_${this.usuario?.id}`;
+    let contadorVideos = this.cargarContador(contadorClave);
+  
+    console.log('Contador actual:', contadorVideos);
+
     if ((esInvitado && !this.visitaRealizadaInvitado) || (!esInvitado && !this.visitaRealizada)) {
       let visitaObservable: Observable<any>;
-
+  
       if (esInvitado) {
         visitaObservable = this.videoService.contarVisitaInvitado(this.videoId);
         this.visitaRealizadaInvitado = true;
@@ -335,15 +561,31 @@ export class VerVideoComponent implements OnInit, AfterViewInit, AfterViewChecke
           return;
         }
       }
-
+  
       visitaObservable.subscribe(
-        response => {
+        (response) => {
+          contadorVideos++;
+          this.guardarContador(contadorClave, contadorVideos);
+          console.log('Contador después de visita:', contadorVideos);
+          if (contadorVideos >= 3) {
+            this.guardarContador(contadorClave, 0); 
+            this.cargarPublicidad();
+          }
         },
-        error => {
+        (error) => {
           console.error('Error al contar visita:', error);
         }
       );
     }
+  }
+
+  guardarContador(clave: string, valor: number): void {
+    localStorage.setItem(clave, valor.toString());
+  }
+  
+  cargarContador(clave: string): number {
+    const valor = localStorage.getItem(clave);
+    return valor ? parseInt(valor, 10) : 0; 
   }
 
   convertirFechaALineaDeTexto(fecha: Date): string {
@@ -457,10 +699,19 @@ export class VerVideoComponent implements OnInit, AfterViewInit, AfterViewChecke
           },
           suscrito: () => {
             this.suscrito = 'suscrito';
+  
+            this.notificacionesService.cambiarEstado(this.canalId, this.userId, true).subscribe(() => {
+              this.notificacionesActivas = true;
+            });
           },
           desuscrito: () => {
-            this.suscrito = 'desuscrito'; 
+            this.suscrito = 'desuscrito';
+  
+            this.notificacionesService.cambiarEstado(this.canalId, this.userId, false).subscribe(() => {
+              this.notificacionesActivas = false;
+            });
           }
+        
         };
 
         (acciones[estado] || (() => {
@@ -478,6 +729,8 @@ export class VerVideoComponent implements OnInit, AfterViewInit, AfterViewChecke
       }
     );
 }
+
+
 
   private handleError(error: any): void {
     if (error.status === 409) {

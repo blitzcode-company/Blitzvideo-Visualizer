@@ -2,12 +2,15 @@
     max-width: 1000px;
     margin: 0 auto;
     padding: 20px;
+    
   }
 
   .configuracion {
 
     display: flex;
     flex-direction: row;
+    margin-top: 75px;
+    
   }
 
   .sidebar a {
@@ -43,7 +46,7 @@
     min-height: 100vh;
     border-right: 1px solid #dee2e6;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  
+    position:fixed;
     padding: 15px;
   }
   

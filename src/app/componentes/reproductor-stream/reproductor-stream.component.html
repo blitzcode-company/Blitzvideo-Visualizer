@@ -1,0 +1,31 @@
+<div class="reproductor" [ngClass]="{'cinema-mode': isCinemaMode}">
+  <div *ngIf="!streamUrl" class="offline-message">
+    Offline
+  </div>
+    <div class="video-container" >
+      <video #videoPlayer 
+      class="video" 
+      muted 
+      (loadedmetadata)="setDuration()" 
+      (timeupdate)="updateProgressBar()" 
+      autoplay 
+      >
+</video>
+   <div class="controls">
+  <button (click)="togglePlayPause()">
+    <i [class]="isPlaying ? 'fas fa-pause' : 'fas fa-play'"></i>
+  </button>
+
+  <span class="live-indicator">🔴 EN DIRECTO</span>
+
+  <button (click)="toggleMute()">
+    <i [class]="isMuted ? 'fas fa-volume-mute' : 'fas fa-volume-up'"></i>
+  </button>
+  <input type="range" #volumeSlider class="volume" value="100" min="0" max="100" (input)="changeVolume(volumeSlider)">
+  <button (click)="toggleFullscreen()">
+    <i class="fas fa-expand"></i>
+  </button>
+  <button (click)="toggleMode()">
+    <i [class]="isCinemaMode ? 'fas fa-compress' : 'fas fa-film'"></i>
+  </button>
+</div>

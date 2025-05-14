@@ -1,155 +1,152 @@
+/* Banner */
 .banner-container {
-  --profile-banner-height: 350px; 
+  --profile-banner-height: 300px; /* Reducido para mejor proporción */
   height: var(--profile-banner-height);
   background-image: var(--profile-banner);
   background-position: center;
   background-size: cover;
   background-repeat: no-repeat;
-  border-bottom: 1px solid #e0e0e0;
-  position: relative; 
+  position: relative;
+  overflow: hidden;
 }
 
+.banner-container::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 80px;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0), #ffffff);
+  pointer-events: none;
+}
+
+/* Header y perfil */
 header {
   display: flex;
-  z-index: 1;
-    flex-direction: column;
-  align-items: center;
   justify-content: center;
+  align-items: center;
   padding: 20px;
+  position: relative;
+  bottom: 0;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  margin-top: 100px;
   box-sizing: border-box;
-  position: absolute;
-  bottom: -125px; 
-  width: 300px; 
-  max-width: 1200px; 
-  left: 0; 
-  transform: none; 
-  text-align: center; 
-}
-
-.suscribirse {
-  display: flex;
-
-  gap:10px
+  background: #ffffff;
 }
 
 .profile {
-  display: grid;
-  grid-template-columns: 110px auto; 
-  align-items: center; 
-  gap: 15px; 
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 20px;
   max-width: 1000px;
   margin: 0 auto;
-  margin-top: 300px;
 }
-.botonreportar {
-  cursor:pointer
-}
-
-.boton {
-  border-radius: 8px;
-  background-color: #32b1f9; 
-  color: #fff; 
-  padding: 5px 10px;
-  font-size: 16px; 
-  font-weight: bold; 
-  text-align: center; 
-  display: inline-flex; 
-  justify-content: center;
-  align-items: center;
-  border: none;
-  cursor: pointer; 
-  transition: background-color 0.3s ease, transform 0.3s ease; 
-}
-
-.boton:hover {
-  background-color: #0282e5; 
-  transform: scale(1.05); 
-}
-
-.boton.suscrito {
-  background-color: #0282e5;  
-  color: white;
-}
-
-.boton.suscrito:hover {
-  background-color: #008bf5; 
-}
-
-.boton.suscrito:active {
-  background-color: #008bf5; 
-}
-
 
 .profile-pic {
-  width: 120px; 
-  height: 120px; 
+  width: 120px;
+  height: 120px;
   border-radius: 50%;
   object-fit: cover;
-  border: 4px solid #fff;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); 
-  margin-top: 50px;
+  border: 3px solid #ffffff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s ease;
+}
+
+.profile-pic:hover {
+  transform: scale(1.05);
 }
 
 .profile-info {
-  text-align: left; 
-  justify-self: start; 
-  align-self: center; 
-  margin-top: 105px; 
+  flex: 1;
+  text-align: left;
 }
 
 .profile-info h1 {
   margin: 0;
-  padding: 0;
-  font-size: 28px;
-  color: #333;
-  white-space: nowrap; 
-  overflow: hidden; 
-  text-overflow: ellipsis; 
-}
-
-.miniatura-container {
-  width: 100%; 
-  height: auto; 
-  aspect-ratio: 16 / 9; 
+  font-size: 26px;
+  color: #030303;
+  font-weight: 600;
+  white-space: nowrap;
   overflow: hidden;
-  position: relative;
+  text-overflow: ellipsis;
 }
 
-.miniatura {
-  width: 100%;
-  height: 100%;
-  object-fit: cover; 
-  transition: transform 0.3s ease; 
+.subscriber-count {
+  margin: 8px 0;
+  font-size: 14px;
+  color: #606060;
 }
 
-.miniatura-container p  {
-  position:absolute;
-  bottom: 0px;
-  right: 15px;
-  
+.suscribirse {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 10px;
 }
 
-.duracionVideo {
-  background-color: #000000;
-  color:white;
+.boton {
+  border-radius: 20px;
+  background-color: #32b1f9;
+  color: #ffffff;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+.boton:hover {
+  background-color: #0282e5;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.boton.suscrito {
+  background-color: #0282e5;
+}
+
+.boton.suscrito:hover {
+  background-color: #008bf5;
+}
+
+.botonreportar {
+  cursor: pointer;
+  font-size: 18px;
+  color: #606060;
+  transition: color 0.2s ease;
+}
+
+.botonreportar:hover {
+  color: #030303;
+}
+
+.botonreportar.disabled {
+  cursor: not-allowed;
   opacity: 0.5;
-  padding: 5px 8px;
-  border-radius: 5px;
-
 }
-
 
 nav {
-  background-color: #fff;
+  background-color: #ffffff;
   border-bottom: 1px solid #e0e0e0;
-  margin: 20px 0;
+  margin: 0;
+  padding: 0 20px;
+  position: sticky;
+  top: 75px;
+  z-index: 10;
 }
 
 nav ul {
   list-style: none;
   display: flex;
-  padding: 10px;
-  margin: 0;
+  padding: 0;
+  margin: 0 auto;
+  max-width: 1200px;
 }
 
 nav ul li {
@@ -158,73 +155,97 @@ nav ul li {
 
 nav ul li a {
   display: block;
-  padding: 15px 20px;
+  padding: 12px 20px;
   text-decoration: none;
-  color: #555;
+  color: #606060;
+  font-size: 14px;
+  font-weight: 500;
+  position: relative;
+  transition: color 0.2s ease;
 }
 
 nav ul li a:hover {
-  background-color: #f1f1f1;
+  color: #030303;
 }
 
+nav ul li a.router-link-active {
+  color: #030303;
+  font-weight: 600;
+}
+
+nav ul li a.router-link-active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 20px;
+  right: 20px;
+  height: 2px;
+  background-color: #ff0000; 
+}
 
 main {
   padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
-
-
 .ultimo-video {
-  margin-bottom: 30px;
-  text-align: center;
+  margin-bottom: 40px;
 }
 
 .ultimo-video h2 {
-  font-size: 18px;
-  margin-bottom: 10px;
-  color: #333;
+  font-size: 20px;
+  font-weight: 600;
+  color: #030303;
+  margin-bottom: 16px;
+  text-align: left;
 }
 
 .ultimo-video-card {
-  background-color: white;
-  border: 1px solid #e0e0e0;
-  border-radius: 4px;
   overflow: hidden;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   max-width: 600px;
-  margin: 0 auto; 
+  margin: 0 auto;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ultimo-video-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
 }
 
 .ultimo-video-miniatura {
   width: 100%;
-  height: auto;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
 }
 
 .ultimo-video-info {
-  padding: 10px;
+  padding: 12px;
 }
 
 .ultimo-video-info h3 {
-  margin: 0 0 5px;
+  margin: 0 0 8px;
   font-size: 16px;
-  color: #333;
+  font-weight: 600;
+  color: #030303;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .ultimo-video-info p {
   margin: 0;
-  color: #888;
-  font-size: 14px;
-}
-
-.ultimo-video-info a {
-  color: #1e90ff;
+  font-size: 13px;
+  color: #606060;
 }
 
 .video-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(400px, 600px));
-  gap: 20px;
-  justify-content: center;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 16px;
 }
 
 .video-row {
@@ -232,56 +253,193 @@ main {
 }
 
 .video-card {
-  background-color: white;
-  border: 1px solid #e0e0e0;
-  border-radius: 4px;
   overflow: hidden;
-  
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.video-card img {
+.video-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+.miniatura-container {
+  position: relative;
   width: 100%;
-  height: auto;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+}
+
+.miniatura-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.video-card:hover .miniatura-container img {
+  transform: scale(1.05);
+}
+
+.duracionVideo {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  background-color: rgba(0, 0, 0, 0.8);
+  color: #ffffff;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
 }
 
 .video-info {
-  padding: 10px;
+  padding: 12px;
 }
 
 .video-info h3 {
-  margin: 0 0 5px;
-  font-size: 16px;
-  color: #333;
+  margin: 0 0 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #030303;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .video-info p {
   margin: 0;
-  color: #888;
-  font-size: 14px;
+  font-size: 12px;
+  color: #606060;
 }
 
-@media (max-width: 768px) {
-  .video-card {
-    flex: 1 1 45%;
+@media (max-width: 1024px) {
+  .banner-container {
+    --profile-banner-height: 250px;
   }
+
   .profile {
-    flex-direction: column; 
-    align-items: center; 
-    justify-content: center; 
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .profile-info {
+    text-align: center;
   }
 
   .profile-pic {
-    margin-bottom: 10px; 
+    margin: 0;
+  }
+
+  .video-grid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .banner-container {
+    --profile-banner-height: 200px;
+  }
+
+  header {
+    padding: 15px;
+  }
+
+  .profile-pic {
+    width: 100px;
+    height: 100px;
   }
 
   .profile-info h1 {
-    font-size: 24px; 
+    font-size: 22px;
+  }
+
+  .subscriber-count {
+    font-size: 13px;
+  }
+
+  .boton {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+
+  .ultimo-video h2 {
+    font-size: 18px;
+  }
+
+  .video-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+  }
+
+  nav ul li a {
+    padding: 10px 15px;
+    font-size: 13px;
   }
 }
 
 @media (max-width: 480px) {
-  .video-card {
-    flex: 1 1 100%;
+  .banner-container {
+    --profile-banner-height: 150px;
+  }
+
+  header {
+    padding: 10px;
+  }
+
+  .profile-pic {
+    width: 80px;
+    height: 80px;
+  }
+
+  .profile-info h1 {
+    font-size: 18px;
+  }
+
+  .subscriber-count {
+    font-size: 12px;
+  }
+
+  .suscribirse {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .boton {
+    padding: 5px 10px;
+    font-size: 12px;
+  }
+
+  .botonreportar {
+    font-size: 16px;
+  }
+
+  .ultimo-video h2 {
+    font-size: 16px;
+  }
+
+  .video-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .video-info h3 {
+    font-size: 13px;
+  }
+
+  .video-info p {
+    font-size: 11px;
+  }
+
+  nav ul {
+    flex-wrap: wrap;
+  }
+
+  nav ul li a {
+    padding: 8px 12px;
+    font-size: 12px;
   }
 }

@@ -1,22 +1,27 @@
+<div class="comentarios-contador">
+  <h4>Comentarios ({{ totalComentarios }})</h4>
+</div>
+
 <div class="comentarios-container">
   <form (ngSubmit)="crearComentario()">
     <div class="comentarista">
       <div class="inputyenvio">
+       
         <img *ngIf="usuario?.foto" [src]="usuario?.foto" class="fotoInput" alt="Foto del usuario">
         <img *ngIf="!usuario?.foto" src="assets/images/user.png" class="fotoInput" alt="Foto del usuario">
         <div class="input-container">
           <input type="text" id="nuevoComentario" [(ngModel)]="nuevoComentario.mensaje" name="nuevoComentarioMensaje"
             placeholder="Escribe un comentario..." required [disabled]="usuarioBloqueado">
         </div>
-        <button class="btn btn-primary" [disabled]="usuarioBloqueado">Enviar</button>
+        <button class="btn btn-primary botonEnviar" [disabled]="usuarioBloqueado">Enviar</button>
       </div>
     </div>
+   
   </form>
   
   <div *ngIf="usuarioBloqueado" class="mensaje-bloqueado">
     <p>Tu cuenta está bloqueada, no puedes comentar.</p>
   </div>
-
   <br>
   
   <div id="comentarios">

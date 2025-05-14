@@ -1,0 +1,25 @@
+<div class="sidebar">
+    <a href="#"><i class="fa-solid fa-house"></i>  Inicio</a>
+    <a *ngIf="status.isLoggedIn && usuarioConCanal.canales?.id"  [routerLink]="['/canal', idCanal]"><i class="fa-regular fa-user"></i>  Mi canal</a>
+    <a *ngIf="status.isLoggedIn" href="/playlists"><i class="fa-solid fa-list"></i>  Listas de reproduccion</a>
+    <hr *ngIf="status.isLoggedIn" class="lineaSideBar">
+    <p *ngIf="status.isLoggedIn" >Suscripciones</p>
+    <div class="canalesSuscritos" *ngFor="let canal of canales">
+      <a *ngIf="status.isLoggedIn" class="canalItem" [routerLink]="['/canal', canal.id]"> 
+        <img
+          class="fotoUserSuscriptores"
+          [src]="canal.user.foto ? canal.user.foto : '/assets/images/user.png'"
+          alt="Foto del canal"
+        />
+        <span class="nombreYEstado">
+          {{ canal.nombre }}
+          <span 
+            *ngIf="canal.canal_online" 
+            class="enVivo" 
+            title="En directo"
+          >🔴</span>
+        </span>
+      </a>
+    </div>
+  </div>
+  

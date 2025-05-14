@@ -1,6 +1,12 @@
-.canalynombre, .comentarios-container {
-  margin-left: 12vh;
+.canalynombre, .comentarios-container, .comentarios-contador {
+
 }
+.btn .btn-primary {
+
+background-color: #32b1f9;
+  
+}
+
 
 .fotoInput {
   width: 80px;
@@ -18,7 +24,9 @@
 
 .comentarios-container {
   margin-top: -120px;
+  
 }
+
 
 .comentarista {
   display: flex;
@@ -29,6 +37,7 @@
   display: flex;
   align-items: center;
   margin-top: 150px;
+
 }
 
 .inputyenvio img.fotoInput {
@@ -36,7 +45,7 @@
 }
 
 .inputyenvio input[type="text"] {
-  width: 800px;
+  width: 1000px;
   height: 50px;
   padding-left: 10px;
   border: none; 
@@ -49,7 +58,7 @@
 .inputyenvio input[type="text"]:focus {
   background-color: #fff; 
   padding-bottom: 12px; 
-  border-bottom: 1px solid #007bff;
+  border-bottom: 1px solid #0282e5;
   outline: none; 
 }
 
@@ -63,7 +72,7 @@
 
 .enviarComentario {
   margin-left: 910px;
-  background-color: #076dc8;
+  background-color: #0282e5;
   color: white;
   border: none;
   padding: 10px;
@@ -71,7 +80,7 @@
 }
 
 .botonResponder {
-  background-color: #076dc8;
+  background-color: #0282e5;
   color: white;
   border: none;
   padding: 5px 10px;
@@ -105,6 +114,10 @@
   margin-bottom: 10px;
 }
 
+.comentarios-header {
+  margin-left: 10px;
+
+}
 .comentario-info {
   margin-left: 10px;
 }

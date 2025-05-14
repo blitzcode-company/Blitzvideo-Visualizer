@@ -1,10 +1,23 @@
 .comentario {
-  margin-top: 0px;
-  margin-bottom: 50px;
+  margin-top: 20px;
+  margin-bottom: 35px;
   padding-left: 10px;
   position: relative;
-  max-width: 1000px;
+  max-width: 1234px;
 }
+
+.megustas {
+  display: flex;
+  flex-direction: row;
+}
+
+.botonEnviar {
+
+  background-color: #32b1f9;
+    
+  }
+  
+
 
 a {
   text-decoration: none;
@@ -92,7 +105,7 @@ a {
 }
 
 .botonResponder {
-  background-color: #076dc8;
+  background-color: #0282e5;
   color: white;
   border: none;
   padding: 5px 10px;
@@ -101,6 +114,8 @@ a {
 }
 .botonLike {
   margin-left: 10px;
+  margin-bottom: 12px;
+
   background:none;
   border: none;
   cursor: pointer;
@@ -139,7 +154,7 @@ a {
 .responderComentario input:focus {
   background-color: #fff; 
   padding-bottom: 12px; 
-  border-bottom: 1px solid #007bff;
+  border-bottom: 1px solid #0282e5;
   outline: none; 
 
 }

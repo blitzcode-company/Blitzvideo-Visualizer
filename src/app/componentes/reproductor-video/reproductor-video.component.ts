@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, Input, EventEmitter, Output, OnInit, AfterViewInit, ViewChild, ElementRef, SimpleChanges } from '@angular/core';
 
 @Component({
   selector: 'app-reproductor-video',
@@ -10,22 +10,65 @@ export class ReproductorVideoComponent implements OnInit, AfterViewInit {
   @ViewChild('videoPlayer', { static: false }) videoPlayer: ElementRef<HTMLVideoElement> | undefined;
   @ViewChild('progressBar', { static: true }) progressBar!: ElementRef<HTMLInputElement>;
   @ViewChild('volumeSlider', { static: true }) volumeSlider!: ElementRef<HTMLInputElement>;
+  @Input() isCinemaMode: boolean = false; 
+  @Output() toggleCinemaMode = new EventEmitter<boolean>(); 
+  @Output() videoTerminado: EventEmitter<void> = new EventEmitter();
 
   isPlaying = false;
   isMuted = false;
   currentTime: number = 0;
   duration: number = 0;
-  isCinemaMode = false;
   isFullscreen = false;
 
+  constructor() { }
 
-  constructor(private el: ElementRef) { }
-
-  ngOnInit(): void {}
+  ngOnInit(): void { }
 
   ngAfterViewInit(): void {
     if (this.videoPlayer?.nativeElement) {
-      this.videoPlayer.nativeElement.load();
+      const videoElement = this.videoPlayer.nativeElement;
+      videoElement.load();
+      videoElement.addEventListener('ended', this.onVideoEnd.bind(this));
+    }
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['videoUrl'] && this.videoUrl) {
+      this.cambiarFuenteVideo(this.videoUrl);
+    }
+  }
+
+  onVideoEnd(): void {
+    this.videoTerminado.emit();
+  }
+
+  toggleMode(): void {
+    this.isCinemaMode = !this.isCinemaMode;
+    this.toggleCinemaMode.emit(this.isCinemaMode); 
+  }
+
+  cambiarFuenteVideo(url: string): void {
+    const videoElement = this.videoPlayer?.nativeElement;
+    if (videoElement) {
+      videoElement.src = url;
+      videoElement.removeEventListener('canplaythrough', this.handleCanPlayThrough);
+
+      videoElement.addEventListener('canplaythrough', () => {
+        videoElement.play().catch((error) => {
+          console.error('Error al reproducir el video:', error);
+        });
+      });
+
+      videoElement.load();
+    }
+  }
+
+  handleCanPlayThrough(): void {
+    const videoElement = this.videoPlayer?.nativeElement;
+    if (videoElement) {
+      videoElement.play().catch((error) => {
+        console.error('Error al reproducir el video:', error);
+      });
     }
   }
 
@@ -103,8 +146,7 @@ export class ReproductorVideoComponent implements OnInit, AfterViewInit {
     }
   }
 
-
-  toggleCinemaMode() {
-    this.isCinemaMode = !this.isCinemaMode;
+  handleCinemaMode(isCinema: boolean): void {
+    this.isCinemaMode = isCinema; 
   }
 }

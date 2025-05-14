@@ -1,0 +1,47 @@
+<app-header></app-header>
+
+<div class="configuracion">
+    <div class="sidebar">
+        <a href="/ajustes/perfil">Perfil</a>
+        <a href="/ajustes/pagos">Pagos</a>
+        <a class="selected" href="/ajustes/streams">Streams</a>
+    </div>
+
+    <div class="containerConfig container">
+        <div class="header">
+            <h2>Configuración de Stream</h2>
+            <hr />
+        </div>
+
+        <div class="streams-container" *ngIf="tieneCanal; else noCanalTemplate">
+            <div class="form-group">
+                <label for="rtmpServer">Servidor RTMP</label>
+                <div class="input-group">
+                    <input type="text" id="rtmpServer" class="form-control" [value]="mostrarRtmpServer ? streamData.server : '********'" readonly />
+                    <button type="button" class="toggle-button" (click)="toggleMostrarRtmpServer()">
+                        <i class="fas" [ngClass]="mostrarRtmpServer ? 'fa-eye-slash' : 'fa-eye'"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="streamKey">Stream Key</label>
+                <div class="input-group">
+                    <input type="text" id="streamKey" class="form-control" [value]="mostrarStreamKey ? streamData.stream_key : '********'" readonly />
+                    <button type="button" class="toggle-button" (click)="toggleMostrarStreamKey()">
+                        <i class="fas" [ngClass]="mostrarStreamKey ? 'fa-eye-slash' : 'fa-eye'"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="alert-container" *ngIf="alertMessageStream">
+                <div class="alert alert-info">{{ alertMessageStream }}</div>
+            </div>
+            <button *ngIf="alertMessageStream && alertMessageStream.includes('Error')" class="btn-submit" (click)="cargarStreamData()">Reintentar</button>
+        </div>
+
+        <ng-template #noCanalTemplate>
+            <div class="alert alert-warning">
+                No tienes un canal creado. <a [href]="serverIp + '3001' + '/#/crearCanal'">Haz click aquí para crear uno</a>.
+            </div>
+        </ng-template>
+    </div>
+</div>

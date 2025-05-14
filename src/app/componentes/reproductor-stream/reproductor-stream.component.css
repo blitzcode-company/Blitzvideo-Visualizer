@@ -1,0 +1,88 @@
+.reproductor {
+    margin-left: 10vh;
+    width: 1000px;
+    transition: all 0.3s ease; 
+  }
+  
+  
+  .reproductor.cinema-mode {
+    margin-left: 0;
+    top: 0;
+    left: 0;
+    width: 98vw;
+    height: 100vh;
+    z-index: 9999;
+    background: #000;
+  }
+  
+  #video {
+    display: none !important;
+  }
+
+  .offline-message {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: black;
+    color: white;
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+  }
+
+  .video-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background-color: #000;
+  }
+  
+  .video {
+    width: 100%;
+    height: 100%; 
+    display: block;
+  }
+  
+  .controls {
+    display: flex;
+  
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+  }
+   span {
+    color:white;
+  
+   }
+   
+  
+  button, input[type="range"] {
+    background: none;
+    border: none;
+    color: white;
+  }
+  
+  button {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  button i {
+    font-size: 20px;
+  }
+  
+  input[type="range"] {
+    flex-grow: 1;
+    margin: 0 10px;
+  }
+  
+  input.volume {
+    width: 100px;
+    flex-grow: 0;
+  }
+  

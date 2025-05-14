@@ -24,13 +24,12 @@
     
     <div class="video-grid">
       <div class="video-card" *ngFor="let video of videos">
-        <a [routerLink]="['/video', video.id]" class="video-link" target="_blank">
+        <a (click)="verVideo(video.id)" class="video-link" target="_blank">
           <div class="miniatura-container">
             <img class="miniatura" [src]="video.miniatura" alt="Miniatura de {{ video.titulo }}">
           </div>
           <div class="video-info">
             <h3>{{ video.titulo }}</h3>
-            <p>{{ video.descripcion }}</p>
             <button class="btn btn-danger" (click)="quitarVideo(playlist.id, video.id)">Quitar Video</button>
 
           </div>

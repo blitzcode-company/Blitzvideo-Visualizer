@@ -1,20 +1,12 @@
 <app-header></app-header>
 <div class="containerHome">
-  <div class="sidebar">
-    <a href="#">Inicio</a>
-    <a *ngIf="status.isLoggedIn" [href]="serverIp + '3001' + '/#/misVideos'">Mi canal</a>
-    <a *ngIf="status.isLoggedIn" href="/playlists">Listas de reproduccion</a>
-    <hr *ngIf="status.isLoggedIn"class="lineaSideBar">
-    <p *ngIf="status.isLoggedIn" >Suscripciones</p>
-    <div class="canalesSuscritos"  *ngFor="let canal of canales">
-      <a class="canalesLista" [routerLink]="['/canal', canal.id]"> 
-        <img *ngIf="!canal.user.foto" class="fotoUserSuscriptores" src="/assets/images/user.png" alt="Foto del canal">
+  <app-sidebar 
+  [status]="status"
+  [usuarioConCanal]="usuarioConCanal"
+  [idCanal]="idCanal"
+  [canales]="canales"
+  ></app-sidebar>
 
-        <img *ngIf="canal.user.foto" class="fotoUserSuscriptores" [src]="canal.user.foto" alt="">
-        {{ canal.nombre }}
-      </a>
-    </div>
-  </div>
 
 <div class="playlist">
   <h1>Listas de reproduccion</h1>

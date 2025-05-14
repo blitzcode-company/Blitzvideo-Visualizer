@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { BrowserModule, provideClientHydration } from '@angular/platform-browser';
 import { ChunkPipe } from './pipes/chunk.pipe'; 
 import { AppRoutingModule } from './app-routing.module';
@@ -49,6 +49,13 @@ import { ReportesService } from './servicios/reportes.service';
 import { ModalReporteComentarioComponent } from './componentes/modal-reporte-comentario/modal-reporte-comentario.component';
 import { ModalReportarUsuarioComponent } from './componentes/modal-reportar-usuario/modal-reportar-usuario.component';
 import { MatCardModule } from '@angular/material/card';
+import { VerStreamComponent } from './componentes/ver-stream/ver-stream.component';
+import { ReproductorStreamComponent } from './componentes/reproductor-stream/reproductor-stream.component';
+import { ConfiguracionStreamComponent } from './componentes/configuracion-stream/configuracion-stream.component';
+import { SidebarComponent } from './componentes/sidebar/sidebar.component';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
+
 
 @NgModule({
   declarations: [
@@ -80,6 +87,10 @@ import { MatCardModule } from '@angular/material/card';
     ModalReporteVideoComponent,
     ModalReporteComentarioComponent,
     ModalReportarUsuarioComponent,
+    VerStreamComponent,
+    ReproductorStreamComponent,
+    ConfiguracionStreamComponent,
+    SidebarComponent,
     
   ],
   imports: [
@@ -101,7 +112,9 @@ import { MatCardModule } from '@angular/material/card';
     VgBufferingModule,
     MatFormFieldModule,
     MatInputModule,
-  
+    MatIconModule,
+    MatTooltipModule,
+    MatButtonModule,
     MatSelectModule,
     MatOption,
     MatSnackBarModule
@@ -111,7 +124,9 @@ import { MatCardModule } from '@angular/material/card';
   exports: [
     VerVideoComponent,
     ContenidoDeComentariosComponent,
-    ComentariosComponent
+    ComentariosComponent,
+    SidebarComponent
+    
   ],
   providers: [
     CookieService, 
@@ -119,6 +134,7 @@ import { MatCardModule } from '@angular/material/card';
     ComentariosService, 
     ReportesService
   ],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   bootstrap: [AppComponent],
 })
 export class AppModule { }

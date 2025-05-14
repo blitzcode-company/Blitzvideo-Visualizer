@@ -35,6 +35,8 @@ export class ComentariosComponent implements OnInit {
   comentarioId : any;
   usuarioBloqueado = false;
   mensaje = '';
+  totalComentarios: number = 0; 
+  
 
   constructor(private comentariosService: ComentariosService, public status: StatusService, private authService: AuthService, public dialog: MatDialog,) {}
 
@@ -70,8 +72,20 @@ export class ComentariosComponent implements OnInit {
 
   traerComentarios(): void {
     this.comentariosService.traerComentariosDelVideo(this.videoId).subscribe(
-      (res: any[]) => { 
-        this.comentarios = this.organizarComentarios(res).filter(comentario => !comentario.bloqueado);
+      (res: any[]) => {
+        const comentariosVisibles = this.organizarComentarios(res).filter(
+          (comentario) => !comentario.bloqueado
+        );
+  
+        this.totalComentarios = comentariosVisibles.reduce((total, comentario) => {
+          const respuestasVisibles = comentario.respuestas?.filter(
+            (respuesta: any) => !respuesta.bloqueado
+          ).length || 0;
+  
+          return total + 1 + respuestasVisibles; 
+        }, 0);
+  
+        this.comentarios = comentariosVisibles;
       },
       (error) => {
         console.error('Error al obtener comentarios:', error);

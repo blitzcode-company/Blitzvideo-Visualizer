@@ -6,63 +6,50 @@ a {
 .containerHome {
   display: flex;
   flex-direction: row;
-
+  margin-top: 75px;
 }
 
-.sidebar {
-  background-color: #fff  ;
-  display: flex;
-  flex-direction: column;
-  min-width: 250px;
-  min-height: 100vh;
-  border-right: 1px solid #dee2e6;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-
-  padding: 15px;
-}
-
-.sidebar a {
-  display: block;
-  padding: 10px;
-  text-decoration: none;
-  color: #495057;
-  min-width: 225px;
-
-  margin-bottom: 10px;
-  border-width: 0 0 1px;
-  transition: background-color 0.3s;
-}
-
-p {
-  padding: 10px;
-  text-decoration: none;
-  margin-bottom: 10px;
-  border-width: 0 0 1px;
-  
-}
-
-.sidebar a:hover {
-  background-color: #ddd;
+.content-wrapper {
+  width: 100%;
 }
 
 .duracionVideo {
   background-color: #000000;
-  color:white;
+  color: white;
   opacity: 0.5;
   padding: 5px 8px;
   border-radius: 5px;
 }
 
+.stream-grid,
 .video-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr); 
+  grid-template-columns: repeat(4, 1fr);
   gap: 30px;
-  justify-content: center; 
-  margin: 40px 40px; 
+  justify-content: center;
+  margin: 40px 40px;
   box-sizing: border-box;
-  max-width: 95%; 
+  max-width: 95%;
+  margin-left: 300px;
 }
 
+.stream-grid h2,
+.video-grid h2 {
+  grid-column: 1 / -1;
+  margin: 0 0 20px;
+  font-size: 24px;
+  color: #333;
+}
+
+.stream-grid p,
+.video-grid p {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: #666;
+  font-size: 16px;
+}
+
+.stream-card,
 .video-card {
   background-color: white;
   overflow: hidden;
@@ -74,10 +61,19 @@ p {
   transition: transform 0.3s ease; 
 }
 
+.stream-link,
+.video-link {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  text-decoration: none;
+  color: inherit;
+}
+
 .miniatura-container {
-  width: 100%; 
-  height: auto; 
-  aspect-ratio: 16 / 9; 
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
   overflow: hidden;
   position: relative;
 }
@@ -85,25 +81,40 @@ p {
 .miniatura {
   width: 100%;
   height: 100%;
-  object-fit: cover; 
-  transition: transform 0.3s ease; 
+  object-fit: cover;
+  transition: transform 0.3s ease;
 }
 
-.miniatura-container p  {
-  position:absolute;
+.miniatura-container p {
+  position: absolute;
   bottom: 0px;
   right: 15px;
-  
 }
 
+.live-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background-color: #e91916;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 3px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.stream-card:hover .miniatura,
 .video-card:hover .miniatura {
-  transform: scale(1.1); 
+  transform: scale(1.1);
 }
 
+.stream-info,
 .video-info {
   padding: 10px;
+  flex-grow: 1;
 }
 
+.stream-info h3,
 .video-info h3 {
   margin: 0 0 5px;
   font-size: 16px;
@@ -113,17 +124,18 @@ p {
   white-space: nowrap; 
 }
 
+.stream-info p,
 .video-info p {
   margin: 0;
   color: #888;
   font-size: 14px;
+  text-align: left;
+
 }
 
 .canalNombre {
-  font-size: 1em; 
+  font-size: 1em;
   color: #4b4b4b;
-  
-  
   display: flex;
   align-items: center;
   gap: 10px;
@@ -134,7 +146,6 @@ p {
   align-items: center;
   text-decoration: none;
   gap: 5px;
-
 }
 
 .canal-link:hover {
@@ -146,6 +157,10 @@ p {
   display: flex;
 }
 
+.nombreYEstado {
+  gap: 6px;
+  font-weight: bold;
+}
 
 .fotoUser {
   border-radius: 25px;
@@ -156,48 +171,47 @@ p {
   object-fit: cover;
 }
 
-.fotoUserSuscriptores {
-  border-radius: 25px;
-  height: 40px; 
-  object-fit: cover;
-}
-
 .fotoUserDefault {
   border-radius: 25px;
   height: 40px;
   width: 40px;
   min-height: 40px;
   min-width: 40px;
-  object-fit: cover; }
-  
+  object-fit: cover;
+}
+
+.lineadivisoria {
+  border-top: 1px solid black;
+
+
+}
 
 hr {
   border: 0;
   border-top: 1px solid #e0e0e0;
-  margin: 10px 0; 
+  margin: 10px 0;
 }
+
 .lineaSideBar {
   border: 0;
   border-top: 1px solid #000000;
-
 }
-
 
 .pagination-controls {
   display: flex;
   align-items: center;
-  justify-content: center; 
-  margin: 20px 0; 
+  justify-content: center;
+  margin: 20px 0;
 }
 
 .pagination-controls button {
-  background-color: #007bff; 
-  color: white; 
-  border: none; 
-  border-radius: 5px; 
-  padding: 10px 15px; 
-  margin: 0 5px; 
-  cursor: pointer; 
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 15px;
+  margin: 0 5px;
+  cursor: pointer;
   transition: background-color 0.3s ease;
   display: flex;
   align-items: center;
@@ -211,30 +225,33 @@ hr {
 }
 
 .pagination-controls button:hover {
-  background-color: #0056b3; 
+  background-color: #0056b3;
 }
 
 .pagination-controls button:disabled {
-  background-color: #ccc; 
-  box-shadow: none; 
+  background-color: #ccc;
+  box-shadow: none;
 }
 
-
 @media (max-width: 1200px) {
+  .stream-grid,
   .video-grid {
-    grid-template-columns: repeat(3, 1fr); 
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 
 @media (max-width: 992px) {
+  .stream-grid,
   .video-grid {
-    grid-template-columns: repeat(2, 1fr); 
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
 @media (max-width: 767px) {
+  .stream-grid,
   .video-grid {
-    grid-template-columns: 1fr; 
+    grid-template-columns: 1fr;
+    margin-left: 20px;
   }
 
   .sidebar {

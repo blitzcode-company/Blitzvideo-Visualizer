@@ -37,6 +37,7 @@ export class ContenidoDeComentariosComponent implements OnInit{
   userId:any
   usuarioBloqueado = false;
   mensaje = '';
+  contadorDeMegustas = '';
 
   @Output() reportar = new EventEmitter<void>();
 
@@ -46,7 +47,9 @@ export class ContenidoDeComentariosComponent implements OnInit{
   ngOnInit(): void {
     if (this.comentario) {
       this.obtenerEstadosDeMeGusta();
-    }
+      this.actualizarContadorMeGusta();    
+     }
+
   }
 
  
@@ -144,6 +147,18 @@ export class ContenidoDeComentariosComponent implements OnInit{
     }
   }
 
+  actualizarContadorMeGusta(): void {
+    this.comentariosService.contadorMeGustaDeComentario(this.comentario.id!).subscribe(
+      (response: any) => {
+        this.comentario.contadorMeGusta = response.cantidadDeMeGustas; 
+      },
+      (error) => {
+        console.error('Error al obtener el contador de Me Gusta:', error);
+        this.comentario.contadorMeGusta = 0; 
+      }
+    );
+  }
+
   darMeGusta(): void {
     if (!this.usuario || !this.usuario.id) {
       window.location.href = `${this.serverIp}:3002/#/`; 
@@ -153,6 +168,8 @@ export class ContenidoDeComentariosComponent implements OnInit{
       (response) => {
         this.comentario.likedByUser = true;
         this.comentario.meGustaId = response.meGustaId;
+        this.comentario.contadorMeGusta = (this.comentario.contadorMeGusta || 0) + 1; // Incrementa localmente
+
       },
       (error) => {
         console.error('Error al dar Me Gusta:', error);
@@ -170,6 +187,8 @@ export class ContenidoDeComentariosComponent implements OnInit{
       () => {
         this.comentario.likedByUser = false;
         this.comentario.meGustaId = null; 
+        this.comentario.contadorMeGusta = (this.comentario.contadorMeGusta || 1) - 1; // Decrementa localmente
+
       },
       (error) => {
         console.error('Error al quitar Me Gusta:', error);

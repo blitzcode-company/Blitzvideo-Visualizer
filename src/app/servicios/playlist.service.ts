@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
@@ -22,11 +22,15 @@ export class PlaylistService {
     );
   }
 
-  obtenerPlaylistConVideos(playlistId: number): Observable<any> {
-    const url = `${this.apiUrl}api/v1/playlists/${playlistId}`;
-    return this.http.get<any>(url);
+  obtenerPlaylistConVideos(playlistId: number, videoId: number, fromPlaylist: boolean): Observable<any> {
+    const url = `${this.apiUrl}api/v1/playlists/${playlistId}/videos`;
+    const params = new HttpParams()
+      .set('video_id', videoId.toString())
+      .set('fromPlaylist', fromPlaylist.toString());
+  
+    return this.http.get<any>(url, { params });
   }
-
+  
   crearLista(nombre: string, acceso: boolean, userId: number): Observable<any> {
     const url = `${this.apiUrl}api/v1/playlists`;
     const httpOptions = {

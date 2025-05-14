@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { PlaylistService } from '../../servicios/playlist.service';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
 import { StatusService } from '../../servicios/status.service';
 import { AuthService } from '../../servicios/auth.service';
@@ -8,6 +8,8 @@ import { SuscripcionesService } from '../../servicios/suscripciones.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Title } from '@angular/platform-browser';
 import { Subscription } from 'rxjs';
+
+
 
 @Component({
   selector: 'app-contenido-lista-de-reproduccion',
@@ -22,6 +24,8 @@ export class ContenidoListaDeReproduccionComponent {
   playlist: any;
   videos: any[] = [];
   serverIp = environment.serverIp;
+  fromPlaylist: boolean = false; 
+  videoId: number | null = null; 
 
   private userSubscription: Subscription = new Subscription();
 
@@ -32,11 +36,13 @@ export class ContenidoListaDeReproduccionComponent {
     private titleService: Title,
     private suscripcionService: SuscripcionesService,
     private snackBar: MatSnackBar,
+    private router: Router,
     public status: StatusService
   ) {}
 
   ngOnInit(): void {
     this.playlistId = this.route.snapshot.params['id'];
+    console.log('playlistId desde URL:', this.playlistId);  
     this.obtenerPlaylistConVideos();
     this.obtenerUsuario();
   }
@@ -84,10 +90,15 @@ export class ContenidoListaDeReproduccionComponent {
   }
 
   obtenerPlaylistConVideos(): void {
-    this.playlistService.obtenerPlaylistConVideos(this.playlistId).subscribe(data => {
+    this.playlistService.obtenerPlaylistConVideos(this.playlistId, this.videoId || 0, this.fromPlaylist).subscribe(data => {
       if (data) {
         this.playlist = data.playlist;
         this.videos = data.videos;
+
+        if (data.videos) {
+          this.videoId = data.videos.id;
+        }
+
         this.titleService.setTitle(`${this.playlist?.nombre} - BlitzVideo`);
       } else {
         console.error('Los datos de la playlist son null o undefined');
@@ -96,4 +107,15 @@ export class ContenidoListaDeReproduccionComponent {
       console.error('Error al obtener la playlist con videos', error);
     });
   }
+
+  verVideo(videoId: number): void {
+    // Verifica que playlistId está siendo enviado correctamente
+    console.log('Enviando playlistId:', this.playlistId);
+
+    this.router.navigate(['/video', videoId], {
+      state: { playlistId: this.playlistId }  // Pasas el playlistId al estado
+    });
+  }
+
+
 }
