@@ -4,6 +4,7 @@ import { PlaylistService } from '../../servicios/playlist.service';
 import { AuthService } from '../../servicios/auth.service';
 import { CrearListaComponent } from '../crear-lista/crear-lista.component'; 
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { Playlist } from '../../clases/playlist';
 
 
 @Component({
@@ -12,7 +13,8 @@ import { MatSnackBar } from '@angular/material/snack-bar';
   styleUrls: ['./agregar-lista.component.css'] 
 })
 export class AgregarListaComponent {
-  listas: any[] = [];
+  listas: Playlist[] = [];
+  
   listaSeleccionada: number | null = null;
   usuario: any;
   userId: any;
@@ -26,6 +28,7 @@ export class AgregarListaComponent {
     private snackBar: MatSnackBar 
   ) {
     this.obtenerUsuario(); 
+    this.listarListas();
   }
 
   obtenerUsuario(): void {
@@ -41,7 +44,9 @@ export class AgregarListaComponent {
   listarListas(): void {
     this.playlistService.obtenerListasDeReproduccion(this.userId).subscribe(
       res => {
-        this.listas = res;
+        console.log('Respuesta transformada:', res);
+        this.listas = res; 
+        console.log('Listas asignadas:', this.listas);
       },
       error => {
         console.error('Error al cargar las lista:', error);

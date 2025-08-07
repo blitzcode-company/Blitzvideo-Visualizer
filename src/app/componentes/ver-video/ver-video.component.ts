@@ -1,11 +1,12 @@
-import { Component, HostListener ,OnInit, OnDestroy, ElementRef, ViewChild, AfterViewInit, AfterViewChecked, ChangeDetectorRef } from '@angular/core';
+import { Component, HostListener ,OnInit, OnDestroy, ElementRef, ViewChild, AfterViewInit, AfterViewChecked, ChangeDetectorRef} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+
 import { VideosService } from '../../servicios/videos.service';
 import { AuthService } from '../../servicios/auth.service';
 import { Title } from '@angular/platform-browser';
 import { PuntuacionesService } from '../../servicios/puntuaciones.service';
 import { StatusService } from '../../servicios/status.service';
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { Videos } from '../../clases/videos';
 import { environment } from '../../../environments/environment';
 import { MatDialog } from '@angular/material/dialog';
@@ -17,6 +18,7 @@ import { ReportesService } from '../../servicios/reportes.service';
 import { ModalReporteVideoComponent } from '../modal-reporte-video/modal-reporte-video.component';
 import { PlaylistService } from '../../servicios/playlist.service';
 import { NotificacionesService } from '../../servicios/notificaciones.service';
+import { ModocineService } from '../../servicios/modocine.service';
 
 @Component({
   selector: 'app-ver-video',
@@ -49,6 +51,7 @@ export class VerVideoComponent implements OnInit, OnDestroy, AfterViewInit, Afte
   usuarioConCanal: any;
   idCanal:any;
   canales: any;
+  modoCine: boolean = false;
 
   puedeEditarVideo: boolean = false;
   numeroDeSuscriptores: any;
@@ -72,8 +75,8 @@ export class VerVideoComponent implements OnInit, OnDestroy, AfterViewInit, Afte
   public videoPublicidadUrl: string | null = null;
   sidebarVisible: boolean = false;
   videosRecomendados: any[] = [];
-
-
+  modoGuardado: any;
+  private cinemaModeSubscription!: Subscription;
 
   @ViewChild('descripcion') descripcionElement!: ElementRef; 
 
@@ -91,10 +94,18 @@ export class VerVideoComponent implements OnInit, OnDestroy, AfterViewInit, Afte
     public dialog: MatDialog,
     private cdr: ChangeDetectorRef,
     private reporteService: ReportesService,
+    private cinemaModeService: ModocineService,
     private notificacionesService: NotificacionesService
   ) {}
 
   ngOnInit(): void {
+
+    this.cinemaModeSubscription = this.cinemaModeService.getCinemaMode().subscribe(enabled => {
+      console.log('CinemaMode desde servicio en ngOnInit:', enabled);
+      this.isCinemaMode = enabled;
+      this.cdr.detectChanges();
+    });
+
     this.route.params.subscribe(params => {
       this.videoId = params['id'];
       this.mostrarVideo();
@@ -106,11 +117,14 @@ export class VerVideoComponent implements OnInit, OnDestroy, AfterViewInit, Afte
     this.obtenerUsuario();
     this.visitar();
     this.checkDescriptionHeight();
-    this.cdr.detectChanges();
     setTimeout(() => {
       this.verificarSuscripcion();
     }, 100);
     this.listarNumeroDeSuscriptores();
+    const storedCinemaMode = localStorage.getItem('cinemaMode');
+    this.isCinemaMode = storedCinemaMode ? JSON.parse(storedCinemaMode) : false;
+    console.log('Modo Cine cargado desde localStorage:', this.isCinemaMode);
+    this.cdr.detectChanges();
   }
 
   ngAfterViewInit(): void {
@@ -132,6 +146,8 @@ export class VerVideoComponent implements OnInit, OnDestroy, AfterViewInit, Afte
         this.cdr.detectChanges();
       }, 200);
     }
+
+
   }
 
   ngOnDestroy(): void {
@@ -241,7 +257,6 @@ toggleNotificaciones(): void {
   obtenerVideosRelacionados() {
     this.videoService.listarVideosRelacionados(this.videoId).subscribe(
       (res: any) => {
-        console.log(res)
         this.videosRecomendados = res; 
       },
       error => {
@@ -302,6 +317,12 @@ toggleNotificaciones(): void {
     );
   }
 
+  onImageError(event: any) {
+    event.target.src = 'assets/images/video-default.png';
+  }
+
+
+
   cargarPublicidad(): void {
     this.videoService.obtenerPublicidad().subscribe(
       (data) => {
@@ -338,12 +359,14 @@ toggleNotificaciones(): void {
 
     this.mostrarVideo(); 
   }
-
-  handleCinemaMode(isCinema: boolean): void {
-    this.isCinemaMode = isCinema;  
+  
+  handleCinemaMode(event: boolean): void {
+    console.log('Iniciando handleCinemaMode, isCinemaMode:', event);
+    this.cinemaModeService.setCinemaMode(event);
+    console.log('CinemaMode guardado en servicio:', event);
+    this.cdr.detectChanges();
   }
 
-  
   saltarPublicidad(): void {
     this.reproduciendoPublicidad = false;
     this.mostrarBotonSaltar = false;
@@ -375,6 +398,7 @@ toggleNotificaciones(): void {
   mostrarVideo(): void {
     this.videoService.obtenerInformacionVideo(this.videoId).subscribe(
       (res) => {
+        console.log(res)
         this.video = res;
         this.errorMessage = ''; 
         this.canalId = this.video.canal_id; 
@@ -382,7 +406,6 @@ toggleNotificaciones(): void {
         if (this.video?.error?.code === 403) {
           this.isBlocked = true;
           this.errorMessage = 'Este video ha sido bloqueado y no se puede acceder.';
-          console.error(this.errorMessage);
           return; 
         }
   
@@ -414,8 +437,8 @@ toggleNotificaciones(): void {
   obtenerVideosDePlaylist(): void {
     this.playlistService.obtenerPlaylistConVideos(this.playlistId, this.videoId, true).subscribe(
       (response) => {
-        this.videosDePlaylist = response.videos;
-        this.videoIdPlaylist = this.videosDePlaylist[0]?.id; 
+        this.videosDePlaylist = response.data.videos;
+        this.videoIdPlaylist = this.videosDePlaylist.length > 0 ? this.videosDePlaylist[0].id : null;
         console.log('Videos de la playlist:', this.videosDePlaylist);
       },
       (error) => {
@@ -469,7 +492,7 @@ toggleNotificaciones(): void {
   }
   
   private obtenerMensajeDeError(error: any): string {
-    return error?.error?.message || error?.message || 'Error desconocido: ' + JSON.stringify(error);
+    return error?.error?.message || error?.message || '' + JSON.stringify(error);
   }
 
 

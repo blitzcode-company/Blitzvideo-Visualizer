@@ -1,11 +1,11 @@
-import { Component, HostListener ,OnInit, OnDestroy, ElementRef, ViewChild, AfterViewInit, AfterViewChecked } from '@angular/core';
+import { Component, HostListener ,OnInit, OnDestroy, ElementRef, ViewChild, AfterViewInit, AfterViewChecked, ChangeDetectorRef } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { VideosService } from '../../servicios/videos.service';
 import { AuthService } from '../../servicios/auth.service';
 import { Title } from '@angular/platform-browser';
 import { PuntuacionesService } from '../../servicios/puntuaciones.service';
 import { StatusService } from '../../servicios/status.service';
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { Streams } from '../../clases/streams';
 import { environment } from '../../../environments/environment';
 import { MatDialog } from '@angular/material/dialog';
@@ -17,6 +17,8 @@ import { ReportesService } from '../../servicios/reportes.service';
 import { ModalReporteVideoComponent } from '../modal-reporte-video/modal-reporte-video.component';
 import { PlaylistService } from '../../servicios/playlist.service';
 import { StreamService } from '../../servicios/stream.service';
+import { NotificacionesService } from '../../servicios/notificaciones.service';
+import { ChatstreamService } from '../../servicios/chatstream.service';
 
 @Component({
   selector: 'app-ver-stream',
@@ -27,6 +29,7 @@ import { StreamService } from '../../servicios/stream.service';
 export class VerStreamComponent implements OnInit, OnDestroy, AfterViewInit, AfterViewChecked{
 
   puntuacionSeleccionada: number | null = null;
+  cargando: boolean = false;
   streamId: any;
   canalId: any;
   userId: any;
@@ -66,15 +69,29 @@ export class VerStreamComponent implements OnInit, OnDestroy, AfterViewInit, Aft
   videoUrlPlaylist:any
   public videoPublicidadUrl: string | null = null;
   isPlayerReady = false;
+  notificacionesActivas: boolean = false;
+  showToggleLink = false;
+  chatMessagesList: { id: number; user: string; user_photo: string | null; text: string; created_at: string }[] = [];
+  chatInput: string = '';
+  private chatSubscription: Subscription | null = null;
+  private subscription: Subscription | null = null;
 
-  @ViewChild('descripcion', { static: true }) descripcionElement: ElementRef | undefined;
+
+  mensajes: any[] = [];
+
+
+  @ViewChild('descripcion') descripcionElement!: ElementRef; 
+  @ViewChild('chatMessages') chatMessages!: ElementRef;
 
   constructor(
     private route: ActivatedRoute,
     private streamService: StreamService,
     private suscripcionService: SuscripcionesService,
     private authService: AuthService,
+    private chatService: ChatstreamService,
+    private notificacionesService: NotificacionesService,
     private titleService: Title,
+    private cdr: ChangeDetectorRef,
     private router: Router,
     public status: StatusService,
     public dialog: MatDialog,
@@ -85,17 +102,81 @@ export class VerStreamComponent implements OnInit, OnDestroy, AfterViewInit, Aft
     this.route.params.subscribe(params => {
       this.streamId = params['id'];
       this.mostrarStream();
+      this.loadChatMessagesAndListen();
+
     });  
+
+    this.chatService.cargarMensaje(this.streamId).subscribe((res) => {
+      this.mensajes = res;
+    });
+
+    this.subscription = this.chatService.startListening(this.streamId).subscribe((nuevo) => {
+      this.mensajes.push(nuevo);
+    });
+
     this.obtenerIdDePlaylist();
     this.obtenerUsuarioConCanal();
     this.obtenerUsuario();
     this.verificarSuscripcion();
     this.listarNumeroDeSuscriptores();
   }
-  ngOnDestroy(): void {
-    this.fromPlaylist = false;
+
+
+  enviarMensaje() {
+    if (!this.mensaje.trim()) return;
+
+    this.chatService.mandarMensaje(this.streamId, this.mensaje.trim(), this.userId).subscribe(() => {
+      this.mensaje = '';
+    });
   }
 
+
+  ngOnDestroy(): void {
+    if (this.streamId) {
+      this.chatService.leaveChannel(this.streamId);
+    }
+    if (this.chatSubscription) {
+      this.chatSubscription.unsubscribe();
+    }  
+  }
+
+  ngOnChanges() {
+    if (this.stream?.descripcion) {
+      setTimeout(() => {
+        this.checkDescriptionHeight();
+        this.cdr.detectChanges();
+      }, 200);
+    }
+
+
+  }
+
+  checkDescriptionHeight() {
+    if (this.descripcionElement && this.stream?.descripcion) {
+      const descripcion = this.descripcionElement.nativeElement;
+      const maxHeight = 150; 
+      const scrollHeight = descripcion.scrollHeight;
+      this.showToggleLink = scrollHeight > maxHeight + 20;
+      if (!this.showToggleLink) {
+        this.isExpanded = true;
+      }
+    } else {
+      console.log('checkDescriptionHeight: Element or description not ready', {
+        hasElement: !!this.descripcionElement,
+        hasDescription: !!this.stream?.descripcion
+      });
+      this.showToggleLink = false;
+    }
+    this.cdr.detectChanges();
+  }
+
+  checkContentOverflow() {
+    if (this.descripcionElement) {
+      const element = this.descripcionElement.nativeElement;
+      this.isContentOverflowing = element.scrollHeight > element.clientHeight;
+    }
+  }
+  
  
 
   obtenerIdDePlaylist() {
@@ -117,8 +198,11 @@ export class VerStreamComponent implements OnInit, OnDestroy, AfterViewInit, Aft
   ngAfterViewInit(): void {
     setTimeout(() => {
       this.checkContentOverflow();
+      this.cdr.detectChanges();
     }, 0);
+    this.checkDescriptionHeight();
   }
+  
 
   ngAfterViewChecked(): void {
     this.checkContentOverflow();
@@ -132,6 +216,7 @@ export class VerStreamComponent implements OnInit, OnDestroy, AfterViewInit, Aft
         this.userId = this.usuario.id;
         this.obtenerUsuarioConCanal();
         this.verificarSuscripcion();
+        this.sendChatMessage();
       }
     });
   
@@ -140,19 +225,14 @@ export class VerStreamComponent implements OnInit, OnDestroy, AfterViewInit, Aft
 
  
 
-  toggleExpand(event: MouseEvent) {
+  toggleExpand(event: Event) {
     event.preventDefault();
     this.isExpanded = !this.isExpanded;
-    setTimeout(() => this.checkContentOverflow(), 0);
+    this.cdr.detectChanges();
   }
 
 
-  checkContentOverflow() {
-    if (this.descripcionElement) {
-      const element = this.descripcionElement.nativeElement;
-      this.isContentOverflowing = element.scrollHeight > element.clientHeight;
-    }
-  }
+
 
   obtenerUsuarioConCanal(): void {
     if (this.userId !== undefined) {
@@ -249,7 +329,7 @@ export class VerStreamComponent implements OnInit, OnDestroy, AfterViewInit, Aft
   }
 
   mostrarStream(): void {
-    this.streamService.obtenerInformacionStreams(7).subscribe(
+    this.streamService.obtenerInformacionStreams(this.streamId).subscribe(
       (res) => {
         this.stream = res.transmision || {};
         this.errorMessage = ''; 
@@ -372,10 +452,19 @@ export class VerStreamComponent implements OnInit, OnDestroy, AfterViewInit, Aft
 }
 
 
+toggleNotificaciones(): void {
+  this.cargando = true;
+  this.notificacionesService.cambiarEstado(this.canalId, this.userId, !this.notificacionesActivas).subscribe({
+    next: () => {
+      this.notificacionesActivas = !this.notificacionesActivas;
+      this.cargando = false;
+    },
+    error: () => this.cargando = false
+  });
+}
 
   toggleSuscripcion(): void {
 
-    
 
     if (this.suscrito) {
       this.anularSuscripcion(); 
@@ -425,6 +514,64 @@ export class VerStreamComponent implements OnInit, OnDestroy, AfterViewInit, Aft
       }
     );
 }
+
+
+loadChatMessagesAndListen() {
+  if (!this.streamId) return;
+
+  this.chatService.cargarMensaje(this.streamId).subscribe({
+    next: (messages: any) => {
+      this.chatMessagesList = messages.map((msg: any) => ({
+        id: msg.id,
+        user: msg.user.name,
+        user_photo: msg.user.foto,
+        text: msg.mensaje,
+        created_at: msg.created_at,
+      }));
+      this.scrollToBottom();
+    },
+    error: (err) => {
+      console.error('Error al cargar mensajes:', err);
+    },
+  });
+
+  if (this.chatSubscription) {
+    this.chatSubscription.unsubscribe();
+  }
+  this.chatSubscription = this.chatService.startListening(this.streamId).subscribe({
+    next: (message) => {
+      console.log('Mensaje websocket recibido:', message);
+      this.chatMessagesList.push(message);
+      this.scrollToBottom();
+    },
+    error: (err) => {
+      console.error('Error al recibir mensaje:', err);
+    },
+  });
+}
+
+
+sendChatMessage() {
+  if (!this.chatInput.trim() || !this.streamId) return;
+  this.chatService.mandarMensaje(this.streamId, this.chatInput, this.userId).subscribe({
+    next: () => {
+      this.chatInput = '';
+    },
+    error: (err) => {
+      console.error('Error al enviar mensaje:', err);
+    },
+  });
+}
+
+scrollToBottom() {
+  setTimeout(() => {
+    if (this.chatMessages) {
+      const chatContainer = this.chatMessages.nativeElement;
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+  }, 0);
+}
+
 
   private handleError(error: any): void {
     if (error.status === 409) {

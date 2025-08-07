@@ -82,11 +82,11 @@ import {
   ɵɵtemplate,
   ɵɵviewQuery
 } from "./chunk-6H7B67QN.js";
-import "./chunk-SAVXX6OM.js";
 import {
   defer,
   merge
 } from "./chunk-SG3BCSKH.js";
+import "./chunk-SAVXX6OM.js";
 import {
   Subject,
   filter,

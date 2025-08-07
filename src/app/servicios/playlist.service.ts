@@ -4,31 +4,59 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { CookieService } from 'ngx-cookie-service';
+import { Playlist } from '../clases/playlist';
+import { Videos } from '../clases/videos';
+
+
+interface PlaylistResponse {
+  message: string;
+  data: {
+    playlists: Playlist[];
+  };
+}
+
+interface PlaylistWithVideosResponse {
+  message: string;
+  data: {
+    playlist: Playlist;
+    videos: Videos[];
+  };
+}
+
 
 @Injectable({
   providedIn: 'root'
 })
+
+
 export class PlaylistService {
 
   private apiUrl = environment.apiUrl;
 
   constructor(private http: HttpClient, private cookie: CookieService) {}
 
-  obtenerListasDeReproduccion(userId: number): Observable<any[]> {
+  obtenerListasDeReproduccion(userId: number): Observable<Playlist[]> {
     const url = `${this.apiUrl}api/v1/playlists/${userId}/playlists`;
-    
-    return this.http.get<any>(url).pipe(
-      map(response => response.playlists || []) 
+    return this.http.get<PlaylistResponse>(url).pipe(
+      map(response => response.data.playlists.map(data => new Playlist(data)))
     );
   }
 
-  obtenerPlaylistConVideos(playlistId: number, videoId: number, fromPlaylist: boolean): Observable<any> {
+ obtenerPlaylistConVideos(playlistId: number, videoId: number, fromPlaylist: boolean): Observable<PlaylistWithVideosResponse> {
     const url = `${this.apiUrl}api/v1/playlists/${playlistId}/videos`;
     const params = new HttpParams()
       .set('video_id', videoId.toString())
       .set('fromPlaylist', fromPlaylist.toString());
-  
-    return this.http.get<any>(url, { params });
+
+    return this.http.get<PlaylistWithVideosResponse>(url, { params }).pipe(
+      map(response => ({
+        ...response,
+        data: {
+          playlist: new Playlist(response.data.playlist),
+          videos: response.data.videos.map(video => new Videos(video))
+        }
+      }))
+    );
   }
   
   crearLista(nombre: string, acceso: boolean, userId: number): Observable<any> {

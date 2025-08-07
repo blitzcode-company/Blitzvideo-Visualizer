@@ -1,4 +1,5 @@
-import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { NgModule, CUSTOM_ELEMENTS_SCHEMA, PLATFORM_ID, Inject  } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { BrowserModule, provideClientHydration } from '@angular/platform-browser';
 import { ChunkPipe } from './pipes/chunk.pipe'; 
 import { AppRoutingModule } from './app-routing.module';
@@ -55,6 +56,12 @@ import { ConfiguracionStreamComponent } from './componentes/configuracion-stream
 import { SidebarComponent } from './componentes/sidebar/sidebar.component';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { ModocineService } from './servicios/modocine.service';
+import Echo from 'laravel-echo';
+import Pusher from 'pusher-js';
+
+
 
 
 @NgModule({
@@ -99,6 +106,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     HttpClientModule,
     FormsModule,
     MatCardModule,
+    BrowserAnimationsModule, 
     RouterModule.forRoot([
       { path: 'video/:id', component: VerVideoComponent },
     ]),
@@ -132,9 +140,13 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     CookieService, 
     provideAnimationsAsync(),
     ComentariosService, 
+    ModocineService,
     ReportesService
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {
+  
+  
+}

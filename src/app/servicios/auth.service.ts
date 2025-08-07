@@ -26,9 +26,8 @@ export class AuthService {
     const token = this.cookie.get('accessToken');
     
     if (!token) {
-      // Si no hay token, simplemente retornamos un observable con null
       console.warn('No se encontró un token de acceso');
-      return of(null); // O también podrías retornar un observable vacío si lo prefieres
+      return of(null); 
     }
   
     const url = `${this.authApiUrl}api/v1/validate`;
@@ -45,7 +44,7 @@ export class AuthService {
         if (error.status === 401) {
           console.warn('Usuario no autenticado');
         }
-        return of(null); // Retorna null si ocurre un error 401
+        return of(null); 
       })
     );
   }

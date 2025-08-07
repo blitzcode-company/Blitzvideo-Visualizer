@@ -1,6 +1,6 @@
 <div class="reproductor" [ngClass]="{'cinema-mode': isCinemaMode}">
-  <div class="video-container" >
-    <video #videoPlayer class="video" [src]="videoUrl" muted (loadedmetadata)="setDuration()" (timeupdate)="updateProgressBar()" autoplay >
+  <div class="reproductor-video-container" #videoContainer>
+    <video #videoPlayer class="video" [src]="videoUrl" muted (loadedmetadata)="setDuration()" (timeupdate)="updateProgressBar()" (ended)="onVideoEnd()" autoplay>
       <source [src]="videoUrl" type="video/mp4">
       Tu navegador no soporta la etiqueta de video.
     </video>
@@ -12,13 +12,16 @@
       <span>{{ formatTime(currentTime) }}</span> <span> / </span> <span>{{ formatTime(duration) }}</span>
 
       <input type="range" #progressBar class="progress" value="0" min="0" max="100" (input)="seek(progressBar)">
+
       <button (click)="toggleMute()">
         <i [class]="isMuted ? 'fas fa-volume-mute' : 'fas fa-volume-up'"></i>
       </button>
+
       <input type="range" #volumeSlider class="volume" value="100" min="0" max="100" (input)="changeVolume(volumeSlider)">
       <button (click)="toggleFullscreen()">
         <i class="fas fa-expand"></i>
       </button>
+      
       <button (click)="toggleMode()">
         <i [class]="isCinemaMode ? 'fas fa-compress' : 'fas fa-film'"></i>
       </button>

@@ -1,4 +1,4 @@
-import { Component, Input, EventEmitter, Output, OnInit, AfterViewInit, ViewChild, ElementRef, SimpleChanges } from '@angular/core';
+import { Component, Input, EventEmitter, Output, OnInit, AfterViewInit, ViewChild, ElementRef, SimpleChanges, ChangeDetectorRef } from '@angular/core';
 import Hls from 'hls.js';
 
 
@@ -10,20 +10,26 @@ import Hls from 'hls.js';
 export class ReproductorStreamComponent {
 
   @Input() streamUrl: string | undefined;
+  @Input() activoStream: number = 0;
   @ViewChild('videoPlayer', { static: false }) videoPlayer: ElementRef<HTMLVideoElement> | undefined;
   @ViewChild('progressBar', { static: true }) progressBar!: ElementRef<HTMLInputElement>;
   @ViewChild('volumeSlider', { static: true }) volumeSlider!: ElementRef<HTMLInputElement>;
   @Input() isCinemaMode: boolean = false; 
   @Output() toggleCinemaMode = new EventEmitter<boolean>(); 
   @Output() videoTerminado: EventEmitter<void> = new EventEmitter();
+  @ViewChild('videoContainer', { static: false }) videoContainer!: ElementRef<HTMLDivElement>;
 
   isPlaying = false;
   isMuted = false;
   currentTime: number = 0;
   duration: number = 0;
   isFullscreen = false;
+  
 
-  constructor() { }
+  constructor(
+    private cdr: ChangeDetectorRef,
+
+  ) { }
 
   ngOnInit(): void { }
 
@@ -38,6 +44,11 @@ export class ReproductorStreamComponent {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['streamUrl'] && this.streamUrl) {
       this.cambiarFuenteVideo(this.streamUrl);
+    }
+    if (changes['isCinemaMode'] && this.videoContainer?.nativeElement) {
+      console.log('Cambiando isCinemaMode:', this.isCinemaMode);
+      this.applyCinemaMode(this.isCinemaMode);
+      this.cdr.detectChanges();
     }
   }
 
@@ -54,7 +65,6 @@ export class ReproductorStreamComponent {
     const video = this.videoPlayer?.nativeElement;
     if (!video) return;
   
-    // Limpia cualquier fuente previa
     video.pause();
     video.removeAttribute('src');
     video.load();
@@ -71,7 +81,6 @@ export class ReproductorStreamComponent {
         });
       });
     } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-      // Safari (que sí soporta HLS nativo)
       video.src = url;
       video.addEventListener('loadedmetadata', () => {
         video.play().then(() => {
@@ -82,6 +91,31 @@ export class ReproductorStreamComponent {
       });
     } else {
       console.error('HLS no es compatible en este navegador y no se puede reproducir el stream.');
+    }
+  }
+
+  private applyCinemaMode(enabled: boolean) {
+    console.log('Aplicando modo cine:', enabled);
+    const videoContainer = this.videoContainer?.nativeElement;
+    const videoElement = this.videoPlayer?.nativeElement;
+
+    if (videoContainer) {
+      if (enabled) {
+        videoContainer.classList.add('cinema-mode');
+        console.log('Añadiendo clase cinema-mode al contenedor', videoContainer.classList);
+      } else {
+        videoContainer.classList.remove('cinema-mode');
+        console.log('Quitando clase cinema-mode del contenedor', videoContainer.classList);
+      }
+    } else {
+      console.warn('videoContainer no está disponible');
+    }
+
+    if (videoElement && this.streamUrl) {
+      videoElement.style.objectFit = enabled ? 'cover' : 'contain';
+      console.log('Ajustando video object-fit:', videoElement.style.objectFit);
+    } else {
+      console.warn('videoElement o videoUrl no están disponibles');
     }
   }
 
@@ -98,7 +132,6 @@ export class ReproductorStreamComponent {
   const video = this.videoPlayer?.nativeElement;
 
   if (video) {
-    // Evita reproducir si no hay fuente
     if (!video.src && video.children.length === 0) {
       console.warn('No hay fuente de video cargada.');
       return;

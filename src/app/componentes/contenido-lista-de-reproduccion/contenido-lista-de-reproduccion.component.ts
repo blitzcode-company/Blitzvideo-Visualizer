@@ -8,8 +8,8 @@ import { SuscripcionesService } from '../../servicios/suscripciones.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Title } from '@angular/platform-browser';
 import { Subscription } from 'rxjs';
-
-
+import { Playlist } from '../../clases/playlist';
+import { Videos } from '../../clases/videos';
 
 @Component({
   selector: 'app-contenido-lista-de-reproduccion',
@@ -90,30 +90,39 @@ export class ContenidoListaDeReproduccionComponent {
   }
 
   obtenerPlaylistConVideos(): void {
-    this.playlistService.obtenerPlaylistConVideos(this.playlistId, this.videoId || 0, this.fromPlaylist).subscribe(data => {
-      if (data) {
-        this.playlist = data.playlist;
-        this.videos = data.videos;
+    this.playlistService.obtenerPlaylistConVideos(this.playlistId, this.videoId || 0, this.fromPlaylist).subscribe(
+      data => {
+        console.log('Respuesta del backend:', data);
+        this.playlist = new Playlist(data.data.playlist);
+        this.videos = data.data.videos.map(video => new Videos(video));
 
-        if (data.videos) {
-          this.videoId = data.videos.id;
+        if (this.videos.length > 0) {
+          if (this.videoId) {
+            const selectedVideo = this.videos.find(video => video.id === this.videoId);
+            this.videoId = selectedVideo ? selectedVideo.id : this.videos[0].id;
+          } else {
+            this.videoId = this.videos[0].id; 
+          }
         }
 
-        this.titleService.setTitle(`${this.playlist?.nombre} - BlitzVideo`);
-      } else {
-        console.error('Los datos de la playlist son null o undefined');
+        if (this.playlist) {
+          this.titleService.setTitle(`${this.playlist.nombre} - BlitzVideo`);
+        } else {
+          console.error('La playlist es null');
+        }
+      },
+      error => {
+        console.error('Error al obtener la playlist con videos:', error);
       }
-    }, error => {
-      console.error('Error al obtener la playlist con videos', error);
-    });
+    );
+  
   }
 
   verVideo(videoId: number): void {
-    // Verifica que playlistId está siendo enviado correctamente
     console.log('Enviando playlistId:', this.playlistId);
 
     this.router.navigate(['/video', videoId], {
-      state: { playlistId: this.playlistId }  // Pasas el playlistId al estado
+      state: { playlistId: this.playlistId }  
     });
   }
 

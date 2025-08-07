@@ -9,6 +9,7 @@ import { SuscripcionesService } from '../../servicios/suscripciones.service';
 import { MatDialog } from '@angular/material/dialog';
 import { ModalReportarUsuarioComponent } from '../modal-reportar-usuario/modal-reportar-usuario.component';
 import { NotificacionesService } from '../../servicios/notificaciones.service';
+import { StatusService } from '../../servicios/status.service';
 
 
 @Component({
@@ -33,6 +34,10 @@ export class VerCanalComponent implements OnInit {
   notificacionesActivas: boolean = false;
   serverIp = environment.serverIp;
   cargandoNotificacion: boolean = false;
+  usuarioConCanal: any;
+  idCanal: any;
+  canales: any[] = [];
+
 
 
   constructor(
@@ -43,6 +48,7 @@ export class VerCanalComponent implements OnInit {
     private authService: AuthService,
     private notificacionesService: NotificacionesService,
     public dialog: MatDialog,
+    public status: StatusService
 
   ) {}
 
@@ -144,47 +150,60 @@ export class VerCanalComponent implements OnInit {
   }
 
   obtenerCanal() {
-    this.canalService.listarVideosDeCanal(this.canalId).subscribe(
-      (res: any) => {
-        console.log('Datos del canal:', res); 
-
-         if (res.length > 0) {
-          this.canal = res[0].canal;
-          this.canalNombre = this.canal.nombre;
-          this.usuario = this.canal.user;
-          this.canalId = this.canal.id
-          this.obtenerEstadoDeNotificaciones();
-
-          console.log('Canal:', this.canal);
-          console.log('Usuario:', this.usuario);
-
-          this.videosGeneral =  res.map((videoData: any) => {
-            return {
-              ...videoData,
-              duracionFormateada: this.convertirDuracion(videoData.duracion)
-            };
-          });
+    this.cargando = true;
   
-          this.videos = this.videosGeneral.slice(0, 3);
+    this.canalService.obtenerCanalPorId(this.canalId).subscribe({
+      next: (canalData: any) => {
+        console.log('Datos del canal:', canalData);
+        this.canal = canalData;
+        this.canalNombre = canalData.nombre;
+        this.usuario = canalData.user;
+        this.canalId = canalData.id;
+        this.setTitle(this.canal.nombre);
+
+        this.obtenerEstadoDeNotificaciones();
   
-          this.ultimoVideo = this.videosGeneral.reduce((prev: any, current: any) => 
-            (prev.id > current.id) ? prev : current
-          );
+        this.canalService.obtenerCanalPorId(this.canalId).subscribe({
+          next: (videosData: any) => {
+            console.log('Videos del canal:', videosData);
+            if (videosData.length > 0) {
+              this.videosGeneral = videosData.map((videoData: any) => ({
+                ...videoData,
+                duracionFormateada: this.convertirDuracion(videoData.duracion)
+              }));
   
-          if (this.ultimoVideo) {
-            this.ultimoVideo.indice = this.videos.findIndex(video => video.id === this.ultimoVideo.id) + 1;
+              this.videos = this.videosGeneral.slice(0, 3);
+  
+              this.ultimoVideo = this.videosGeneral.reduce((prev: any, current: any) =>
+                (prev.id > current.id) ? prev : current
+              );
+  
+              if (this.ultimoVideo) {
+                this.ultimoVideo.indice = this.videos.findIndex(video => video.id === this.ultimoVideo.id) + 1;
+              }
+            } else {
+              console.log('No se encontraron videos para este canal');
+              this.videos = [];
+              this.ultimoVideo = null;
+            }
+            this.cargando = false;
+          },
+          error: (error) => {
+            console.error('Error al obtener los videos del canal:', error);
+            this.videos = [];
+            this.ultimoVideo = null;
+            this.cargando = false;
           }
-  
-          this.setTitle(this.canal.nombre);
-        } else {
-          console.error('No se encontraron videos para este canal');
-        }
+        });
       },
-      error => {
+      error: (error) => {
         console.error('Error al obtener el canal:', error);
+        this.canal = {};
+        this.canalNombre = '';
+        this.usuario = {};
         this.cargando = false;
       }
-    );
+    });
   }
 
   openReportModal() {

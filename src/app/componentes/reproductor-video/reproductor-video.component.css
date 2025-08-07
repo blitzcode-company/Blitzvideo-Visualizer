@@ -1,69 +1,55 @@
 .reproductor {
   width: 100%;
-  aspect-ratio: 16 / 9; 
+  max-width: 1234px;
+  aspect-ratio: 16 / 9;
   position: relative;
   transition: all 0.3s ease;
 }
 
 .reproductor.cinema-mode {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: 9999;
-  background: #000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 100%; 
+  max-width: none; 
+  height: auto;
+  background: black; 
+  display: block;
+  position: relative;
+
 }
 
-.video-container {
+.reproductor-video-container {
   position: relative;
   width: 100%;
   height: 100%;
-  background-color: #000;
+  background: black !important; 
 }
 
 .video {
   width: 100%;
-  height: 100%; 
+  height: 100%;
   display: block;
-  object-fit: contain; 
+  object-fit: cover;
 }
 
 .controls {
   display: flex;
-
   justify-content: space-between;
   align-items: center;
   padding: 10px;
   position: absolute;
   bottom: 0;
   width: 100%;
-  background: rgba(0, 0, 0, 0.7); 
-  opacity: 1;
+  background: rgba(0, 0, 0, 0.7);
+  opacity: 0;
   transition: opacity 0.3s ease;
 }
 
-.video-container:hover .controls {
+.reproductor-video-container:hover .controls {
   opacity: 1;
 }
 
-.video-container .controls {
-  opacity: 0;
+span {
+  color: white;
 }
-
-.reproductor.cinema-mode .video-container {
-  max-width: 100%;
-  max-height: 100%;
-  aspect-ratio: 16 / 9;
-}
-
- span {
-  color:white;
-
- }
 
 button, input[type="range"] {
   background: none;

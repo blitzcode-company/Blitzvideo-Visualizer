@@ -1,6 +1,6 @@
 <app-header></app-header>
 <div class="containerHome">
-  <app-sidebar 
+  <app-sidebar
     [status]="status"
     [usuarioConCanal]="usuarioConCanal"
     [idCanal]="idCanal"
@@ -8,13 +8,18 @@
   ></app-sidebar>
 
   <div class="content-wrapper">
-    <div class="stream-grid" *ngIf="streams; else loadingStreams">
+    <div class="stream-grid" *ngIf="!errorStreams; else errorStreamsTemplate">
       <h2>Transmisiones</h2>
-      <ng-container *ngIf="streams.length > 0; else noStreams">
+      <ng-container *ngIf="!isLoading && streams.length > 0; else noStreams">
         <div class="stream-card" *ngFor="let stream of streams">
           <a [routerLink]="['/stream', stream.id]" class="stream-link" [title]="stream.titulo">
             <div class="miniatura-container">
-              <img class="miniatura" [src]="stream.miniatura ? stream.miniatura : 'assets/images/stream-default.png'" alt="Miniatura del stream">
+              <img
+                class="miniatura"
+                [src]="stream.miniatura ? stream.miniatura : 'assets/images/stream-default.png'"
+                alt="Miniatura del stream"
+                (error)="onImageError($event)"
+              >
               <span class="live-badge" *ngIf="stream.activo === 1">EN VIVO</span>
               <p class="duracionVideo" *ngIf="stream.duracionFormateada">{{ stream.duracionFormateada }}</p>
             </div>
@@ -24,8 +29,18 @@
               <hr>
               <div class="canalNombre">
                 <a [routerLink]="['/canal', stream.canal.id]" [title]="stream.canal.nombre" class="canal-link">
-                  <img *ngIf="stream.canal.user?.foto" class="fotoUser" [src]="stream.canal.user.foto" alt="Foto del canal">
-                  <img *ngIf="!stream.canal.user?.foto" class="fotoUserDefault" src="/assets/images/user.png" alt="Foto del canal">
+                  <img
+                    *ngIf="stream.canal.user?.foto"
+                    class="fotoUser"
+                    [src]="stream.canal.user.foto"
+                    alt="Foto del canal"
+                  >
+                  <img
+                    *ngIf="!stream.canal.user?.foto"
+                    class="fotoUserDefault"
+                    src="/assets/images/user.png"
+                    alt="Foto del canal"
+                  >
                   {{ stream.canal.nombre }}
                 </a>
               </div>
@@ -34,36 +49,63 @@
         </div>
       </ng-container>
       <ng-template #noStreams>
-        <p>No hay transmisiones en vivo en este momento.</p>
+        <p *ngIf="!isLoading">No hay transmisiones en vivo en este momento.</p>
+        <p *ngIf="isLoading">Cargando transmisiones...</p>
       </ng-template>
     </div>
-    <ng-template #loadingStreams>
-      <p>Cargando transmisiones...</p>
+    <ng-template #errorStreamsTemplate>
+      <p>Error al cargar las transmisiones. Por favor, intenta de nuevo.</p>
     </ng-template>
-<hr class="lineadivisoria">
+
+    <hr class="lineadivisoria">
+
     <div class="video-grid">
       <h2>Videos</h2>
-
-      <div class="video-card" *ngFor="let video of videos">
-        <a [routerLink]="['/video', video.id]" class="video-link" [title]="video.titulo">
-          <div class="miniatura-container">
-            <img class="miniatura" [src]="video.miniatura ? video.miniatura : 'assets/images/video-default.png'" alt="Miniatura del video">
-            <p class="duracionVideo">{{ video.duracionFormateada }}</p>
+      <ng-container *ngIf="!isLoading; else loadingVideos">
+        <ng-container *ngIf="videos.length > 0; else noVideos">
+          <div class="video-card" *ngFor="let video of videos">
+            <a [routerLink]="['/video', video.id]" class="video-link" [title]="video.titulo">
+              <div class="miniatura-container">
+                <img
+                  class="miniatura"
+                  [src]="video.miniatura ? video.miniatura : 'assets/images/video-default.png'"
+                  alt="Miniatura del video"
+                  (error)="onImageError($event)"
+                >
+                <p class="duracionVideo">{{ video.duracionFormateada }}</p>
+              </div>
+              <div class="video-info">
+                <h3>{{ video.titulo }}</h3>
+                <p>{{ video.visitas_count }} vistas • {{ video.created_at | date:'short' }}</p>
+                <hr>
+                <div class="canalNombre">
+                  <a [routerLink]="['/canal', video.canal.id]" [title]="video.canal.nombre" class="canal-link">
+                    <img
+                      *ngIf="video.canal.user?.foto"
+                      class="fotoUser"
+                      [src]="video.canal.user.foto"
+                      alt="Foto del canal"
+                    >
+                    <img
+                      *ngIf="!video.canal.user?.foto"
+                      class="fotoUserDefault"
+                      src="/assets/images/user.png"
+                      alt="Foto del canal"
+                    >
+                    {{ video.canal.nombre }}
+                  </a>
+                </div>
+              </div>
+            </a>
           </div>
-          <div class="video-info">
-            <h3>{{ video.titulo }}</h3>
-            <p>{{ video.visitas_count }} vistas • {{ video.created_at | date:'short' }}</p>
-            <hr>
-            <div class="canalNombre">
-              <a [routerLink]="['/canal', video.canal.id]" [title]="video.canal.nombre" class="canal-link">
-                <img *ngIf="video.canal.user.foto" class="fotoUser" [src]="video.canal.user.foto" alt="Foto del canal">
-                <img *ngIf="!video.canal.user.foto" class="fotoUserDefault" src="/assets/images/user.png" alt="Foto del canal">
-                {{ video.canal.nombre }}
-              </a>
-            </div>
-          </div>
-        </a>
-      </div>
+        </ng-container>
+        <ng-template #noVideos>
+          <p>No hay videos disponibles en este momento.</p>
+        </ng-template>
+      </ng-container>
+      <ng-template #loadingVideos>
+        <p>Cargando videos...</p>
+      </ng-template>
     </div>
   </div>
 </div>

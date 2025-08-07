@@ -10,10 +10,10 @@
   <p>Cargando stream...</p>
 </div>
 <div class="container-fluid">
-<div class="video-container" *ngIf="!isBlocked && !errorMessage && stream">
-  <div class="tituloyvideo">
-    <h1>{{ stream.titulo }}</h1>
-  </div>
+  <div class="video-container" *ngIf="!isBlocked && !errorMessage && stream">
+    <div class="tituloyvideo">
+      <h1>{{ stream.titulo }}</h1>
+    </div>
   
     <div class="reproductor" [ngClass]="{ 'cinema-mode': isCinemaMode }">
       <div *ngIf="reproduciendoPublicidad" class="publicidad-overlay">
@@ -24,68 +24,85 @@
       </div>
     
       <app-reproductor-stream
-      [streamUrl]="streamUrl"
-      [isCinemaMode]="isCinemaMode"
-      (toggleCinemaMode)="handleCinemaMode($event)"
-    ></app-reproductor-stream>
-  
-     
-    </div>
- 
- 
-
-
-  <div class="info-container">
-    <a *ngIf="stream.canal" [routerLink]="['/canal', stream.canal.id]">
-      
-    <div class="info-canal">
-      <img *ngIf="!stream.canal.user.foto" class="fotodeperfil" src="assets/images/user.png" alt="Logo del canal del usuario" srcset="">
-      <img *ngIf="stream.canal.user.foto" class="fotodeperfil" [src]="stream.canal.user.foto" alt="Logo del canal del usuario" srcset="">
+        [activoStream]="stream?.activo"
+        [streamUrl]="streamUrl"
+        [isCinemaMode]="isCinemaMode"
+        (toggleCinemaMode)="handleCinemaMode($event)"
+      ></app-reproductor-stream>
     </div>
 
-    </a>
+    <div class="info-container">
+      <a *ngIf="stream.canal" [routerLink]="['/canal', stream.canal.id]">
+        <div class="info-canal">
+          <img *ngIf="!stream.canal.user.foto" class="fotodeperfil" src="assets/images/user.png" alt="Logo del canal del usuario" srcset="">
+          <img *ngIf="stream.canal.user.foto" class="fotodeperfil" [src]="stream.canal.user.foto" alt="Logo del canal del usuario" srcset="">
+        </div>
+      </a>
 
-    <div class="nombreysubs">
-      <a *ngIf="stream.canal" class="nombrecanal" [routerLink]="['/canal', stream.canal.id]">
-        {{ stream.canal.nombre }}</a>
-      <p class="suscriptores" *ngIf="numeroDeSuscriptores">
-        {{  numeroDeSuscriptores.numero_suscripciones  }} suscriptores
-      </p>
-    </div>
+      <div class="nombreysubs">
+        <a *ngIf="stream.canal" class="nombrecanal" [routerLink]="['/canal', stream.canal.id]">
+          {{ stream.canal.nombre }}</a>
+        <p class="suscriptores" *ngIf="numeroDeSuscriptores">
+          {{ numeroDeSuscriptores.numero_suscripciones }} suscriptores
+        </p>
+      </div>
  
-    <div>
-      
       <button *ngIf="suscrito !== 'propietario'" class="boton" 
-      [ngClass]="{ 'suscrito': suscrito === 'suscrito' }" 
-      (click)="suscrito === 'suscrito' ? anularSuscripcion() : suscribirse()">
-      {{ suscrito === 'suscrito' ? 'Suscrito' : 'Suscribirse' }}
+        [ngClass]="{'suscrito': suscrito === 'suscrito'}" 
+        (click)="suscrito === 'suscrito' ? anularSuscripcion() : suscribirse()">
+        {{ suscrito === 'suscrito' ? 'Suscrito' : 'Suscribirse' }}
       </button>
-     
-    </div>
+      <ng-container *ngIf="suscrito === 'suscrito'">
+        <button mat-icon-button 
+          [matTooltip]="notificacionesActivas ? 'Desactivar notificaciones' : 'Activar notificaciones'" 
+          (click)="toggleNotificaciones()" 
+          [disabled]="cargando"
+          aria-label="Notificaciones">
+          <mat-icon color="primary">
+            {{ notificacionesActivas ? 'notifications' : 'notifications_off' }}
+          </mat-icon>
+        </button>
+      </ng-container>
 
-    <div class="puntuaryguardar">
-  
-      <div class="options">
-        <i class="fa-solid fa-ellipsis-vertical botonTresPuntos" (click)="toggleDropdown()" aria-hidden="true"></i>
-      
-        <div *ngIf="dropdownVisible" class="dropdown-menu">
-          <a (click)="openReportModal()">Reportar Stream</a>
+      <div class="puntuaryguardar">
+        <div class="options">
+          <i class="fa-solid fa-ellipsis-vertical botonTresPuntos" (click)="toggleDropdown()" aria-hidden="true"></i>
+          <div *ngIf="dropdownVisible" class="dropdown-menu">
+            <a (click)="openReportModal()">Reportar Stream</a>
+          </div>
         </div>
       </div>
-  
-  </div>
-   
+    </div>
  
+    <div #descripcion class="descripcion" [ngClass]="{'expanded': isExpanded}">
+      <p class="fechadescripcion">Fecha de subida: {{ stream.created_at }}</p>
+      <p>{{ stream.descripcion }}</p>
+      <div class="toggle-container">
+        <a *ngIf="!isExpanded" class="toggle-link" (click)="toggleExpand($event)">Ver más</a>
+        <a *ngIf="isExpanded" class="toggle-link" (click)="toggleExpand($event)">Ver menos</a>
+      </div>
+    </div>
   </div>
- 
-  <div #descripcion class="descripcion" [ngClass]="{ 'expanded': isExpanded }">
-    
-    <p class="fechadescripcion">Fecha de subida: {{ stream.created_at }} <a href="#" class="toggle-link" (click)="toggleExpand($event)">
-    </a></p>
-    <p>{{ stream.descripcion }}</p>
-   
-  </div>
-  
-</div>
 
+  <div class="columnaLateral">
+    <div class="chat-container">
+      <h3>Chat en vivo</h3>
+      <div  #chatMessages class="chat-messages">
+        <div *ngFor="let message of chatMessagesList" class="chat-message">
+          <img *ngIf="message.user_photo" class="chat-user-photo" [src]="message.user_photo" alt="User photo">
+          <img *ngIf="!message.user_photo" class="chat-user-photo" src="assets/images/user.png" alt="User photo">
+          <span class="chat-user">{{ message.user }}:</span>
+          <span class="chat-text">{{ message.text }}</span>
+          <small>{{ message.created_at | date:'shortTime' }}</small>
+
+        </div>
+      </div>
+      <div class="chat-input">
+        <form (submit)="enviarMensaje()" class="chat-input-form">
+          <input [(ngModel)]="mensaje" name="mensaje" class="chat-input" placeholder="Escribe un mensaje..." required>
+          <button type="submit" class="chat-send-btn">Enviar</button>
+        </form>
+      </div>
+    </div>
+  </div>
 </div>
