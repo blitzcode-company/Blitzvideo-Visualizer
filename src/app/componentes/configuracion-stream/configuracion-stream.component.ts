@@ -35,8 +35,11 @@ export class ConfiguracionStreamComponent {
   mostrarStreamKey = false;
   alertMessageStream: string | null = null;
   serverIp = environment.serverIp;
-  apiUrl = environment.apiUrl; // Asegúrate de definir apiUrl en environment.ts
+  apiUrl = environment.apiUrl; 
   usuarioSubscription: Subscription | undefined;
+  copiadoServer = false;
+copiadoStreamKey = false;
+
 
   constructor(
       private authService: AuthService,
@@ -65,6 +68,22 @@ export class ConfiguracionStreamComponent {
           }
       });
       this.authService.mostrarUserLogueado().subscribe();
+  }
+  
+  copiarAlPortapapeles(valor: string, tipo: 'server' | 'streamKey'): void {
+    navigator.clipboard.writeText(valor).then(() => {
+      if (tipo === 'server') {
+        this.copiadoServer = true;
+        setTimeout(() => this.copiadoServer = false, 2000);
+      } else {
+        this.copiadoStreamKey = true;
+        setTimeout(() => this.copiadoStreamKey = false, 2000);
+      }
+      this.alertMessageStream = 'Copiado al portapapeles';
+      setTimeout(() => this.alertMessageStream = '', 2000);
+    }).catch(err => {
+      console.error('Error al copiar al portapapeles: ', err);
+    });
   }
 
   obtenerCanal() {

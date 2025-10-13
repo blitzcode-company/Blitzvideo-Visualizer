@@ -1,6 +1,5 @@
-/* Banner */
 .banner-container {
-  --profile-banner-height: 300px; /* Reducido para mejor proporción */
+  --profile-banner-height: 300px; 
   height: var(--profile-banner-height);
   background-image: var(--profile-banner);
   background-position: center;
@@ -21,7 +20,43 @@
   pointer-events: none;
 }
 
-/* Header y perfil */
+.containerHome {
+  display: flex;
+  min-height: 100vh;
+  margin-top: 75px;
+}
+
+.sidebar-container {
+  width: 250px;
+  transition: width 0.3s ease;
+  overflow: hidden;
+  flex-shrink: 0;
+  position: fixed; 
+  top: 75px;       
+  bottom: 0;
+  left: 0;
+  background-color: #f8f8f8;
+  z-index: 100;
+}
+
+.containerHome.collapsed .sidebar-container {
+  width: 55px;
+  border-right: 1px solid #dee2e6;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  transition: margin-left 0.3s ease;
+  margin-left: 250px; 
+}
+
+.containerHome.collapsed .main-content {
+  margin-left: 55px; 
+}
+
 header {
   display: flex;
   justify-content: center;
@@ -32,7 +67,7 @@ header {
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  margin-top: 100px;
+  margin-top: 50px;
   box-sizing: border-box;
   background: #ffffff;
 }
@@ -74,6 +109,7 @@ header {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
 
 .subscriber-count {
   margin: 8px 0;
@@ -297,10 +333,13 @@ main {
   padding: 12px;
 }
 
+.video-card a {
+text-decoration: none;
+
+}
 .video-info h3 {
   margin: 0 0 8px;
   font-size: 14px;
-  font-weight: 600;
   color: #030303;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -313,6 +352,7 @@ main {
   margin: 0;
   font-size: 12px;
   color: #606060;
+  text-decoration: none;
 }
 
 @media (max-width: 1024px) {

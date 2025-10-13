@@ -37,6 +37,11 @@ export class ResultadoDeBusquedaComponent implements OnInit{
   }
 
 
+  onImageError(event: any) {
+    event.target.src = 'assets/images/video-default.png';
+  }
+  
+
   listarVideosPorNombre(nombre: string): void {
     this.videoService.listarVideosPorNombre(nombre).subscribe(
       (res: any[]) => {  

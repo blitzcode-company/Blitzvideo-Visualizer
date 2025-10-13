@@ -10,6 +10,7 @@ import { Title } from '@angular/platform-browser';
 import { Subscription } from 'rxjs';
 import { Playlist } from '../../clases/playlist';
 import { Videos } from '../../clases/videos';
+import { UsuarioGlobalService } from '../../servicios/usuario-global.service';
 
 @Component({
   selector: 'app-contenido-lista-de-reproduccion',
@@ -26,6 +27,11 @@ export class ContenidoListaDeReproduccionComponent {
   serverIp = environment.serverIp;
   fromPlaylist: boolean = false; 
   videoId: number | null = null; 
+  sidebarVisible: boolean = true;
+  usuarioConCanal: any;
+  idCanal: any;
+  sidebarCollapsed = false;
+  sidebarCollapsed$ = this.usuarioGlobal.sidebarCollapsed$;
 
   private userSubscription: Subscription = new Subscription();
 
@@ -33,6 +39,7 @@ export class ContenidoListaDeReproduccionComponent {
     private playlistService: PlaylistService, 
     private route: ActivatedRoute,
     private authService: AuthService,
+    private usuarioGlobal: UsuarioGlobalService,
     private titleService: Title,
     private suscripcionService: SuscripcionesService,
     private snackBar: MatSnackBar,
@@ -51,17 +58,30 @@ export class ContenidoListaDeReproduccionComponent {
     this.userSubscription.unsubscribe();
   }
 
+  toggleSidebar() {
+    this.sidebarCollapsed = !this.sidebarCollapsed;
+  }
+  
+
   obtenerUsuario(): void {
     this.userSubscription = this.authService.usuario$.subscribe(res => {
       if (res) {
         this.usuario = res;
         this.userId = this.usuario.id;
-        this.mostrarCanalesSuscritos();
+
       } 
     });
   
     this.authService.mostrarUserLogueado().subscribe();
   }
+
+
+
+  onImageError(event: any) {
+    event.target.src = 'assets/images/video-default.png';
+  }
+
+
 
   quitarVideo(playlistId: number, videoId: number): void {
     this.playlistService.quitarVideoDePlaylist(playlistId, videoId).subscribe(
@@ -76,25 +96,13 @@ export class ContenidoListaDeReproduccionComponent {
     );
   }
 
-  mostrarCanalesSuscritos(): void {
-    if (this.userId) {
-      this.suscripcionService.listarSuscripciones(this.userId).subscribe(
-        suscripciones => {
-          this.canales = suscripciones.map((suscripcion: any) => suscripcion.canal);
-        },
-        error => {
-          console.error('Error al obtener listas de suscripciones', error);
-        }
-      );
-    } 
-  }
 
   obtenerPlaylistConVideos(): void {
     this.playlistService.obtenerPlaylistConVideos(this.playlistId, this.videoId || 0, this.fromPlaylist).subscribe(
       data => {
         console.log('Respuesta del backend:', data);
         this.playlist = new Playlist(data.data.playlist);
-        this.videos = data.data.videos.map(video => new Videos(video));
+        this.videos = (data.data.playlist.videos ?? []).map(video => new Videos(video));
 
         if (this.videos.length > 0) {
           if (this.videoId) {

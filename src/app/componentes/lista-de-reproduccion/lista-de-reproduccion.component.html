@@ -1,42 +1,37 @@
-<app-header></app-header>
-<div class="containerHome">
-  <app-sidebar 
-  [status]="status"
-  [usuarioConCanal]="usuarioConCanal"
-  [idCanal]="idCanal"
-  [canales]="canales"
-  ></app-sidebar>
+<app-header (toggleSidebar)="toggleSidebar()"></app-header>
 
+<div class="containerHome" [class.collapsed]="sidebarCollapsed$ | async">
+  <div class="sidebar-container">
+    <app-sidebar [collapsed]="!!(sidebarCollapsed$ | async)"></app-sidebar>
+  </div>
 
-<div class="playlist">
-  <h1>Listas de reproduccion</h1>
+  <div class="main-content">
+    <div class="playlist">
+      <h1>Listas de reproducción</h1>
 
-  <div class="video-grid">
-    <div class="video-card" *ngFor="let lista of listas;  let i = index">
-      
-      <a [routerLink]="['/playlists', lista.id]" class="video-link">
-        
-        <div class="miniatura-container">
-          <img class="miniatura" [src]="lista.imagen" alt="Miniatura de la lista">
-        </div>
-        <div class="video-info">
-          <h3>{{ lista.nombre }}</h3>
-          
-        </div>
-        
-        <hr>
-        
-      </a>
-      <div class="playlist-actions">
-        <button class="menu-button" (click)="toggleMenu(i)">⋮</button>
-        <div *ngIf="showMenuIndex === i" class="menu-dropdown">
-          <button (click)="abrirModalEditar(lista)">Editar</button>
-          <button (click)="borrarPlaylist(lista.id)">Eliminar</button>
+      <div class="video-grid">
+        <div class="video-card" *ngFor="let lista of listas; let i = index; trackBy: trackById">
+
+          <a [routerLink]="['/playlists', lista.id]" class="video-link">
+            <div class="miniatura-container">
+              <img class="miniatura" [src]="lista.imagen" (error)="onImageError($event)" alt="Miniatura de la lista">
+            </div>
+            <div class="video-info">
+              <h3>{{ lista.nombre }}</h3>
+              <p>{{ lista.videos.length }} videos • {{ lista.creador }}</p>
+            </div>
+          </a>
+
+          <div class="playlist-actions">
+            <button class="menu-button">⋮</button>
+            <div class="menu-dropdown">
+              <button (click)="abrirModalEditar(lista)">Editar</button>
+              <button (click)="borrarPlaylist(lista.id)">Eliminar</button>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
-
   </div>
-</div>
-
 </div>

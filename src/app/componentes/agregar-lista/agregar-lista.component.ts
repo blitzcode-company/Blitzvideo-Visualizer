@@ -28,21 +28,20 @@ export class AgregarListaComponent {
     private snackBar: MatSnackBar 
   ) {
     this.obtenerUsuario(); 
-    this.listarListas();
   }
 
   obtenerUsuario(): void {
     this.authService.usuario$.subscribe(res => {
       this.usuario = res;
       this.userId = this.usuario.id;
-      this.listarListas(); 
+      this.listarListas(this.userId); 
     });
 
     this.authService.mostrarUserLogueado().subscribe();
   }
 
-  listarListas(): void {
-    this.playlistService.obtenerListasDeReproduccion(this.userId).subscribe(
+  listarListas(userId:number): void {
+    this.playlistService.obtenerListasDeReproduccion(userId).subscribe(
       res => {
         console.log('Respuesta transformada:', res);
         this.listas = res; 
@@ -78,13 +77,12 @@ export class AgregarListaComponent {
       width: '400px',
       data: { videoId: this.data.videoId } 
     });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.listarListas();
-
-        this.listaSeleccionada = result.id;
-      }
+  
+    const instance = dialogRef.componentInstance;
+  
+    instance.listaCreada.subscribe((nuevaLista: any) => {
+      this.listas.push(nuevaLista);      
+      this.listaSeleccionada = nuevaLista.id; 
     });
   }
 

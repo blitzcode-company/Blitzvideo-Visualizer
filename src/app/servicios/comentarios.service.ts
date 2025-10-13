@@ -17,9 +17,12 @@ export class ComentariosService {
   private apiUrl = environment.apiUrl
   constructor(private http: HttpClient, private cookie:CookieService) { }
 
-  traerComentariosDelVideo(idVideo: any): Observable<any> {
-    const url = `${this.apiUrl}api/v1/videos/${idVideo}/comentarios`
-    return this.http.get<any[]>(url)
+  traerComentariosDelVideo(idVideo: any, usuarioId?: number): Observable<any> {
+    let url = `${this.apiUrl}api/v1/videos/${idVideo}/comentarios`;
+    if (usuarioId) {
+      url += `?usuario_id=${usuarioId}`;
+    }
+    return this.http.get<any[]>(url);
   }
 
   crearComentario(idVideo: any, comentario:any): Observable<any> {

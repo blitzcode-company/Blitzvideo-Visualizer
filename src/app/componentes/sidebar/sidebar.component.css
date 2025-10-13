@@ -1,43 +1,209 @@
 .sidebar {
-    background-color: #fff  ;
-    display: flex;
-    flex-direction: column;
-    min-width: 250px;
-    max-width: 250px;
-    min-height: 100vh;
-    border-right: 1px solid #dee2e6;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    position: fixed;
-    z-index: 100;
-    padding: 15px;
-  }
-  
-  .sidebar a {
-    display: block;
-    padding: 10px;
-    text-decoration: none;
-    color: #495057;
-    min-width: 225px;
-  
-    margin-bottom: 10px;
-    border-width: 0 0 1px;
-    transition: background-color 0.3s;
-  }
-  
-  p {
-    padding: 10px;
-    text-decoration: none;
-    margin-bottom: 10px;
-    border-width: 0 0 1px;
-    
-  }
-  
-  .sidebar a:hover {
-    background-color: #ddd;
-  }
+  background-color: #fff;
+  display: flex;
+  flex-direction: column;
+  min-width: 250px;
+  max-width: 250px;
+  min-height: 100vh;
+  border-right: 1px solid #dee2e6;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: fixed;
+  z-index: 100;
+  padding: 20px 0px;
+}
 
-  .fotoUserSuscriptores {
-    border-radius: 25px;
-    height: 40px; 
-    object-fit: cover;
-  }
+p {
+  padding: 10px;
+}
+
+
+.sidebar.collapsed {
+  width: 70px; 
+
+  
+}
+
+:host {
+  width: 250px;
+  transition: width 0.3s ease;
+  overflow: hidden;
+  
+}
+
+:host.collapsed {
+  width: 70px; 
+}
+
+.sidebar a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  white-space: nowrap;
+  
+}
+
+
+
+:host.collapsed .sidebar a span {
+  display: none;
+
+}
+
+
+.sidebar.collapsed a {
+  justify-content: flex-start;
+  padding-left: 12px;
+}
+
+.sidebar.collapsed a span {
+  display: none;
+}
+
+.sidebar.collapsed .canalesSuscritos .canalItem {
+  justify-content: flex-start;
+  padding-left: 12px;
+}
+
+.sidebar.collapsed .canalesSuscritos .nombreYEstado {
+  display: none;
+}
+
+
+
+.sidebar.collapsed a.active {
+  border-left-width: 2px; 
+  padding-left: 9px; 
+
+}
+
+.containerHome {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.sidebar-container {
+  width: 250px;
+  transition: width 0.3s ease;
+  overflow: hidden;
+}
+
+.containerHome.collapsed .sidebar-container {
+  width: 70px;
+}
+
+.content-wrapper {
+  flex-grow: 1;
+  margin-left: 0;
+  padding: 20px;
+  transition: margin-left 0.3s ease;
+}
+
+.containerHome.collapsed .content-wrapper {
+  margin-left: 70px;
+}
+
+
+:host {
+  display: block;
+}
+
+:host(.collapsed) .texto-link {
+  display: none;
+}
+
+:host(.collapsed) .icono-link {
+  margin: 0 auto;
+  display: block;
+  text-align: center;
+}
+
+
+
+.sidebar a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  color: #333;
+  font-weight: 500;
+  font-size: 1rem;
+  text-decoration: none;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.sidebar a:hover,
+.sidebar a:focus {
+  background-color: #f0f0f0;
+  color: #007bff;
+  outline: none;
+}
+
+.sidebar a.active {
+  background-color: #e7f1ff;
+  color:  #17445f ;
+  font-weight: 600;
+  border-left: 1px solid #0056b3; 
+
+  box-shadow:inset;
+  padding-left: 11px; 
+  transition: border-left-width 0.3s ease, padding-left 0.3s ease;
+}
+
+.sidebar a i {
+  min-width: 20px;
+  font-size: 18px;
+  color: inherit;
+}
+
+.lineaSideBar {
+  height: 1px;
+  background-color: #e0e0e0;
+  margin: 15px 0;
+}
+
+.canalesSuscritos {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.canalItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  transition: background-color 0.3s;
+  color: #444;
+  font-size: 0.95rem;
+  text-decoration: none;
+}
+
+.canalItem:hover,
+.canalItem:focus {
+  background-color: #f0f0f0;
+  outline: none;
+}
+
+.fotoUserSuscriptores {
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  object-fit: cover;
+  border: 1.5px solid #ccc;
+  flex-shrink: 0;
+}
+
+.nombreYEstado {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.enVivo {
+  color: #e63946;
+  font-weight: 700;
+  font-size: 0.9rem;
+}

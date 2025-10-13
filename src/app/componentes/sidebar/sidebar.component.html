@@ -1,21 +1,29 @@
-<div class="sidebar">
-  <a href="#"><i class="fa-solid fa-house"></i> Inicio</a>
+<div class="sidebar" [class.collapsed]="collapsed" > 
+  <a routerLink="/" title="Inicio" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+    <mat-icon>home</mat-icon>
+    <span *ngIf="!collapsed">Inicio</span>
+  </a>
 
   <ng-container *ngIf="status.isLoggedIn">
-    <a *ngIf="usuarioConCanal && usuarioConCanal.canales && usuarioConCanal.canales.id" [routerLink]="['/canal', idCanal]">
-      <i class="fa-regular fa-user"></i> Mi canal
+    <a *ngIf="usuarioConCanal?.canales?.id" title="Mi canal" [routerLink]="['/canal', idCanal]" routerLinkActive="active">
+      <mat-icon>account_circle</mat-icon>
+      <span *ngIf="!collapsed">Mi canal</span>
     </a>
-    <a href="/playlists"><i class="fa-solid fa-list"></i> Listas de reproducción</a>
-    <hr class="lineaSideBar">
+    <a routerLink="/playlists" title="Listas de reproducción" routerLinkActive="active">
+      <mat-icon>list</mat-icon>
+      <span *ngIf="!collapsed">Listas de reproducción</span>
+    </a>
+    
+    <hr class="lineaSideBar" />
 
-    <p>Suscripciones</p>
+    <p *ngIf="!collapsed">Suscripciones</p>
     <div class="canalesSuscritos">
       <ng-container *ngIf="!isLoading; else loadingTemplate">
         <ng-container *ngIf="canales.length > 0; else noSubscriptions">
-          <a *ngFor="let canal of canales" class="canalItem" [routerLink]="['/canal', canal.id]">
+          <a *ngFor="let canal of canales" class="canalItem" [title]="canal.nombre"  [routerLink]="['/canal', canal.id]" (click)="reloadPage($event)" routerLinkActive="active">
             <img
               class="fotoUserSuscriptores"
-              [src]="canal.user?.foto ? canal.user.foto : '/assets/images/user.png'"
+              [src]="canal.user?.foto || '/assets/images/user.png'"
               alt="Foto del canal"
             />
             <span class="nombreYEstado">
@@ -28,7 +36,7 @@
             </span>
           </a>
         </ng-container>
-        <ng-template #noSubscriptions>
+        <ng-template  #noSubscriptions >
           <p>No estás suscrito a ningún canal.</p>
         </ng-template>
       </ng-container>
@@ -37,6 +45,4 @@
       </ng-template>
     </div>
   </ng-container>
-
- 
 </div>

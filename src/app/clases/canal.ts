@@ -7,7 +7,7 @@ export class Canal {
     descripcion: string;
     user: Usuario;
     portada?: File; 
-    portadaPreview?: string; 
+    portadaPreview?: string;
     
 
     constructor(data?: any) {
@@ -17,6 +17,8 @@ export class Canal {
         this.descripcion = data?.descripcion ?? '';
         this.user_id = data?.user_id ?? '';
         this.user = new Usuario(data?.user);
+        this.portada = data?.portada ?? undefined; 
+        this.portadaPreview = data?.portadaPreview ?? ''; 
       }
 
 }

@@ -10,6 +10,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { ModalReportarUsuarioComponent } from '../modal-reportar-usuario/modal-reportar-usuario.component';
 import { NotificacionesService } from '../../servicios/notificaciones.service';
 import { StatusService } from '../../servicios/status.service';
+import { UsuarioGlobalService } from '../../servicios/usuario-global.service';
 
 
 @Component({
@@ -20,6 +21,7 @@ import { StatusService } from '../../servicios/status.service';
 export class VerCanalComponent implements OnInit {
   
   usuario: any;
+  usuarioCanal:any;
   canal: any = {};
   canalId: any;
   canalNombre: any;
@@ -38,11 +40,15 @@ export class VerCanalComponent implements OnInit {
   idCanal: any;
   canales: any[] = [];
 
+  sidebarCollapsed = false;
+  sidebarCollapsed$ = this.usuarioGlobal.sidebarCollapsed$;
+  sidebarVisible: boolean = true;
 
 
   constructor(
     private canalService: CanalService,
     private route: ActivatedRoute, 
+    private usuarioGlobal: UsuarioGlobalService,
     private titleService: Title,
     private suscripcionService: SuscripcionesService,
     private authService: AuthService,
@@ -54,10 +60,20 @@ export class VerCanalComponent implements OnInit {
 
   ngOnInit() {
     this.canalId = this.route.snapshot.params['id'];
-    this.obtenerCanal();
+
+    this.canal = {};
+    this.videos = [];
+    this.ultimoVideo = null;
+    this.cargando = true;
+
+    this.obtenerCanal(this.canalId);
     this.obtenerUsuario();
-    this.listarNumeroDeSuscriptores(); 
   }
+
+  toggleSidebar() {
+    this.sidebarCollapsed = !this.sidebarCollapsed;
+  }
+  
 
   obtenerEstadoDeNotificaciones() {
     this.notificacionesService.obtenerEstado(this.canalId, this.userId).subscribe({
@@ -124,46 +140,55 @@ export class VerCanalComponent implements OnInit {
   }
 
   verificarSuscripcion(): void {
-    this.suscripcionService.verificarSuscripcion(this.usuario.id, this.canalId).subscribe(
+    if (!this.userId || !this.canalId) {
+      return; 
+    }
+
+    this.suscripcionService.verificarSuscripcion(this.userId, this.canalId).subscribe(
       response => {
-        this.suscrito = response.estado;
-        console.log(response.estado);
-  
-        if (this.suscrito === 'suscrito') {
-          this.notificacionesService.cambiarEstado(this.canalId, this.usuario.id, true).subscribe(() => {
+        switch (response.estado) {
+          case 'propietario':
+            this.suscrito = 'propietario';
+            break;
+          case 'suscrito':
+            this.suscrito = 'suscrito';
             this.notificacionesActivas = true;
-          });
-        } else {
-          this.notificacionesActivas = false;
+            break;
+          case 'desuscrito':
+            this.suscrito = 'desuscrito';
+            this.notificacionesActivas = false;
+            break;
+          default:
+            console.warn('Estado desconocido:', response.estado);
         }
       },
       error => {
         if (error.status === 404) {
           console.warn('No se encontró la suscripción.');
           this.suscrito = 'desuscrito';
-          this.notificacionesActivas = false;
         } else {
           console.error('Error al verificar la suscripción:', error);
         }
       }
     );
-  }
+}
 
-  obtenerCanal() {
+  obtenerCanal(canalId: number) {
     this.cargando = true;
   
-    this.canalService.obtenerCanalPorId(this.canalId).subscribe({
+    this.canalService.obtenerCanalPorId(canalId).subscribe({
       next: (canalData: any) => {
         console.log('Datos del canal:', canalData);
         this.canal = canalData;
         this.canalNombre = canalData.nombre;
-        this.usuario = canalData.user;
+        this.usuarioCanal = canalData.user;
         this.canalId = canalData.id;
         this.setTitle(this.canal.nombre);
 
         this.obtenerEstadoDeNotificaciones();
-  
-        this.canalService.obtenerCanalPorId(this.canalId).subscribe({
+        this.listarNumeroDeSuscriptores(canalId); 
+
+        this.canalService.listarVideosDeCanal(canalId).subscribe({
           next: (videosData: any) => {
             console.log('Videos del canal:', videosData);
             if (videosData.length > 0) {
@@ -227,9 +252,13 @@ export class VerCanalComponent implements OnInit {
     this.dialog.closeAll(); 
   }
   
+  onImageError(event: any) {
+    event.target.src = 'assets/images/video-default.png';
+  }
+
   
-  listarNumeroDeSuscriptores() {
-    this.suscripcionService.listarNumeroDeSuscriptores(this.canalId).subscribe(res => {
+  listarNumeroDeSuscriptores(canalId:number) {
+    this.suscripcionService.listarNumeroDeSuscriptores(canalId).subscribe(res => {
       this.numeroDeSuscriptores = res;
     });
   }

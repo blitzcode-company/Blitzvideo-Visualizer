@@ -23,6 +23,9 @@ export class AuthService {
   constructor(private http: HttpClient, private cookie: CookieService, private dialog: MatDialog) { }
   
   mostrarUserLogueado() {
+    if (this.usuarioSubject.value) {
+      return of(this.usuarioSubject.value);
+    }
     const token = this.cookie.get('accessToken');
     
     if (!token) {
@@ -65,13 +68,10 @@ export class AuthService {
   }
 
   editarUsuario(id: number, formData: FormData): Observable<any> {
-    const url = `${this.apiUrl}api/v1/usuario/${id}`
-    const httpOptions = {
-      headers: new HttpHeaders({
-          'Authorization' : 'Bearer ' + this.cookie.get('accessToken')
-      })
-    };
-    return this.http.post(url, formData, httpOptions).pipe(
+    const url = `${this.apiUrl}api/v1/usuario/${id}`;
+    const headers = { 'Authorization': 'Bearer ' + this.cookie.get('accessToken') };
+  
+    return this.http.post(url, formData, { headers }).pipe(
       catchError(error => {
         console.error('Error al editar usuario', error);
         return of(null);

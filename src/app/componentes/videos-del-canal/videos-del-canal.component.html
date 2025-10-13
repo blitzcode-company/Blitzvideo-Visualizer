@@ -1,61 +1,105 @@
-<app-header></app-header>
+<app-header (toggleSidebar)="toggleSidebar()"></app-header>
 
-<div   class="banner-container" [ngStyle]="{'--profile-banner': 'url(' + canal.portada + ')'}">
-  <header>
-    <div class="profile">
-      <img *ngIf="!usuario.foto" src="assets/images/user.png" alt="Foto de perfil" class="profile-pic">
-      <img *ngIf="usuario.foto" [src]="usuario.foto" alt="Foto de perfil" class="profile-pic">
-      <div class="profile-info">
-        <h1>{{ canalNombre }}</h1>
-        <p class="subscriber-count">{{  numeroDeSuscriptores.numero_suscripciones  }} suscriptores
-          
-        </p>  
-        <div class="suscribirse">
-          <button *ngIf="suscrito !== 'propietario'" class="boton" 
-          [ngClass]="{ 'suscrito': suscrito === 'suscrito' }" 
-          (click)="suscrito === 'suscrito' ? anularSuscripcion() : suscribirse()">
-          {{ suscrito === 'suscrito' ? 'Suscrito' : 'Suscribirse' }}
-          </button>
-          <span *ngIf="usuario?.id !== canal?.user_id" (click)="openReportModal()" class="botonreportar" title="Reportar" [class.disabled]="!usuario || !canal?.user_id">
-            <i class="fa-solid fa-flag"></i>
-          </span>
+<div class="containerHome" [class.collapsed]="sidebarCollapsed$ | async">
+  <div class="sidebar-container">
+    <app-sidebar 
+    [collapsed]="!!(sidebarCollapsed$ | async)"
+
+    ></app-sidebar>
+  </div>
+
+  <div class="main-content">
+    <div
+    class="banner-container"
+    [ngStyle]="{
+      '--profile-banner': 'url(' + (canal?.portada ? canal.portada : 'assets/images/cover-default.png') + ')'
+    }"
+    ></div>
+
+    <header>
+      <div class="profile">
+        <img
+        [src]="usuarioCanal?.foto ? usuarioCanal.foto : 'assets/images/user.png'"
+        alt="Foto de perfil"
+        class="profile-pic"
+      />
+        <div class="profile-info">
+          <h1>{{ canalNombre }}</h1>
+          <p class="subscriber-count">{{ numeroDeSuscriptores.numero_suscripciones }} suscriptores</p>
+          <div class="suscribirse">
+            <button
+              *ngIf="suscrito !== 'propietario'"
+              class="boton"
+              [ngClass]="{ suscrito: suscrito === 'suscrito' }"
+              (click)="suscrito === 'suscrito' ? anularSuscripcion() : suscribirse()"
+            >
+              {{ suscrito === 'suscrito' ? 'Suscrito' : 'Suscribirse' }}
+            </button>
+            <ng-container *ngIf="suscrito === 'suscrito'">
+              <button
+                mat-icon-button
+                [matTooltip]="
+                  notificacionesActivas
+                    ? 'Desactivar notificaciones'
+                    : 'Activar notificaciones'
+                "
+                (click)="toggleNotificaciones()"
+                [disabled]="cargando"
+                aria-label="Notificaciones"
+              >
+                <mat-icon color="primary">{{
+                  notificacionesActivas ? 'notifications' : 'notifications_off'
+                }}</mat-icon>
+              </button>
+            </ng-container>
+            <span
+              *ngIf="usuario?.id !== canal?.user_id"
+              (click)="openReportModal()"
+              class="botonreportar"
+              title="Reportar"
+              [class.disabled]="!usuario || !canal?.user_id"
+              matTooltip="Reportar cuenta"
+
+            >
+              <i class="fa-solid fa-flag"></i>
+            </span>
+          </div>
         </div>
       </div>
-    </div>
-  </header>
-  
-</div>
-
-<nav>
-  <br>
-  <br>
-  <br>
-  <ul>
-    <li>
-     
-    </li>
-
-    <li><a [routerLink]="['/canal', canalId]">Inicio</a></li>
-    <li><a [routerLink]="['/canal', canalId, 'videos']">Videos</a></li>
+    </header>
     
-  </ul>
-</nav>
 
-<main>
-  <section class="video-grid">
-    <div *ngFor="let chunk of videos | chunkPipe: 4" class="video-row">
-      <div *ngFor="let video of chunk" class="video-card">
-        <a [routerLink]="['/video', video.id]">
-          <div class="miniatura-container">
-            <img [src]="video.miniatura" alt="Miniatura del video">ç
-            <p class="duracionVideo"> {{  video.duracionFormateada  }}</p>
-          </div>
-          <div class="video-info">
-            <h3>{{ video.titulo }}</h3>
-            <p>{{ video.visitas_count }} vistas • {{ video.created_at | date:'short' }}</p>
-          </div>
-        </a>
+
+  <nav>
+
+    <ul>
+      <li>
+      
+      </li>
+
+      <li><a [routerLink]="['/canal', canalId]">Inicio</a></li>
+      <li><a [routerLink]="['/canal', canalId, 'videos']">Videos</a></li>
+      
+    </ul>
+  </nav>
+
+  <main>
+    <section class="video-grid">
+      <div *ngFor="let chunk of videos | chunkPipe: 4" class="video-row">
+        <div *ngFor="let video of chunk" class="video-card">
+          <a [routerLink]="['/video', video.id]">
+            <div class="miniatura-container">
+              <img [src]="video.miniatura ? video.miniatura : 'assets/images/video-default.png'" (error)="onImageError($event)" alt="Miniatura del video">
+              <p class="duracionVideo"> {{  video.duracionFormateada  }}</p>
+            </div>
+            <div class="video-info">
+              <h3>{{ video.titulo }}</h3>
+              <p>{{ video.visitas_count }} vistas • {{ video.created_at | tiempo }}</p>
+            </div>
+          </a>
+        </div>
       </div>
-    </div>
-  </section>
-</main>
+    </section>
+  </main>
+  </div>
+</div>

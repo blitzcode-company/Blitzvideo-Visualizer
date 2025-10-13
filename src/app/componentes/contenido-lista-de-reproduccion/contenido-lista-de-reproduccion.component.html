@@ -1,39 +1,41 @@
-<app-header></app-header>
-<div class="containerHome">
-  <div class="sidebar">
-    <a href="#">Inicio</a>
-    <a *ngIf="status.isLoggedIn" [href]="serverIp + '3001' + '/#/misVideos'">Mi canal</a>
-    <a *ngIf="status.isLoggedIn" href="/playlists">Listas de reproduccion</a>
-    <hr *ngIf="status.isLoggedIn"class="lineaSideBar">
-    <p *ngIf="status.isLoggedIn" >Suscripciones</p>
-    <div class="canalesSuscritos"  *ngFor="let canal of canales">
-      <a class="canalesLista" [routerLink]="['/canal', canal.id]"> 
-        <img *ngIf="!canal.user.foto" class="fotoUserSuscriptores" src="/assets/images/user.png" alt="Foto del canal">
+<app-header (toggleSidebar)="toggleSidebar()"></app-header>
+<div class="containerHome" [class.collapsed]="sidebarCollapsed$ | async">
+  <div class="sidebar-container">
+    <app-sidebar 
+    [collapsed]="!!(sidebarCollapsed$ | async)"
 
-        <img *ngIf="canal.user.foto" class="fotoUserSuscriptores" [src]="canal.user.foto" alt="">
-        {{ canal.nombre }}
-      </a>
-    </div>
+    ></app-sidebar>
   </div>
+
+<div class="main-content">
+
   <div *ngIf="!playlist">
     <p>Cargando...</p>
   </div>
-<div class="playlist" *ngIf="playlist">
+  <div class="playlist" *ngIf="playlist">
     <h1>{{ playlist.nombre }}</h1>
     <p>Acceso: {{ playlist.acceso ? 'Público' : 'Privado' }}</p>
-    
+  
     <div class="video-grid">
-      <div class="video-card" *ngFor="let video of videos">
-        <a (click)="verVideo(video.id)" class="video-link" target="_blank">
+      <div class="video-card" *ngFor="let video of videos; let i = index">
+        
+        <a (click)="verVideo(video.id)" class="video-link">
           <div class="miniatura-container">
-            <img class="miniatura" [src]="video.miniatura" alt="Miniatura de {{ video.titulo }}">
+            <img class="miniatura" [src]="video.miniatura" (error)="onImageError($event)"  alt="Miniatura de {{ video.titulo }}">
           </div>
           <div class="video-info">
             <h3>{{ video.titulo }}</h3>
-            <button class="btn btn-danger" (click)="quitarVideo(playlist.id, video.id)">Quitar Video</button>
-
           </div>
         </a>
+  
+        <div class="playlist-actions">
+          <button class="menu-button">⋮</button>
+          <div class="menu-dropdown">
+            <button (click)="quitarVideo(playlist.id, video.id)">Quitar Video</button>
+          </div>
+        </div>
+  
       </div>
     </div>
+  </div>
   </div>

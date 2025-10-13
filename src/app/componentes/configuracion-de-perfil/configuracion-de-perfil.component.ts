@@ -29,7 +29,7 @@ import { trigger, transition, style, animate } from '@angular/animations';
 })
 export class ConfiguracionDePerfilComponent {
   usuario: any;
-  fotoFile: File | undefined = undefined;
+  fotoFile: File | null = null;
   alerta: string[] = [];
   usuarioSubscription: Subscription | undefined;
   alertMessageUser: string | null = null;
@@ -41,7 +41,7 @@ export class ConfiguracionDePerfilComponent {
   tieneCanal: boolean = false;  
   mostrarPerfil: boolean = false; 
   mostrarCanal: boolean = false; 
-
+  userId: number = 0;
 
   constructor(
     private router: Router,
@@ -53,7 +53,6 @@ export class ConfiguracionDePerfilComponent {
 
   ngOnInit() {
     this.obtenerUsuario();
-    this.obtenerCanal();
     this.titleService.setTitle('Configuración de Perfil - BlitzVideo');
   }
 
@@ -66,17 +65,19 @@ export class ConfiguracionDePerfilComponent {
   obtenerUsuario() {
     this.usuarioSubscription = this.authService.usuario$.subscribe(res => {
       this.usuario = res;
-      this.obtenerCanal();  
+      this.userId = this.usuario.id
+      this.obtenerCanal(this.userId);  
     });
     this.authService.mostrarUserLogueado().subscribe();
   }
 
-  obtenerCanal(): void {
-    this.canalService.obtenerUsuarioPorId(this.usuario.id).subscribe({
-      next: (canal) => {
-        if (canal && canal.canales) {
-          this.canal = canal.canales; 
+  obtenerCanal(userId: number): void {
+    this.canalService.obtenerUsuarioPorId(userId).subscribe({
+      next: (res: any) => {
+        if (res && res.canales) {
+          this.canal = res.canales; 
           this.tieneCanal = true;
+          
           if (typeof this.canal.portada === 'string') {
             this.canal.portadaPreview = this.canal.portada; 
         } else {
@@ -93,15 +94,11 @@ export class ConfiguracionDePerfilComponent {
     });
 }
 
-  onFileSelected(event: any): void {
-    const file = event.target.files[0]; 
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = (e: any) => {
-            this.usuario.foto = e.target.result; 
-        };
-        reader.readAsDataURL(file); 
-    }
+onFileSelected(event: Event): void {
+  const input = event.target as HTMLInputElement;
+  if (input.files && input.files.length > 0) {
+    this.fotoFile = input.files[0];
+  }
 }
 
   editarCanal(): void {

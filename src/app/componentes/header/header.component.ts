@@ -1,4 +1,4 @@
-import { Component, HostListener,  Output, EventEmitter } from '@angular/core';
+import { Component, HostListener, Output, EventEmitter, ElementRef  } from '@angular/core';
 
 import { Router } from '@angular/router';
 import { StatusService } from '../../servicios/status.service';
@@ -9,7 +9,7 @@ import { CanalService } from '../../servicios/canal.service';
 import { environment } from '../../../environments/environment';
 import { NotificacionesService } from '../../servicios/notificaciones.service';
 import { Notificacion } from '../../clases/notificacion';
-
+import { UsuarioGlobalService } from '../../servicios/usuario-global.service';
 
 @Component({
   selector: 'app-header',
@@ -23,6 +23,8 @@ export class HeaderComponent {
     public status:StatusService,
     private cookie:CookieService,
     private api:AuthService,
+    private eRef: ElementRef,
+    private usuarioGlobal:UsuarioGlobalService,
     private canalService: CanalService,
     private notificacionesService: NotificacionesService,
 ){}    
@@ -33,7 +35,6 @@ export class HeaderComponent {
 
     ngOnInit() {
       this.obtenerUsuario();
-      this.obtenerNotificacionesDelMes();
     }
 
   usuario:any;
@@ -46,21 +47,34 @@ export class HeaderComponent {
   mostrarNotificaciones: boolean = false; 
   contadorNotificaciones: number = 0;
   sidebarVisible: boolean = true;
-
+  userId:number = 0;
+  logoUrl: string | null = null; 
 
   @Output() toggleSidebar = new EventEmitter<void>();
 
   onMenuClick() {
-    this.toggleSidebar.emit();
+    this.usuarioGlobal.toggleSidebar();
   }
   
-  obtenerUsuario() {
-    this.api.usuario$.subscribe(user => {
-      this.usuario = user;
-      this.obtenerCanal();
-      this.obtenerNotificacionesDelMes();
 
+
+  obtenerUsuario() {
+    this.usuarioGlobal.usuario$.subscribe(user => {
+      this.usuario = user;
+  
+      if (!this.usuario) {
+        console.log('Usuario no logueado');
+        return;
+      }
+  
+      this.userId = this.usuario.id;
+  
+      this.obtenerCanal(this.userId);
+      this.obtenerNotificacionesDelMes(this.userId);
+  
+      this.logoUrl = this.usuario.premium ? 'assets/images/logopremium.png' : 'assets/images/logo.png';
     });
+  
     this.api.mostrarUserLogueado().subscribe();
   }
 
@@ -68,8 +82,8 @@ export class HeaderComponent {
     this.mostrarNotificaciones = !this.mostrarNotificaciones;
   }
 
-  obtenerNotificacionesDelMes(): void {
-    this.notificacionesService.listarNotificaciones(this.usuario.id).subscribe({
+  obtenerNotificacionesDelMes(userId: number): void {
+    this.notificacionesService.listarNotificaciones(userId).subscribe({
       next: (response) => {
         if (response?.notificaciones) {
           this.notificaciones = response.notificaciones.map((notificacion: any) => ({
@@ -79,8 +93,8 @@ export class HeaderComponent {
             referencia_tipo: notificacion.referencia_tipo,
             fecha_creacion: notificacion.fecha_creacion,
             leido: notificacion.leido,
-          }));
-
+          }))
+          .reverse();
 
           const notificacionesNoLeidas = this.notificaciones.filter(notificacion => notificacion.leido === 0);
           this.contadorNotificaciones = notificacionesNoLeidas.length; 
@@ -95,6 +109,9 @@ export class HeaderComponent {
     });
   }
   
+
+
+
   marcarComoVista(notificacionId: number): void {
     this.notificacionesService.marcarNotificacionComoVista(notificacionId, this.usuario.id).subscribe({
       next: () => {
@@ -121,9 +138,9 @@ export class HeaderComponent {
     return this.usuario.foto ? this.usuario.foto : '../../../assets/images/user.png';
   }
 
-  obtenerCanal(): void {
-    if (this.usuario && this.usuario.id) {
-      this.api.obtenerCanalDelUsuario(this.usuario.id).subscribe(
+  obtenerCanal(userId: number): void {
+    if (userId) {
+      this.api.obtenerCanalDelUsuario(userId).subscribe(
         (res: any) => {
           this.canal = res;
           if (res.canales) {
@@ -147,7 +164,7 @@ export class HeaderComponent {
     this.cookie.delete('accessToken');
     console.log('Cookie accessToken eliminada');
     this.status.isLoggedIn = false;
-    this.router.navigate(['/']);
+    window.location.reload();
     
   }
 
@@ -162,10 +179,29 @@ export class HeaderComponent {
     this.isDropdownOpen = !this.isDropdownOpen;
   }
 
+
+  obtenerIconoNotificaciones(): string {
+    if (this.contadorNotificaciones === 0) {
+      return 'notifications_none';
+    } else if (this.mostrarNotificaciones) {
+      return 'notifications_active';
+    } else {
+      return 'notifications'; 
+    }
+  }
+
+
+
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: Event) {
     const target = event.target as HTMLElement;
-    if (!target.closest('.dropdown')) {
+  
+    if (this.mostrarNotificaciones && !this.eRef.nativeElement.querySelector('.lista-notificaciones')?.contains(target) 
+        && !this.eRef.nativeElement.querySelector('.campanita')?.contains(target)) {
+      this.mostrarNotificaciones = false;
+    }
+  
+    if (this.isDropdownOpen && !target.closest('.dropdown')) {
       this.isDropdownOpen = false;
     }
   }

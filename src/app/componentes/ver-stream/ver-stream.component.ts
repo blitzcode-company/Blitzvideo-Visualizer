@@ -1,21 +1,16 @@
 import { Component, HostListener ,OnInit, OnDestroy, ElementRef, ViewChild, AfterViewInit, AfterViewChecked, ChangeDetectorRef } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { VideosService } from '../../servicios/videos.service';
 import { AuthService } from '../../servicios/auth.service';
 import { Title } from '@angular/platform-browser';
-import { PuntuacionesService } from '../../servicios/puntuaciones.service';
 import { StatusService } from '../../servicios/status.service';
 import { Observable, Subscription } from 'rxjs';
 import { Streams } from '../../clases/streams';
 import { environment } from '../../../environments/environment';
 import { MatDialog } from '@angular/material/dialog';
-import { CrearListaComponent } from '../crear-lista/crear-lista.component';
 import { SuscripcionesService } from '../../servicios/suscripciones.service';
 import { ConfirmacionDesuscribirModalComponent } from '../confirmacion-desuscribir-modal/confirmacion-desuscribir-modal.component';
-import { AgregarListaComponent } from '../agregar-lista/agregar-lista.component';
 import { ReportesService } from '../../servicios/reportes.service';
 import { ModalReporteVideoComponent } from '../modal-reporte-video/modal-reporte-video.component';
-import { PlaylistService } from '../../servicios/playlist.service';
 import { StreamService } from '../../servicios/stream.service';
 import { NotificacionesService } from '../../servicios/notificaciones.service';
 import { ChatstreamService } from '../../servicios/chatstream.service';
@@ -114,7 +109,6 @@ export class VerStreamComponent implements OnInit, OnDestroy, AfterViewInit, Aft
       this.mensajes.push(nuevo);
     });
 
-    this.obtenerIdDePlaylist();
     this.obtenerUsuarioConCanal();
     this.obtenerUsuario();
     this.verificarSuscripcion();
@@ -179,21 +173,6 @@ export class VerStreamComponent implements OnInit, OnDestroy, AfterViewInit, Aft
   
  
 
-  obtenerIdDePlaylist() {
-    const state = history.state as { playlistId: number };
-    if (state && state.playlistId) {
-      this.playlistId = state.playlistId;
-      this.fromPlaylist = true;
-      console.log('playlistId recibido desde history.state:', this.playlistId);
-    } else {
-      this.fromPlaylist = false; 
-      console.log('No se pasó el estado a la navegación');
-    }
-
-    if (this.playlistId === undefined) {
-      console.error('playlistId sigue siendo undefined');
-    }
-  }
   
   ngAfterViewInit(): void {
     setTimeout(() => {
@@ -474,6 +453,7 @@ toggleNotificaciones(): void {
   }
 
   
+    
   verificarSuscripcion(): void {
     if (!this.userId || !this.canalId) {
       return; 
@@ -481,28 +461,21 @@ toggleNotificaciones(): void {
 
     this.suscripcionService.verificarSuscripcion(this.userId, this.canalId).subscribe(
       response => {
-        const estado: 'propietario' | 'suscrito' | 'desuscrito' = response.estado;
-
-        const acciones: {
-          propietario: () => void;
-          suscrito: () => void;
-          desuscrito: () => void;
-        } = {
-          propietario: () => {
+        switch (response.estado) {
+          case 'propietario':
             this.suscrito = 'propietario';
-          },
-          suscrito: () => {
+            break;
+          case 'suscrito':
             this.suscrito = 'suscrito';
-          },
-          desuscrito: () => {
-            this.suscrito = 'desuscrito'; 
-          }
-        };
-
-        (acciones[estado] || (() => {
-          console.warn('Estado desconocido:', estado);
-        }))();
-
+            this.notificacionesActivas = true;
+            break;
+          case 'desuscrito':
+            this.suscrito = 'desuscrito';
+            this.notificacionesActivas = false;
+            break;
+          default:
+            console.warn('Estado desconocido:', response.estado);
+        }
       },
       error => {
         if (error.status === 404) {
@@ -514,7 +487,6 @@ toggleNotificaciones(): void {
       }
     );
 }
-
 
 loadChatMessagesAndListen() {
   if (!this.streamId) return;

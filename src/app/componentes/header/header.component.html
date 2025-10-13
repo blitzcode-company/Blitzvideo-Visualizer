@@ -3,8 +3,10 @@
     <a class="menu-button" (click)="onMenuClick()">
       <mat-icon>menu</mat-icon>
     </a>
-    <a href="/" class="navbar-brand">
-      <img class="logo logo-navbar" src="assets/images/logo.png" alt="Logo de Blitzvideo">
+    <a href="/" class="navbar-brand" title="Página de inicio de Blitzvideo">
+      <img class="logo logo-navbar" 
+           [src]="usuario?.premium ? 'assets/images/logopremium.png' : 'assets/images/logo.png'" 
+           alt="Logo de Blitzvideo">
     </a>
 
     <nav class="nav"></nav>
@@ -14,25 +16,37 @@
              class="search-input" aria-label="Buscar video">
     </div>
     <div class="notificaciones" *ngIf="status.isLoggedIn">
-      <button class="campanita" (click)="alternarNotificaciones()">
-        <i class="fa fa-bell campanita"></i>
-        <span *ngIf="contadorNotificaciones > 0" class="contador">{{ contadorNotificaciones }}</span>
+      <button mat-icon-button (click)="alternarNotificaciones()" title="Notificaciones" class="campanita">
+        <mat-icon>
+          {{ obtenerIconoNotificaciones() }}
+        </mat-icon>
+      
+        <span *ngIf="contadorNotificaciones > 0" class="contador">
+          {{ contadorNotificaciones }}
+        </span>
       </button>
     
       <div *ngIf="mostrarNotificaciones" class="lista-notificaciones">
+        <div class="notificaciones-header">
+          Notificaciones
+          <hr>
+        </div>
+      
         <div *ngIf="notificaciones.length === 0" class="sin-notificaciones">
           No tienes notificaciones este mes.
         </div>
-    
+      
         <ul *ngIf="notificaciones.length > 0">
-          <li *ngFor="let notificacion of notificaciones" class="notificacion-item"
+          <li *ngFor="let notificacion of notificaciones" 
+              class="notificacion-item"
               [ngClass]="{ 'nueva': notificacion.leido === 0, 'leida': notificacion.leido === 1 }">
-            <a [routerLink]="['/video', notificacion.referencia_id]">
-              <div (click)="marcarComoVista(notificacion.id)">
+            <a [routerLink]="['/video', notificacion.referencia_id]" 
+               (click)="marcarComoVista(notificacion.id)">
+              <div>
                 <strong>{{ notificacion.mensaje }}</strong>
                 <span *ngIf="notificacion.leido === 0" class="nueva-notificacion">Nueva</span>
               </div>
-              <small>{{ notificacion.fecha_creacion | date: 'short' }}</small>
+              <small>{{ notificacion.fecha_creacion | tiempo }}</small>
             </a>
           </li>
         </ul>
@@ -60,7 +74,7 @@
         <a *ngIf="canalNombre" [href]="serverIp + '3001/#/misVideos'" class="dropdown-item">Mi canal</a>
         <a routerLink="/ajustes/perfil" class="dropdown-item">Configuración</a>
         <hr class="dropdown-divider">
-        <a routerLink="/#" (click)="logout()" class="dropdown-item">Cerrar sesión</a>
+        <a (click)="logout()" class="dropdown-item">Cerrar sesión</a>
       </div>
 
       <button *ngIf="!status.isLoggedIn" (click)="redirectToLogin()" class="botonLogin">

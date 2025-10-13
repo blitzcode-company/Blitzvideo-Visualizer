@@ -5,6 +5,10 @@ import { SuscripcionesService } from '../../servicios/suscripciones.service';
 import { AuthService } from '../../servicios/auth.service';
 import { MatDialog } from '@angular/material/dialog';
 import { ModalReportarUsuarioComponent } from '../modal-reportar-usuario/modal-reportar-usuario.component';
+import { NotificacionesService } from '../../servicios/notificaciones.service';
+import { Title } from '@angular/platform-browser';
+import { StatusService } from '../../servicios/status.service';
+import { UsuarioGlobalService } from '../../servicios/usuario-global.service';
 
 @Component({
   selector: 'app-videos-del-canal',
@@ -14,6 +18,8 @@ import { ModalReportarUsuarioComponent } from '../modal-reportar-usuario/modal-r
 export class VideosDelCanalComponent {
 
   usuario:any;
+  usuarioCanal:any;
+
   canal:any;
   canalId:any;
   mensaje: string = '';
@@ -24,21 +30,63 @@ export class VideosDelCanalComponent {
   canalNombre:any
   userId:any;
   numeroDeSuscriptores:any;
+  notificacionesActivas: boolean = false;
+  cargandoNotificacion: boolean = false;
+  usuarioConCanal: any;
+  idCanal: any;
+  canales: any[] = [];
+
+
+  sidebarCollapsed = false;
+  sidebarCollapsed$ = this.usuarioGlobal.sidebarCollapsed$;
+  sidebarVisible: boolean = true;
+
 
 
   ngOnInit() {
     this.canalId = this.route.snapshot.params['id'];
     this.obtenerCanal();
-    this.listarNumeroDeSuscriptores(); 
     this.obtenerUsuario();
 
   }
   constructor(private canalService: CanalService, 
               private route: ActivatedRoute,
+              private notificacionesService: NotificacionesService,
               private authService:AuthService,
+              private titleService: Title,
+              private usuarioGlobal: UsuarioGlobalService,
               private suscripcionService: SuscripcionesService,
               public dialog: MatDialog,
+              public status: StatusService
+
   ){}
+
+
+  obtenerEstadoDeNotificaciones() {
+    this.notificacionesService.obtenerEstado(this.canalId, this.userId).subscribe({
+      next: (res: any) => this.notificacionesActivas = res.notificaciones,
+      error: () => this.notificacionesActivas = false 
+    });
+  
+  }
+
+
+  toggleSidebar() {
+    this.sidebarCollapsed = !this.sidebarCollapsed;
+  }
+  
+
+  toggleNotificaciones(): void {
+    this.cargandoNotificacion = true;
+    this.notificacionesService.cambiarEstado(this.canalId, this.userId, !this.notificacionesActivas).subscribe({
+      next: () => {
+        this.notificacionesActivas = !this.notificacionesActivas;
+        this.cargandoNotificacion = false;
+      },
+      error: () => this.cargandoNotificacion = false
+    });
+  }
+
 
   obtenerUsuario(): void {
     this.authService.usuario$.subscribe(res => {
@@ -60,7 +108,14 @@ export class VideosDelCanalComponent {
         if (res.length > 0) {
           this.canal = res[0].canal;
           this.canalNombre = this.canal.nombre;
-          this.usuario = this.canal.user;  
+          this.canalId = this.canal.id
+          this.usuarioCanal = this.canal.user;  
+          this.setTitle(this.canal.nombre);
+
+
+          this.listarNumeroDeSuscriptores(this.canalId); 
+
+
           this.videos = res.map((videoData: any) => {
             return {
               ...videoData,
@@ -69,10 +124,6 @@ export class VideosDelCanalComponent {
           });
 
           this.userId = this.canal.user_id;  
-
-          console.log(this.canal);
-          console.log(this.usuario);
-          console.log(this.videos);
         } else {
           console.error('No se encontraron videos para este canal');
         }
@@ -137,10 +188,27 @@ export class VideosDelCanalComponent {
   }
 
   verificarSuscripcion(): void {
-    this.suscripcionService.verificarSuscripcion(this.usuario.id, this.canalId).subscribe(
+    if (!this.userId || !this.canalId) {
+      return; 
+    }
+
+    this.suscripcionService.verificarSuscripcion(this.userId, this.canalId).subscribe(
       response => {
-        this.suscrito = response.estado;
-        console.log(response.estado)
+        switch (response.estado) {
+          case 'propietario':
+            this.suscrito = 'propietario';
+            break;
+          case 'suscrito':
+            this.suscrito = 'suscrito';
+            this.notificacionesActivas = true;
+            break;
+          case 'desuscrito':
+            this.suscrito = 'desuscrito';
+            this.notificacionesActivas = false;
+            break;
+          default:
+            console.warn('Estado desconocido:', response.estado);
+        }
       },
       error => {
         if (error.status === 404) {
@@ -151,13 +219,20 @@ export class VideosDelCanalComponent {
         }
       }
     );
-  }
+}
+onImageError(event: any) {
+  event.target.src = 'assets/images/video-default.png';
+}
 
 
-  listarNumeroDeSuscriptores() {
-    this.suscripcionService.listarNumeroDeSuscriptores(this.canalId).subscribe(res => {
+  listarNumeroDeSuscriptores(canalId:number) {
+    this.suscripcionService.listarNumeroDeSuscriptores(canalId).subscribe(res => {
       this.numeroDeSuscriptores = res;
     });
+  }
+
+  setTitle(canalNombre: string) {
+    this.titleService.setTitle(`${canalNombre} - BlitzVideo`);
   }
 
   private handleError(error: any): void {

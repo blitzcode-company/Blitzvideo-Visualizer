@@ -31,24 +31,28 @@ export class CrearListaComponent {
     this.authService.usuario$.subscribe(res => {
       this.usuario = res;
       this.userId = this.usuario.id;
+
+      this.crearLista(this.userId)
     });
 
     this.authService.mostrarUserLogueado().subscribe();
   }
 
-  crearLista(): void {
+  crearLista(userId:number): void {
     if (this.nombreLista.trim()) {
-        this.playlistService.crearLista(this.nombreLista, this.acceso, this.userId).subscribe(
+        this.playlistService.crearLista(this.nombreLista, this.acceso, userId).subscribe(
             response => {
-                if (response && response.playlist && response.playlist.id) {
-                    this.agregarVideoALista(response.playlist.id, this.data.videoId);
+                if (response && response.data && response.data.id) {
+                  this.snackBar.open('Video agregado a la lista con éxito.', 'Cerrar', {
+                    duration: 3000,
+                  });
+                  this.listaCreada.emit(response.data);
+                  this.nombreLista = '';
                 } else {
-                    console.error('No se pudo obtener el ID de la lista creada:', response);
                     this.dialogRef.close();
                 }
             },
             error => {
-                console.error('Error al crear la lista:', error);
                 this.dialogRef.close(); 
             }
         );

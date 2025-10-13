@@ -9,6 +9,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { ModalEditarlistaComponent } from '../modal-editarlista/modal-editarlista.component';
 import { MatDialog } from '@angular/material/dialog';
 import { Title } from '@angular/platform-browser';
+import { UsuarioGlobalService } from '../../servicios/usuario-global.service';
 
 @Component({
   selector: 'app-lista-de-reproduccion',
@@ -26,12 +27,15 @@ export class ListaDeReproduccionComponent implements OnInit, OnDestroy {
   showMenuIndex: number | null = null; 
   usuarioConCanal:any;
   idCanal:any;
+  sidebarCollapsed = false;
+  sidebarCollapsed$ = this.usuarioGlobal.sidebarCollapsed$;
 
   constructor(
     private playlistService: PlaylistService,
     private authService: AuthService,
     private titleService: Title,
     public status:StatusService,
+    private usuarioGlobal: UsuarioGlobalService,
     private snackBar: MatSnackBar,
     private dialog: MatDialog,
 
@@ -40,7 +44,7 @@ export class ListaDeReproduccionComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.obtenerUsuario();
-    this.titleService.setTitle( 'Listas de reproduccion - BlitzVideo');
+    this.titleService.setTitle('Listas de reproduccion - BlitzVideo');
 
   }
 
@@ -50,15 +54,19 @@ export class ListaDeReproduccionComponent implements OnInit, OnDestroy {
     }
   }
 
+  toggleSidebar() {
+    this.sidebarCollapsed = !this.sidebarCollapsed;
+  }
+
+  trackById(index: number, item: any) {
+    return item.id;
+  }
+
   obtenerUsuario(): void {
     this.authService.usuario$.subscribe(res => {
       this.usuario = res;
-  
       if (this.usuario) {
         this.userId = this.usuario.id; 
-        this.obtenerUsuarioConCanal()
-
-        this.mostrarCanalesSuscritos();
   
         if (this.userId) {
           this.obtenerListasDeReproduccion(this.userId); 
@@ -72,7 +80,11 @@ export class ListaDeReproduccionComponent implements OnInit, OnDestroy {
   toggleMenu(index: number): void {
     this.showMenuIndex = this.showMenuIndex === index ? null : index;
   }
-  
+
+
+  onImageError(event: any) {
+    event.target.src = 'assets/images/video-default.png';
+  }
 
   obtenerListasDeReproduccion(userId: number) {
     this.playlistService.obtenerListasDeReproduccion(userId).subscribe(
@@ -88,21 +100,6 @@ export class ListaDeReproduccionComponent implements OnInit, OnDestroy {
     );
   }
 
-  obtenerUsuarioConCanal(): void {
-    if (this.userId !== undefined) {
-      this.authService.obtenerCanalDelUsuario(this.userId).subscribe(
-        (res: any) => {
-          this.usuarioConCanal = res;
-          this.idCanal = this.usuarioConCanal.canales.id;
-        },
-        (error) => {
-          console.error('Error al obtener el canal del usuario', error);
-        }
-      );
-    } else {
-      console.error('El userId no está definido');
-    }
-  }
 
   borrarPlaylist(playlistId: number): void {
     if (confirm('¿Estás seguro de que deseas borrar esta playlist?')) {
@@ -132,16 +129,7 @@ export class ListaDeReproduccionComponent implements OnInit, OnDestroy {
     );
   }
 
-  mostrarCanalesSuscritos() {
-    this.suscripcionService.listarSuscripciones(this.userId).subscribe(
-      suscripciones => {
-        this.canales = suscripciones; 
-      },
-      error => {
-        console.error('Error al obtener listas de suscripciones', error);
-      }
-    );
-  }
+
   abrirModalEditar(playlist: any): void {
     const dialogRef = this.dialog.open(ModalEditarlistaComponent, {
       data: { playlist },

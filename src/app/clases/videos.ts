@@ -30,6 +30,8 @@ export class Videos {
   visitas_count: number;
   promedio_puntuaciones: number;
   canal: Canal;
+  duracionFormateada?: string; // <--- agregalo como opcional
+
   etiquetas: Etiqueta[];
 
   constructor(data: Partial<Videos> = {}) {
@@ -53,6 +55,9 @@ export class Videos {
     this.visitas_count = data.visitas_count ?? 0;
     this.promedio_puntuaciones = data.promedio_puntuaciones ?? 0;
     this.canal = new Canal(data.canal);
-    this.etiquetas = data.etiquetas ?? [];
+    this.etiquetas = Array.isArray(data.etiquetas)
+  ? data.etiquetas.map(et => ({ ...et }))
+  : [];
   }
+  
 }

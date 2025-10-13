@@ -60,7 +60,9 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ModocineService } from './servicios/modocine.service';
 import Echo from 'laravel-echo';
 import Pusher from 'pusher-js';
-
+import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatListModule } from '@angular/material/list';
+import { TiempoPipe } from './pipes/tiempo.pipe';
 
 
 
@@ -98,6 +100,7 @@ import Pusher from 'pusher-js';
     ReproductorStreamComponent,
     ConfiguracionStreamComponent,
     SidebarComponent,
+    TiempoPipe,
     
   ],
   imports: [
@@ -125,8 +128,9 @@ import Pusher from 'pusher-js';
     MatButtonModule,
     MatSelectModule,
     MatOption,
-    MatSnackBarModule
-
+    MatSnackBarModule,
+    MatSidenavModule,
+    MatListModule,
 
   ],
   exports: [

@@ -19,7 +19,7 @@ interface PlaylistWithVideosResponse {
   message: string;
   data: {
     playlist: Playlist;
-    videos: Videos[];
+    videos?: any[];
   };
 }
 
@@ -52,8 +52,10 @@ export class PlaylistService {
       map(response => ({
         ...response,
         data: {
-          playlist: new Playlist(response.data.playlist),
-          videos: response.data.videos.map(video => new Videos(video))
+          playlist: new Playlist({
+            ...response.data.playlist,
+            videos: response.data.videos,
+          }),
         }
       }))
     );

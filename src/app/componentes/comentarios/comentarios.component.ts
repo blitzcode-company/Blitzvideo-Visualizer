@@ -1,4 +1,4 @@
-import { Component, input, Input, OnInit } from '@angular/core';
+import { Component, input, Input, OnInit, OnChanges, SimpleChanges } from '@angular/core';
 import { Comentario } from '../../clases/comentario';
 import { ComentariosService } from '../../servicios/comentarios.service';
 import { StatusService } from '../../servicios/status.service';
@@ -38,12 +38,18 @@ export class ComentariosComponent implements OnInit {
   totalComentarios: number = 0; 
   
 
-  constructor(private comentariosService: ComentariosService, public status: StatusService, private authService: AuthService, public dialog: MatDialog,) {}
+  constructor(private comentariosService: ComentariosService, 
+    
+    public status: StatusService, private authService: AuthService, public dialog: MatDialog,) {}
 
   ngOnInit(): void {
     this.traerComentarios();
-    this.obtenerEstadosDeMeGusta();
     this.obtenerUsuario();
+  }
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['videoId'] && this.videoId) {
+      this.traerComentarios();
+    }
   }
 
   obtenerUsuario() {
@@ -51,8 +57,8 @@ export class ComentariosComponent implements OnInit {
       this.usuario = res;
       if (this.usuario) {
         this.userId = this.usuario.id;
-        console.log("User ID obtenido:", this.userId);
-        
+        this.crearComentario(this.userId);
+    
         if (this.usuario.bloqueado) {
           this.usuarioBloqueado = true;  
           this.mensaje = 'Tu cuenta está bloqueada, no puedes comentar.';
@@ -71,29 +77,24 @@ export class ComentariosComponent implements OnInit {
 
 
   traerComentarios(): void {
-    this.comentariosService.traerComentariosDelVideo(this.videoId).subscribe(
+    const userId = this.usuario?.id;
+    this.comentariosService.traerComentariosDelVideo(this.videoId, userId).subscribe(
       (res: any[]) => {
-        const comentariosVisibles = this.organizarComentarios(res).filter(
-          (comentario) => !comentario.bloqueado
-        );
-  
+        console.log(res)
+        const comentariosVisibles = this.organizarComentarios(res).filter(c => !c.bloqueado);
+        
         this.totalComentarios = comentariosVisibles.reduce((total, comentario) => {
-          const respuestasVisibles = comentario.respuestas?.filter(
-            (respuesta: any) => !respuesta.bloqueado
-          ).length || 0;
-  
-          return total + 1 + respuestasVisibles; 
+          const respuestasVisibles = comentario.respuestas?.filter(r => !r.bloqueado).length || 0;
+          return total + 1 + respuestasVisibles;
         }, 0);
   
         this.comentarios = comentariosVisibles;
       },
-      (error) => {
-        console.error('Error al obtener comentarios:', error);
-      }
+      error => console.error('Error al obtener comentarios:', error)
     );
   }
 
-  crearComentario(): void {
+  crearComentario(userId: number): void {
 
     if (this.usuarioBloqueado) {
       console.log('El usuario está bloqueado, no puede comentar.');
@@ -105,12 +106,12 @@ export class ComentariosComponent implements OnInit {
       return;
     }
 
-    if (!this.usuario || !this.usuario.id) {
+    if (!this.usuario || !userId) {
       window.location.href = `${this.serverIp}:3002/#/`; 
     }
 
 
-    this.nuevoComentario.usuario_id = this.usuario.id; 
+    this.nuevoComentario.usuario_id = this.userId; 
 
     this.comentariosService.crearComentario(this.videoId, this.nuevoComentario).subscribe(() => {
       this.traerComentarios();
@@ -208,19 +209,7 @@ export class ComentariosComponent implements OnInit {
     return comentariosRaiz;
   }
 
-  obtenerEstadosDeMeGusta(): void {
-    this.comentarios.forEach(comentario => {
-      this.comentariosService.getEstadoMeGusta(comentario.id!, this.usuario.id).subscribe(
-        (res: any) => {
-          comentario.likedByUser = res.likedByUser;
-          comentario.meGustaId = res.meGustaId;
-        },
-        (error) => {
-          console.error('Error al obtener el estado de Me Gusta:', error);
-        }
-      );
-    });
-  }
+
 
   darMeGusta(comentarioId: number): void {
     if (!this.usuario || !this.usuario.id) {
@@ -237,7 +226,7 @@ export class ComentariosComponent implements OnInit {
     );
   }
 
-  quitarMeGusta(comentarioId: number, meGustaId: number): void {
+  quitarMeGusta(meGustaId: number): void {
     
     this.comentariosService.quitarMeGusta(meGustaId, this.usuario.id).subscribe(
       () => {
@@ -250,17 +239,15 @@ export class ComentariosComponent implements OnInit {
   }
   
   abrirModalReporte(comentarioId: number | undefined) {
-    // Verifica si el userId está disponible
     if (!this.userId) {
       console.error("User ID no está definido. Asegúrate de que el usuario esté logueado.");
-      this.obtenerUsuario();  // Llama a obtenerUsuario para obtener el usuario
+      this.obtenerUsuario();  
       return;
     }
   
-    // Si el userId ya está disponible, abrimos el modal
-    const dialogRef = this.dialog.open(ModalReporteComentarioComponent, {
+   const dialogRef = this.dialog.open(ModalReporteComentarioComponent, {
       data: {
-        userId: this.usuario.id,  // Usamos el valor de userId disponible
+        userId: this.usuario.id, 
         comentarioId: comentarioId,
       }
     });

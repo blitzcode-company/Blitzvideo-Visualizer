@@ -1,38 +1,31 @@
 <app-header></app-header>
 <div class="configuracion">
   <div class="sidebar">
-    <a href="/ajustes/perfil">Perfil</a>
-    <a class="selected" href="/ajustes/pagos">Pagos</a>
-    <a href="/ajustes/streams">Streams</a>
+    <a  href="/ajustes/perfil"> <mat-icon>account_box</mat-icon>
 
+      Perfil</a>
+    <a class="selected" href="/ajustes/pagos"><mat-icon>payment</mat-icon>
+      Pagos</a>
+    <a href="/ajustes/streams"> <mat-icon>view_stream</mat-icon>
+      Streams</a>
   </div>
   <div class="container" *ngIf="!planUsuario">
     <div>
       <h2>Selecciona un Método de Pago</h2>
       
-      <div>
-        <label>
-          <input 
-            type="radio" 
-            name="paymentMethod" 
-            value="paypal" 
-            checked 
-            (change)="cambiarMetodoPago('paypal')" 
-          />
+      <div class="payment-methods">
+        <label class="payment-card" [class.selected]="selectedPaymentMethod === 'paypal'">
+          <input type="radio" name="paymentMethod" value="paypal" (change)="cambiarMetodoPago('paypal')" checked />
+          <i class="fab fa-paypal"></i>
           PayPal
         </label>
-        <br>        
-        <label>
-          <input 
-            type="radio" 
-            name="paymentMethod" 
-            value="stripe" 
-            (change)="cambiarMetodoPago('stripe')" 
-          />
-          Tarjeta de credito o debito
+      
+        <label class="payment-card" [class.selected]="selectedPaymentMethod === 'stripe'">
+          <input type="radio" name="paymentMethod" value="stripe" (change)="cambiarMetodoPago('stripe')" />
+          <i class="fas fa-credit-card"></i>
+          Tarjeta de crédito/débito
         </label>
       </div>
-    
       <div *ngIf="selectedPaymentMethod === 'paypal'">
         <app-suscripcion-paypal></app-suscripcion-paypal>
       </div>
@@ -47,10 +40,41 @@
   <div *ngIf="planUsuario" class="plandelusuario">
     <h2>Detalles del Plan</h2>
     <hr>
-    <p><strong>Plan:</strong> {{ planUsuario.plan }}</p>
-    <p><strong>Método de Pago:</strong> {{ planUsuario.metodo_de_pago }}</p>
-    <p><strong>Fecha de Inicio:</strong> {{ planUsuario.fecha_inicio | date }}</p>
-    <p><strong>ID de Suscripción:</strong> {{ planUsuario.suscripcion_id }}</p>
+  
+    <div class="plan-cards">
+      <div class="plan-card">
+        <i class="fas fa-gem"></i>
+        <div>
+          <p class="card-title">Plan</p>
+          <p class="card-value">{{ planUsuario.plan }}</p>
+        </div>
+      </div>
+  
+      <div class="plan-card">
+        <i class="fas fa-credit-card"></i>
+        <div>
+          <p class="card-title">Método de Pago</p>
+          <p class="card-value">{{ planUsuario.metodo_de_pago }}</p>
+        </div>
+      </div>
+  
+      <div class="plan-card">
+        <i class="fas fa-calendar-alt"></i>
+        <div>
+          <p class="card-title">Fecha de Inicio</p>
+          <p class="card-value">{{ planUsuario.fecha_inicio | date:'dd/MM/yyyy' }}</p>
+        </div>
+      </div>
+  
+      <div class="plan-card">
+        <i class="fas fa-id-card"></i>
+        <div>
+          <p class="card-title">ID de Suscripción</p>
+          <p class="card-value">{{ planUsuario.suscripcion_id }}</p>
+        </div>
+      </div>
+    </div>
+  
     <button (click)="bajaPlan()" class="btn btn-danger">Dar de baja el plan Premium</button>
   </div>
 </div>

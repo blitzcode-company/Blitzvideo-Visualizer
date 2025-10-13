@@ -153,6 +153,8 @@ h2 {
     object-fit: cover;
 }
 
+
+
 @media (max-width: 800px) {
     .video-search-result {
         grid-template-columns: 1fr;

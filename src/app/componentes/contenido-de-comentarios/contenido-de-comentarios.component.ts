@@ -45,10 +45,7 @@ export class ContenidoDeComentariosComponent implements OnInit{
   ) {}
 
   ngOnInit(): void {
-    if (this.comentario) {
-      this.obtenerEstadosDeMeGusta();
-      this.actualizarContadorMeGusta();    
-     }
+
 
   }
 
@@ -133,32 +130,6 @@ export class ContenidoDeComentariosComponent implements OnInit{
     }
   }
 
-  obtenerEstadosDeMeGusta(): void {
-    if (this.comentario && this.usuario?.id) {
-      this.comentariosService.getEstadoMeGusta(this.comentario.id!, this.usuario.id).subscribe(
-        (response: any) => {
-          this.comentario.likedByUser = response.likedByUser;
-          this.comentario.meGustaId = response.meGustaId;
-        },
-        (error) => {
-          console.error('Error al obtener el estado de Me Gusta:', error);
-        }
-      );
-    }
-  }
-
-  actualizarContadorMeGusta(): void {
-    this.comentariosService.contadorMeGustaDeComentario(this.comentario.id!).subscribe(
-      (response: any) => {
-        this.comentario.contadorMeGusta = response.cantidadDeMeGustas; 
-      },
-      (error) => {
-        console.error('Error al obtener el contador de Me Gusta:', error);
-        this.comentario.contadorMeGusta = 0; 
-      }
-    );
-  }
-
   darMeGusta(): void {
     if (!this.usuario || !this.usuario.id) {
       window.location.href = `${this.serverIp}:3002/#/`; 
@@ -168,7 +139,7 @@ export class ContenidoDeComentariosComponent implements OnInit{
       (response) => {
         this.comentario.likedByUser = true;
         this.comentario.meGustaId = response.meGustaId;
-        this.comentario.contadorMeGusta = (this.comentario.contadorMeGusta || 0) + 1; // Incrementa localmente
+        this.comentario.contadorDeLikes = (this.comentario.contadorDeLikes || 0) + 1;
 
       },
       (error) => {
@@ -187,7 +158,7 @@ export class ContenidoDeComentariosComponent implements OnInit{
       () => {
         this.comentario.likedByUser = false;
         this.comentario.meGustaId = null; 
-        this.comentario.contadorMeGusta = (this.comentario.contadorMeGusta || 1) - 1; // Decrementa localmente
+        this.comentario.contadorDeLikes = (this.comentario.contadorDeLikes || 1) - 1; 
 
       },
       (error) => {

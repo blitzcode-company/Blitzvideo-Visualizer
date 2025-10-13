@@ -9,6 +9,7 @@ import { NotificacionesService } from '../../servicios/notificaciones.service';
 import { Notificacion } from '../../clases/notificacion';
 import { StreamService } from '../../servicios/stream.service';
 import { Subscription } from 'rxjs';
+import { UsuarioGlobalService } from '../../servicios/usuario-global.service';
 
 @Component({
   selector: 'app-home',
@@ -24,17 +25,22 @@ export class HomeComponent implements OnDestroy {
   userId: any;
   usuario: any;
   usuarioConCanal: any;
-  idCanal: any;
   notificaciones: Notificacion[] = [];
   mostrarNotificaciones: boolean = false;
   contadorNotificaciones: number = 0;
+  sidebarVisible: boolean = true;
+
   streams: any[] = [];
   errorStreams: boolean = false;
   private subscriptions = new Subscription();
+  sidebarCollapsed = false;
+  sidebarCollapsed$ = this.usuarioGlobal.sidebarCollapsed$;
+
 
   constructor(
     private videoService: VideosService,
     private titleService: Title,
+    private usuarioGlobal: UsuarioGlobalService,
     public status: StatusService,
     private notificacionesService: NotificacionesService,
     private streamService: StreamService,
@@ -42,14 +48,18 @@ export class HomeComponent implements OnDestroy {
     private authService: AuthService
   ) {}
 
+
+
+  toggleSidebar() {
+    this.sidebarCollapsed = !this.sidebarCollapsed;
+  }
+  
   ngOnInit() {
     this.subscriptions.add(
       this.authService.usuario$.subscribe(res => {
         this.usuario = res;
         if (this.usuario) {
           this.userId = this.usuario.id;
-          this.obtenerUsuarioConCanal();
-          this.mostrarCanalesSuscritos();
           this.mostrarVideos();
           this.notificacionesService.actualizarCantidadDesdeApi(this.userId);
         } else {
@@ -79,26 +89,12 @@ export class HomeComponent implements OnDestroy {
     this.subscriptions.unsubscribe();
   }
 
-  obtenerUsuarioConCanal(): void {
-    if (this.userId !== undefined) {
-      this.authService.obtenerCanalDelUsuario(this.userId).subscribe({
-        next: (res: any) => {
-          console.log('Respuesta de obtenerCanalDelUsuario:', res);
-          this.usuarioConCanal = res || {};
-          this.idCanal = res?.canales?.id || null;
-        },
-        error: (error) => {
-          console.error('Error al obtener el canal del usuario:', error);
-          this.usuarioConCanal = {};
-          this.idCanal = null;
-        }
-      });
-    } else {
-      console.error('El userId no está definido');
-      this.usuarioConCanal = {};
-      this.idCanal = null;
-    }
+  reloadPage(event: Event) {
+    event.preventDefault();  
+    const target = event.currentTarget as HTMLAnchorElement;
+    window.location.href = target.href;
   }
+
 
   onImageError(event: any) {
     event.target.src = 'assets/images/video-default.png';
@@ -172,15 +168,5 @@ export class HomeComponent implements OnDestroy {
     return `${minutos}:${segundosFormateados}`;
   }
 
-  mostrarCanalesSuscritos() {
-    this.suscripcionService.listarSuscripciones(this.userId).subscribe({
-      next: (suscripciones) => {
-        this.canales = suscripciones;
-        console.log('Canales suscritos:', this.canales);
-      },
-      error: (error) => {
-        console.error('Error al obtener listas de suscripciones', error);
-      }
-    });
-  }
+
 }

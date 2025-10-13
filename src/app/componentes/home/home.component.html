@@ -1,22 +1,22 @@
-<app-header></app-header>
-<div class="containerHome">
-  <app-sidebar
-    [status]="status"
-    [usuarioConCanal]="usuarioConCanal"
-    [idCanal]="idCanal"
-    [canales]="canales"
-  ></app-sidebar>
+<app-header (toggleSidebar)="toggleSidebar()"></app-header>
+<div class="containerHome" [class.collapsed]="sidebarCollapsed$ | async">
+  <div class="sidebar-container">
+    <app-sidebar 
+    [collapsed]="!!(sidebarCollapsed$ | async)"
 
-  <div class="content-wrapper">
+    ></app-sidebar>
+  </div>
+
+  <div class="content-wrapper" >
     <div class="stream-grid" *ngIf="!errorStreams; else errorStreamsTemplate">
       <h2>Transmisiones</h2>
       <ng-container *ngIf="!isLoading && streams.length > 0; else noStreams">
         <div class="stream-card" *ngFor="let stream of streams">
-          <a [routerLink]="['/stream', stream.id]" class="stream-link" [title]="stream.titulo">
+          <a [routerLink]="['/stream', stream.id]" (click)="reloadPage($event)" class="stream-link" [title]="stream.titulo">
             <div class="miniatura-container">
               <img
                 class="miniatura"
-                [src]="stream.miniatura ? stream.miniatura : 'assets/images/stream-default.png'"
+                [src]="stream.miniatura ? stream.miniatura : 'assets/images/video-default.png'"
                 alt="Miniatura del stream"
                 (error)="onImageError($event)"
               >
@@ -25,10 +25,10 @@
             </div>
             <div class="stream-info">
               <h3>{{ stream.titulo }}</h3>
-              <p>{{ stream.espectadores_count || 0 }} espectadores • {{ stream.started_at | date:'short' }}</p>
+              <p>{{ stream.espectadores_count || 0 }} espectadores • {{ stream.started_at | tiempo }}</p>
               <hr>
               <div class="canalNombre">
-                <a [routerLink]="['/canal', stream.canal.id]" [title]="stream.canal.nombre" class="canal-link">
+                <a [routerLink]="['/canal', stream.canal.id]" (click)="reloadPage($event)" [title]="stream.canal.nombre" class="canal-link">
                   <img
                     *ngIf="stream.canal.user?.foto"
                     class="fotoUser"
@@ -64,7 +64,7 @@
       <ng-container *ngIf="!isLoading; else loadingVideos">
         <ng-container *ngIf="videos.length > 0; else noVideos">
           <div class="video-card" *ngFor="let video of videos">
-            <a [routerLink]="['/video', video.id]" class="video-link" [title]="video.titulo">
+            <a [routerLink]="['/video', video.id]" (click)="reloadPage($event)" class="video-link" [title]="video.titulo">
               <div class="miniatura-container">
                 <img
                   class="miniatura"
@@ -76,10 +76,10 @@
               </div>
               <div class="video-info">
                 <h3>{{ video.titulo }}</h3>
-                <p>{{ video.visitas_count }} vistas • {{ video.created_at | date:'short' }}</p>
+                <p>{{ video.visitas_count }} vistas • {{ video.created_at | tiempo }}</p>
                 <hr>
                 <div class="canalNombre">
-                  <a [routerLink]="['/canal', video.canal.id]" [title]="video.canal.nombre" class="canal-link">
+                  <a [routerLink]="['/canal', video.canal.id]"  (click)="reloadPage($event)" [title]="video.canal.nombre" class="canal-link">
                     <img
                       *ngIf="video.canal.user?.foto"
                       class="fotoUser"
