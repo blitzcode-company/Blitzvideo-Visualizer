@@ -1,87 +1,222 @@
-<header class="navbar fixed-top navbar-expand-lg header">
-  <div class="container-fluid">
-    <a class="menu-button" (click)="onMenuClick()">
-      <mat-icon>menu</mat-icon>
-    </a>
-    <a href="/" class="navbar-brand" title="Página de inicio de Blitzvideo">
-      <img class="logo logo-navbar" 
-           [src]="usuario?.premium ? 'assets/images/logopremium.png' : 'assets/images/logo.png'" 
-           alt="Logo de Blitzvideo">
-    </a>
+<header class="navbar navbar-expand-lg fixed-top bg-header shadow-sm">
+  <div class="container-fluid d-flex align-items-center navbar-container">
 
-    <nav class="nav"></nav>
-
-    <div class="search-box">
-      <input type="text" [(ngModel)]="nombre" placeholder="Buscar video" (keyup.enter)="buscarVideos()" 
-             class="search-input" aria-label="Buscar video">
-    </div>
-    <div class="notificaciones" *ngIf="status.isLoggedIn">
-      <button mat-icon-button (click)="alternarNotificaciones()" title="Notificaciones" class="campanita">
-        <mat-icon>
-          {{ obtenerIconoNotificaciones() }}
-        </mat-icon>
-      
-        <span *ngIf="contadorNotificaciones > 0" class="contador">
-          {{ contadorNotificaciones }}
-        </span>
+    <div class="navbar-left">
+      <button class="btn text-white me-2  d-md-block d-none" (click)="onMenuClick()">
+        <mat-icon>menu</mat-icon>
       </button>
+
+      
+      <a class="navbar-brand d-flex align-items-center" href="/">
+        <img 
+          class="logo-navbar"
+          [src]="usuario?.premium ? 'assets/images/logopremium.svg' : 'assets/images/logo.svg'" 
+          alt="Logo">
+      </a>
+    </div>
+
+    <div class="search-container d-none d-md-flex">
+      <form class="search-form" (submit)="buscarVideos()">
+        <div class="search-wrapper position-relative">
+          <mat-icon class="search-icon" [class.hide]="nombre.length > 0">search</mat-icon>
     
-      <div *ngIf="mostrarNotificaciones" class="lista-notificaciones">
-        <div class="notificaciones-header">
-          Notificaciones
-          <hr>
+          <input 
+            [(ngModel)]="nombre"
+            name="busqueda"
+            type="text"
+            class="search-input"
+            [placeholder]="nombre.length > 0 ? '' : 'Buscar video'"
+            aria-label="Buscar video"
+            (input)="filtrarHistorial()"
+            autocomplete="off">
+          
+          <div class="historial-dropdown" *ngIf="nombre.length > 0 && historialFiltrado.length > 0" [@fadeIn]>
+            <div class="historial-header">
+              <mat-icon class="me-2">history</mat-icon>
+              Búsquedas recientes
+            </div>
+            <ul class="historial-list">
+              <li *ngFor="let busqueda of historialFiltrado" 
+                  class="historial-item"
+                  (click)="seleccionarBusqueda(busqueda)">
+                <mat-icon class="me-2">search</mat-icon>
+                {{ busqueda }}
+                <button type="button" class="btn-clear" (click)="eliminarBusqueda(busqueda); $event.stopPropagation()">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </li>
+            </ul>
+            <div class="historial-footer">
+              <button type="button" class="btn-clear-all" (click)="limpiarHistorial()">
+                <mat-icon>delete_sweep</mat-icon>
+                Limpiar todo
+              </button>
+            </div>
+          </div>
         </div>
-      
-        <div *ngIf="notificaciones.length === 0" class="sin-notificaciones">
-          No tienes notificaciones este mes.
-        </div>
-      
-        <ul *ngIf="notificaciones.length > 0">
-          <li *ngFor="let notificacion of notificaciones" 
-              class="notificacion-item"
-              [ngClass]="{ 'nueva': notificacion.leido === 0, 'leida': notificacion.leido === 1 }">
-            <a [routerLink]="['/video', notificacion.referencia_id]" 
-               (click)="marcarComoVista(notificacion.id)">
-              <div>
-                <strong>{{ notificacion.mensaje }}</strong>
-                <span *ngIf="notificacion.leido === 0" class="nueva-notificacion">Nueva</span>
-              </div>
-              <small>{{ notificacion.fecha_creacion | tiempo }}</small>
+      </form>
+    </div>
+    <div class="navbar-right">
+      <div class="d-flex align-items-center ms-auto">
+        <button class="btn text-white d-md-none me-2" (click)="toggleMobileSearch()">
+          <mat-icon>search</mat-icon>
+        </button>
+
+
+          <div class="dropdown mx-1" *ngIf="status.isLoggedIn && canalNombre">
+          <button class="btn crear-btn d-flex align-items-center text-white" (click)="toggleCrearDropdown()">
+            <mat-icon class="me-1 crear-icon">add</mat-icon> 
+            
+            <span class="crear-texto">Crear</span>
+          </button>
+            <div class="crear-dropdown dropdown-menu" [class.open]="isCrearDropdownOpen">
+            <a class="dropdown-item crear-item" (click)="irLive()">
+              <mat-icon class="item-icon">live_tv</mat-icon>
+              <span class="item-text">Emitir en directo</span>
             </a>
-          </li>
-        </ul>
+            <a class="dropdown-item crear-item" (click)="irSubirVideo()">
+              <mat-icon class="item-icon">upload</mat-icon>
+              <span class="item-text">Subir video</span>
+            </a>
+          </div>
+        </div>
+
+        
+        <div class="dropdown noti-bell-wrapper" *ngIf="status.isLoggedIn" #bellRef>
+            <button mat-icon-button class="noti-bell" (click)="toggleNotiDropdown()"
+                    [class.ringing]="contadorNotificaciones > 0"
+                    [attr.aria-expanded]="isNotiDropdownOpen">
+                     <mat-icon>{{ contadorNotificaciones > 0 ? 'notifications_active' : 'notifications' }}</mat-icon>
+                  <span class="noti-badge" *ngIf="contadorNotificaciones > 0">
+                    {{ contadorNotificaciones > 99 ? '99+' : contadorNotificaciones }}
+                  </span>
+            </button>
+
+                <div class="noti-panel" [class.open]="isNotiDropdownOpen">
+                  <div class="panel-header">
+                    <h5>Notificaciones</h5>
+                
+                  </div>
+
+                  <div class="panel-body">
+                    <div class="empty-state" *ngIf="notificaciones.length === 0">
+                      <mat-icon>notifications_off</mat-icon>
+                      <p>No tienes notificaciones</p>
+                    </div>
+
+                    <div *ngFor="let n of notificaciones; trackBy: trackByNotif"
+                          class="noti-item"
+                          [class.unread]="n.leido === 0"
+                          [routerLink]="n.id_video ? ['/video', n.id_video] : null"
+                          (click)="irANotificacion(n)">
+
+          <img [src]="n.foto_perfil_comentador || n.foto_perfil_subidor || 'assets/images/user.svg'"
+              class="user-avatar"
+              [alt]="n.nombre_comentador || n.nombre_subidor || 'Usuario'">
+
+          <div class="noti-content">
+
+            <div class="message">
+            <strong class="user-name">
+              {{ getNombreUsuario(n) }}
+            </strong>
+
+              <span class="action-text" [ngSwitch]="n.referencia_tipo">
+
+                <span *ngSwitchCase="'new_video'">
+                  subió un nuevo vídeo
+                </span>
+
+                <span *ngSwitchCase="'new_comment'">
+                  comentó tu vídeo
+                </span>
+
+                <span *ngSwitchCase="'new_reply'">
+                  respondió a tu comentario
+                </span>            
+
+                <span *ngSwitchDefault>
+                  interactuó contigo
+                </span>
+              </span>
+            </div>
+
+            <div class="video-title" *ngIf="n.titulo_video">
+              {{ n.titulo_video }}
+            </div>
+
+            <div class="comment-preview" *ngIf="n.texto_comentario">
+              <span class="quote">“</span>{{ n.texto_comentario }}<span class="quote">”</span>
+            </div>
+
+            <div class="time-ago">
+              {{ n.fecha_creacion | tiempo }}
+            </div>
+          </div>
+
+          <img *ngIf="n.miniatura_video" 
+              [src]="n.miniatura_video"
+              class="video-thumb" 
+              alt="Miniatura"
+              (error)="onImgError($event)">
+
+          <div class="unread-dot" *ngIf="n.leido === 0"></div>
+        </div>
+          </div>
+        </div>
+      </div>
+      <div class="dropdown">
+        <div *ngIf="status.isLoggedIn">
+          <button class="btn d-flex align-items-center text-white"  (click)="toggleUserDropdown()">
+            <span *ngIf="usuario?.name" class="me-2 d-none d-lg-inline">{{ usuario.name }}</span>
+            <img *ngIf="usuario?.foto" [src]="usuario.foto" class="avatar">
+            <img *ngIf="!usuario?.foto" src="assets/images/user.svg" class="avatar">
+            <mat-icon>keyboard_arrow_down</mat-icon>
+          </button>
+          <div class="dropdown-menu dropdown-menu-end" [class.open]="isUserDropdownOpen">
+            <a *ngIf="!canalNombre" [href]="serverIp + '3001/#/crearCanal'" class="dropdown-item">Crear canal</a>
+            <a *ngIf="canalNombre" [href]="serverIp + '3001/#/misVideos'" class="dropdown-item">Mi canal</a>
+            <a routerLink="/ajustes/perfil" class="dropdown-item">Configuración</a>
+            <div class="dropdown-divider"></div>
+            <a (click)="logout()" class="dropdown-item">Cerrar sesión</a>
+          </div>
+        </div>
+
+      <a *ngIf="!status.isLoggedIn" class="btn acceder-btn" [href]="serverIp + '3002/#/'">
+        <mat-icon>login</mat-icon> Acceder
+      </a>
+    </div>
+
+
       </div>
     </div>
-    <div class="dropdown" [class.open]="isDropdownOpen">
-      <button *ngIf="status.isLoggedIn" class="dropdown-toggle" (click)="toggleDropdown($event)">
+  </div>
+  <div class="mobile-search-overlay" *ngIf="mobileSearchActive">
+    <div class="mobile-search-container position-relative">
+      <button class="btn" (click)="toggleMobileSearch()">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
 
-        <div class="dropdown-content">
-
-          <a *ngIf="usuario?.name" class="dropdown-item canal">{{ usuario?.name }}</a>
-
-          <img *ngIf="usuario?.foto" [src]="usuario.foto" alt="Foto de perfil" 
-               width="32" height="32" class="avatar">
-
-          <img *ngIf="!usuario?.foto" src="assets/images/user.png" alt="Foto de perfil predeterminada" 
-               height="32" class="avatar">
-
+      <div class="mobile-search-wrapper">
+        <input 
+          type="text" 
+          [(ngModel)]="nombre"
+          (keyup.enter)="buscarVideos(); toggleMobileSearch()"
+          (input)="filtrarHistorial()"
+          placeholder="Buscar video..."
+          class="mobile-search-input">
+        
+        <div class="mobile-historial" *ngIf="mobileSearchActive && nombre.length > 0 && historialFiltrado.length > 0">
+          <div *ngFor="let busqueda of historialFiltrado" 
+               class="mobile-historial-item"
+               (click)="seleccionarBusqueda(busqueda)">
+            {{ busqueda }}
+            <button type="button" class="btn-clear" (click)="eliminarBusqueda(busqueda); $event.stopPropagation()">
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
         </div>
-
-      </button>
-
-      <div class="dropdown-menu" *ngIf="status.isLoggedIn">
-        <a *ngIf="!canalNombre" [href]="serverIp + '3001/#/crearCanal'" class="dropdown-item">Crear canal</a>
-        <a *ngIf="canalNombre" [href]="serverIp + '3001/#/misVideos'" class="dropdown-item">Mi canal</a>
-        <a routerLink="/ajustes/perfil" class="dropdown-item">Configuración</a>
-        <hr class="dropdown-divider">
-        <a (click)="logout()" class="dropdown-item">Cerrar sesión</a>
       </div>
-
-      <button *ngIf="!status.isLoggedIn" (click)="redirectToLogin()" class="botonLogin">
-        <img *ngIf="!status.isLoggedIn" src="assets/images/user.png" alt="Foto de perfil predeterminada" 
-               height="32" class="avatar">  
-        Acceder
-      </button>
     </div>
   </div>
 </header>

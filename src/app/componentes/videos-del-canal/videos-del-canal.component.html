@@ -1,10 +1,11 @@
 <app-header (toggleSidebar)="toggleSidebar()"></app-header>
-
 <div class="containerHome" [class.collapsed]="sidebarCollapsed$ | async">
-  <div class="sidebar-container">
+  <div class="sidebar-container"  [class.bottom-mobile]="isMobile">
     <app-sidebar 
     [collapsed]="!!(sidebarCollapsed$ | async)"
-
+    [class.bottom-mobile]="isMobile"
+    [isMobile]="isMobile"
+    
     ></app-sidebar>
   </div>
 
@@ -19,7 +20,7 @@
     <header>
       <div class="profile">
         <img
-        [src]="usuarioCanal?.foto ? usuarioCanal.foto : 'assets/images/user.png'"
+        [src]="usuarioCanal?.foto ? usuarioCanal.foto : 'assets/images/user.svg'"
         alt="Foto de perfil"
         class="profile-pic"
       />
@@ -70,19 +71,12 @@
     
 
 
-  <nav>
-
-    <ul>
-      <li>
-      
-      </li>
-
-      <li><a [routerLink]="['/canal', canalId]">Inicio</a></li>
-      <li><a [routerLink]="['/canal', canalId, 'videos']">Videos</a></li>
-      
-    </ul>
-  </nav>
-
+    <nav *ngIf="tieneContenido">
+      <ul>
+        <li><a [routerLink]="['/canal', canalId]">Inicio</a></li>
+        <li><a [routerLink]="['/canal', canalId, 'videos']">Videos</a></li>
+      </ul>
+    </nav>
   <main>
     <section class="video-grid">
       <div *ngFor="let chunk of videos | chunkPipe: 4" class="video-row">
@@ -100,6 +94,11 @@
         </div>
       </div>
     </section>
+    <div class="no-content-message" *ngIf="!tieneContenido">
+      <i class="fas fa-video-slash no-content-icon"></i>
+        <h2>Este canal no tiene contenido</h2>
+    </div>
+
   </main>
   </div>
 </div>

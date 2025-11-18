@@ -1,48 +1,138 @@
-<div class="sidebar" [class.collapsed]="collapsed" > 
-  <a routerLink="/" title="Inicio" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
-    <mat-icon>home</mat-icon>
-    <span *ngIf="!collapsed">Inicio</span>
-  </a>
+<div class="sidebar" 
+[class.bottom-mobile]="isMobile" 
+[class.collapsed]="collapsed"> 
 
-  <ng-container *ngIf="status.isLoggedIn">
-    <a *ngIf="usuarioConCanal?.canales?.id" title="Mi canal" [routerLink]="['/canal', idCanal]" routerLinkActive="active">
-      <mat-icon>account_circle</mat-icon>
-      <span *ngIf="!collapsed">Mi canal</span>
+  <ng-container *ngIf="isMobile; else desktopMenu">
+    <a routerLink="/" title="Inicio" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+      <mat-icon>home</mat-icon>
     </a>
+    <ng-container *ngIf="status.isLoggedIn">
+      <a *ngIf="usuarioConCanal?.canales?.id" title="Mi canal" [routerLink]="['/canal', idCanal]" routerLinkActive="active">
+        <mat-icon>account_circle</mat-icon>
+      </a>
+    </ng-container>
     <a routerLink="/playlists" title="Listas de reproducción" routerLinkActive="active">
       <mat-icon>list</mat-icon>
-      <span *ngIf="!collapsed">Listas de reproducción</span>
+      <span class="text-label">Listas de reproducción</span>
     </a>
     
-    <hr class="lineaSideBar" />
+    <a routerLink="/historial" title="Historial" routerLinkActive="active">
+      <mat-icon>history</mat-icon>
+      <span class="text-label">Historial</span>
+    </a>
 
-    <p *ngIf="!collapsed">Suscripciones</p>
-    <div class="canalesSuscritos">
-      <ng-container *ngIf="!isLoading; else loadingTemplate">
-        <ng-container *ngIf="canales.length > 0; else noSubscriptions">
-          <a *ngFor="let canal of canales" class="canalItem" [title]="canal.nombre"  [routerLink]="['/canal', canal.id]" (click)="reloadPage($event)" routerLinkActive="active">
-            <img
-              class="fotoUserSuscriptores"
-              [src]="canal.user?.foto || '/assets/images/user.png'"
-              alt="Foto del canal"
-            />
-            <span class="nombreYEstado">
-              {{ canal.nombre }}
-              <span
-                *ngIf="canal.canal_online"
-                class="enVivo"
-                title="En directo"
-              >🔴</span>
-            </span>
+    <a routerLink="/explorar/tendencias" title="Tendencias" routerLinkActive="active">
+      <mat-icon>whatshot</mat-icon>
+    </a>
+    <a routerLink="/explorar/nuevos" title="Nuevos" routerLinkActive="active">
+      <mat-icon>new_releases</mat-icon>
+    </a>
+  </ng-container>
+
+  <ng-template #desktopMenu>
+    <a routerLink="/" title="Inicio" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+      <mat-icon>home</mat-icon>
+      <span class="text-label">Inicio</span>
+    </a>
+
+    <ng-container *ngIf="status.isLoggedIn">
+      <a *ngIf="usuarioConCanal?.canales?.id" title="Mi canal" [routerLink]="['/canal', idCanal]" routerLinkActive="active">
+        <mat-icon>account_circle</mat-icon>
+        <span class="text-label">Mi canal</span>
+      </a>
+      <a routerLink="/playlists" title="Listas de reproducción" routerLinkActive="active">
+        <mat-icon>list</mat-icon>
+        <span class="text-label">Listas de reproducción</span>
+      </a>
+      <a routerLink="/historial" title="Historial" routerLinkActive="active">
+        <mat-icon>history</mat-icon>
+        <span class="text-label">Historial</span>
+      </a>
+    </ng-container>
+
+    <ng-container *ngIf="status.isLoggedIn">
+      <p class="text-label">Suscripciones</p>
+      <div class="canalesSuscritos">
+        <ng-container *ngIf="!isLoading; else loadingTemplate2">
+          <ng-container *ngIf="canales.length > 0; else noSubscriptions2">
+
+            <a *ngFor="let canal of visibleCanales; let i = index" 
+               class="canalItem" 
+               [title]="canal.nombre" 
+               [routerLink]="['/canal', canal.id]" 
+               (click)="reloadPage($event)"
+               routerLinkActive="active">
+              <img class="fotoUserSuscriptores" 
+                   [src]="canal.user?.foto || '/assets/images/user.svg'" 
+                   alt="Foto del canal"/>
+              <span class="nombreYEstado">
+                {{ canal.nombre }}
+                <span *ngIf="canal.canal_online" class="enVivo">🔴</span>
+              </span>
+            </a>
+      
+            <button *ngIf="hayMas()" 
+                    class="btn-expandir"
+                    (click)="mostrarMas()"
+                    mat-ripple>
+              <mat-icon>expand_more</mat-icon>
+              <span>+{{ canalesOcultos }} más</span>
+            </button>
+      
+            <button *ngIf="!hayMas() && canales.length > canalesPorPagina" 
+                    class="btn-colapsar"
+                    (click)="colapsarTodo()"
+                    mat-ripple>
+              <mat-icon>expand_less</mat-icon>
+              <span>Mostrar menos</span>
+            </button>
+          </ng-container>
+          <ng-template #noSubscriptions2>
+            <p class="no-subs-text text-label">No estás suscrito a ningún canal.</p>
+          </ng-template>
+        </ng-container>
+        <ng-template #loadingTemplate2>
+          <p class="loading-text">Cargando suscripciones...</p>
+        </ng-template>
+      </div>
+    </ng-container>
+
+    <hr class="lineaSideBar text-label"/>
+
+    <p class="text-label">Explorar</p>
+    <div class="seccionExplorar">
+      <a routerLink="/explorar/tendencias" title="Tendencias" routerLinkActive="active">
+        <mat-icon>whatshot</mat-icon>
+        <span class="text-label">Tendencias</span>
+      </a>
+      <a routerLink="/explorar/nuevos" title="Nuevos" routerLinkActive="active">
+        <mat-icon>new_releases</mat-icon>
+        <span class="text-label">Nuevos</span>
+      </a>
+      <a routerLink="/explorar/populares" title="Más vistos" routerLinkActive="active">
+        <mat-icon>trending_up</mat-icon>
+        <span class="text-label">Más vistos</span>
+      </a>
+    </div>
+
+    <hr class="lineaSideBar text-label"/>
+
+    <p class="text-label">Etiquetas</p>
+    <div class="etiquetasContainer">
+      <ng-container *ngIf="!loadingEtiquetas; else loadingEtiquetasTemplate">
+        <ng-container *ngIf="etiquetas.length > 0; else noEtiquetas">
+          <a *ngFor="let etiqueta of etiquetas | slice:0:5" class="etiquetaItem" [title]="etiqueta.nombre" [routerLink]="['/etiqueta', etiqueta.id]" routerLinkActive="active">
+            <mat-icon class="etiqueta-icon">label</mat-icon>
+            <span class="etiqueta-nombre text-label">{{ etiqueta.nombre }}</span>
           </a>
         </ng-container>
-        <ng-template  #noSubscriptions >
-          <p>No estás suscrito a ningún canal.</p>
+        <ng-template #noEtiquetas>
+          <p class="no-tags-text text-label">No hay etiquetas disponibles.</p>
         </ng-template>
       </ng-container>
-      <ng-template #loadingTemplate>
-        <p>Cargando suscripciones...</p>
+      <ng-template #loadingEtiquetasTemplate>
+        <p class="loading-text text-label">Cargando etiquetas...</p>
       </ng-template>
     </div>
-  </ng-container>
+  </ng-template>
 </div>

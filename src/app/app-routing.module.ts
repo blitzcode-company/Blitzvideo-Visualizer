@@ -16,12 +16,14 @@ import { SeleccionPagoComponent } from './componentes/seleccion-pago/seleccion-p
 import { autenticacionGuard } from './guards/autenticacion.guard';
 import { VerStreamComponent } from './componentes/ver-stream/ver-stream.component';
 import { ConfiguracionStreamComponent } from './componentes/configuracion-stream/configuracion-stream.component';
+import { HistorialComponent } from './componentes/historial/historial.component';
 
 const routes: Routes = [
   {path: '', component: HomeComponent},
   {path: 'video/:id', component: VerVideoComponent, },
+  {path: 'video/:id/playlist/:playlistId', component: VerVideoComponent, },
   {path: 'editarUsuario', component: EditarUsuarioComponent, canActivate: [autenticacionGuard]},
-  { path: 'buscar/:nombre', component: ResultadoDeBusquedaComponent,  }, 
+  { path: 'buscar', component: ResultadoDeBusquedaComponent}, 
   { path: 'canal/:id', component: VerCanalComponent},
   { path: 'canal/:id/videos', component: VideosDelCanalComponent},
   { path: 'playlists', component: ListaDeReproduccionComponent, canActivate: [autenticacionGuard]},
@@ -29,7 +31,7 @@ const routes: Routes = [
   {path: 'ajustes/pagos', component: SeleccionPagoComponent, canActivate: [autenticacionGuard]},
   {path: 'ajustes/perfil', component: ConfiguracionDePerfilComponent, canActivate: [autenticacionGuard]},
   {path: 'ajustes/streams', component: ConfiguracionStreamComponent, canActivate: [autenticacionGuard]},
-
+  {path: 'historial', component: HistorialComponent, canActivate: [autenticacionGuard]},
   {path: 'stream/:id', component: VerStreamComponent},
   
   { path: '**', component: NoEncontradoComponent }, 

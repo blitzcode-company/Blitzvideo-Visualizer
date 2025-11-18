@@ -1,10 +1,13 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { VideosService } from '../../servicios/videos.service';
 import { TiempoService } from '../../servicios/tiempo.service';
 import { Title } from '@angular/platform-browser';
 import  moment from 'moment';
 import 'moment/locale/es';
+import { UsuarioGlobalService } from '../../servicios/usuario-global.service';
+import { AuthService } from '../../servicios/auth.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-resultado-de-busqueda',
@@ -15,26 +18,58 @@ export class ResultadoDeBusquedaComponent implements OnInit{
 
   videos: any[] = [];
   video: any;
+  sidebarCollapsed = false;
+  sidebarVisible: boolean = true;
+  private subscriptions = new Subscription();
 
+  sidebarCollapsed$ = this.usuarioGlobal.sidebarCollapsed$;
   nombre: string = '';
+  isMobile = window.innerWidth <= 768;
 
   constructor(private videoService: VideosService,
+              private usuarioGlobal: UsuarioGlobalService,
               private route: ActivatedRoute,
+              private authService: AuthService,
               private titleService: Title,
               private tiempo: TiempoService) {
                 moment.locale('es'); 
               }
 
-  ngOnInit(): void {
-    this.route.paramMap.subscribe(params => {
-      this.nombre = params.get('nombre') || '';
-      if (this.nombre) {
-        this.listarVideosPorNombre(this.nombre);
-      }
-      this.titleService.setTitle(this.nombre + ' - BlitzVideo');
+ngOnInit(): void {
+  this.route.queryParams.subscribe(params => {
+    this.nombre = params['q'] || ''; 
+    if (this.nombre) {
+      this.listarVideosPorNombre(this.nombre);
+    }
+    this.titleService.setTitle(this.nombre + ' - BlitzVideo');
+  });
 
-    });
-  }
+  this.checkMobile();
+  this.subscriptions.add(
+    this.authService.mostrarUserLogueado().subscribe()
+  );
+}
+
+ngOnDestroy() {
+  this.subscriptions.unsubscribe();
+}
+
+
+
+toggleSidebar() {
+  this.sidebarCollapsed = !this.sidebarCollapsed;
+}
+
+checkMobile() {
+  this.isMobile = window.innerWidth <= 767;
+}
+
+
+
+@HostListener('window:resize', ['$event'])
+onResize(event: any) {
+  this.isMobile = event.target.innerWidth <= 768;
+}
 
 
   onImageError(event: any) {

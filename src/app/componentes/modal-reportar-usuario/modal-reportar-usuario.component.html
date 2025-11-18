@@ -1,44 +1,68 @@
-<div mat-dialog-content>
-    <h2>Reportar usuario</h2>
-    <form (ngSubmit)="enviarReporteUsuario(reportForm.value)" #reportForm="ngForm">
-     
- 
-      <label>
-        <input type="checkbox" name="ciberacoso" ngModel>
-        Ciberacoso 
-      </label>
-      <br>
-      <label>
-        <input type="checkbox" name="privacidad" ngModel>
-        Privacidad
-      </label>
-      <br>
-      <label>
-        <input type="checkbox" name="suplantacion_identidad" ngModel>
-        Suplantacion de identidad   
-      </label>
-      <br>
-      <label>
-        <input type="checkbox" name="amenazas" ngModel>
+<h2 mat-dialog-title>
+  <mat-icon>flag</mat-icon>
+  Reportar usuario
+</h2>
+
+<mat-dialog-content class="report-content">
+  <form (ngSubmit)="enviarReporteUsuario()" #reportForm="ngForm" class="report-form">
+
+    <!-- Opciones -->
+    <div class="report-options">
+      <mat-checkbox [(ngModel)]="reporte.ciberacoso" name="ciberacoso">
+        Ciberacoso
+      </mat-checkbox>
+
+      <mat-checkbox [(ngModel)]="reporte.privacidad" name="privacidad">
+        Violación de privacidad
+      </mat-checkbox>
+
+      <mat-checkbox [(ngModel)]="reporte.suplantacion_identidad" name="suplantacion_identidad">
+        Suplantación de identidad
+      </mat-checkbox>
+
+      <mat-checkbox [(ngModel)]="reporte.amenazas" name="amenazas">
         Amenazas
-      </label>
-      <br>
-      <label>
-        <input type="checkbox" name="incitacion_odio" ngModel>
+      </mat-checkbox>
+
+      <mat-checkbox [(ngModel)]="reporte.incitacion_odio" name="incitacion_odio">
         Incitación al odio
-      </label>
-      <br>
-      <label>
-        <input type="checkbox" name="otros" ngModel>
+      </mat-checkbox>
+
+      <mat-checkbox 
+        [(ngModel)]="reporte.otros" 
+        name="otros"
+        (ngModelChange)="onOtrosChange($event)"
+      >
         Otros
-      </label>
-      <br>
-      <label for="detalle">Detalle:</label>
-      <br>
-      <textarea id="detalle" name="detalle" ngModel></textarea>
-      <br><br>
-
-      <button type="submit" [disabled]="reportForm.invalid">Enviar Reporte</button>
-
-    </form>
+      </mat-checkbox>
     </div>
+
+    <mat-form-field appearance="outline" class="full-width" *ngIf="mostrarDetalle">
+      <mat-label>Describe el problema</mat-label>
+      <textarea 
+        matInput 
+        [(ngModel)]="reporte.detalle" 
+        name="detalle"
+        rows="3"
+        required
+        placeholder="Proporciona más detalles..."
+      ></textarea>
+      <mat-error>Este campo es obligatorio</mat-error>
+    </mat-form-field>
+
+    <mat-dialog-actions align="end">
+      <button mat-button type="button" (click)="cerrar()" [disabled]="loading">
+        Cancelar
+      </button>
+      <button 
+        mat-raised-button 
+        color="warn" 
+        type="submit"
+        [disabled]="!esValido() || loading"
+      >
+        <mat-spinner diameter="20" *ngIf="loading"></mat-spinner>
+        <span *ngIf="!loading">Enviar reporte</span>
+      </button>
+    </mat-dialog-actions>
+  </form>
+</mat-dialog-content>

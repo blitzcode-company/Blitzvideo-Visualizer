@@ -80,12 +80,16 @@ export class VideosService {
   }
 
   
-  contarVisita(idVideo: any, userId: any): Observable<any> {
+  contarVisita(idVideo: number, userId: number, progresoSegundos: number = 0, completado: boolean = false): Observable<any> {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
         'Authorization': 'Bearer ' + this.cookie.get('accessToken') 
       })
+    };
+    const body = {
+      progreso_segundos: progresoSegundos,
+      completado: completado
     };
     const url = `${this.apiUrl}api/v1/usuario/${userId}/visita/${idVideo}`;
   
@@ -107,7 +111,7 @@ export class VideosService {
 
 
 
-  contarVisitaInvitado(idVideo: any): Observable<any> {
+  contarVisitaInvitado(idVideo: number, progresoSegundos: number = 0, completado: boolean = false):Observable<any> {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
@@ -131,4 +135,6 @@ export class VideosService {
     );
   }
 
+
+  
 }

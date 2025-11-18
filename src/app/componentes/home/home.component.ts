@@ -1,4 +1,4 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, HostListener } from '@angular/core';
 import { VideosService } from '../../servicios/videos.service';
 import { Title } from '@angular/platform-browser';
 import { environment } from '../../../environments/environment';
@@ -35,6 +35,7 @@ export class HomeComponent implements OnDestroy {
   private subscriptions = new Subscription();
   sidebarCollapsed = false;
   sidebarCollapsed$ = this.usuarioGlobal.sidebarCollapsed$;
+  isMobile = window.innerWidth <= 767;
 
 
   constructor(
@@ -70,7 +71,8 @@ export class HomeComponent implements OnDestroy {
         }
       })
     );
-
+    this.checkMobile();
+    window.addEventListener('resize', () => this.checkMobile());
     this.subscriptions.add(
       this.authService.mostrarUserLogueado().subscribe()
     );
@@ -89,10 +91,21 @@ export class HomeComponent implements OnDestroy {
     this.subscriptions.unsubscribe();
   }
 
+  checkMobile() {
+    this.isMobile = window.innerWidth <= 767;
+  }
+
+
   reloadPage(event: Event) {
     event.preventDefault();  
     const target = event.currentTarget as HTMLAnchorElement;
     window.location.href = target.href;
+  }
+
+
+  @HostListener('window:resize', ['$event'])
+  onResize(event: any) {
+    this.isMobile = event.target.innerWidth <= 768;
   }
 
 

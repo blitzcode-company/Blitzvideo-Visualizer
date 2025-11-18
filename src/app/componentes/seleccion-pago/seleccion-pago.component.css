@@ -7,7 +7,7 @@
 
 .container, .plandelusuario {
   flex-grow: 1;
-  margin-left: 270px; /* espacio para sidebar */
+  margin-left: 270px;
   background-color: #fff;
   padding: 20px 30px;
 

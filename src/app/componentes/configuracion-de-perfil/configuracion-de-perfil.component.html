@@ -35,7 +35,10 @@
 
         <div class="photo-upload">
           <img class="user-photo" *ngIf="usuario.foto" [src]="usuario.foto" alt="Foto de perfil" />
+          <br>
+
           <label for="userPhoto" class="upload-button">
+            
             <i class="fas fa-upload"></i> Subir nueva foto
           </label>
           <input type="file" id="userPhoto" class="file-input" (change)="onFileSelected($event)" />

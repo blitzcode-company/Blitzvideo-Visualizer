@@ -1,81 +1,81 @@
-import { Component, Inject, Output, EventEmitter } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA, MatDialog } from '@angular/material/dialog';
+import { Component, Inject } from '@angular/core';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { PlaylistService } from '../../servicios/playlist.service';
 import { AuthService } from '../../servicios/auth.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
-
 @Component({
   selector: 'app-crear-lista',
   templateUrl: './crear-lista.component.html',
-  styleUrls: ['./crear-lista.component.css'] 
+  styleUrls: ['./crear-lista.component.css']
 })
 export class CrearListaComponent {
   nombreLista: string = '';
   acceso: boolean = true;
-  @Output() listaCreada = new EventEmitter<any>(); 
-  usuario: any;
-  userId: any;
+  userId: number | null = null;
+  loading = false;
 
   constructor(
     public dialogRef: MatDialogRef<CrearListaComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: { videoId?: number },
     private playlistService: PlaylistService,
-    @Inject(MAT_DIALOG_DATA) public data: { videoId: number },
-    private snackBar: MatSnackBar,
-    private authService: AuthService
+    private authService: AuthService,
+    private snackBar: MatSnackBar
   ) {
-    this.obtenerUsuario(); 
+    this.obtenerUsuarioId();
   }
 
-  obtenerUsuario(): void {
-    this.authService.usuario$.subscribe(res => {
-      this.usuario = res;
-      this.userId = this.usuario.id;
-
-      this.crearLista(this.userId)
-    });
-
-    this.authService.mostrarUserLogueado().subscribe();
-  }
-
-  crearLista(userId:number): void {
-    if (this.nombreLista.trim()) {
-        this.playlistService.crearLista(this.nombreLista, this.acceso, userId).subscribe(
-            response => {
-                if (response && response.data && response.data.id) {
-                  this.snackBar.open('Video agregado a la lista con éxito.', 'Cerrar', {
-                    duration: 3000,
-                  });
-                  this.listaCreada.emit(response.data);
-                  this.nombreLista = '';
-                } else {
-                    this.dialogRef.close();
-                }
-            },
-            error => {
-                this.dialogRef.close(); 
-            }
-        );
-    } else {
-        alert('El nombre de la lista no puede estar vacío.');
-    }
-}
-
-  agregarVideoALista(listaId: number, videoId: number): void {
-    this.playlistService.agregarVideoALista(listaId, videoId).subscribe(
-      () => {
-        this.snackBar.open('Video agregado a la lista con éxito.', 'Cerrar', {
-            duration: 3000,
-        });
-        this.dialogRef.close();
-        window.location.reload(); 
-
-      },
-      error => {
-        console.error('Error al agregar video a la lista:', error);
-        this.dialogRef.close(); 
+obtenerUsuarioId(): void {
+    this.authService.usuario$.subscribe(usuario => {
+      if (usuario?.id) {
+        this.userId = usuario.id;
       }
-    );
+    });
+  }
+
+  crearLista(): void {
+    if (!this.userId) {
+      this.snackBar.open('Error: usuario no identificado', 'Cerrar', { duration: 3000 });
+      return;
+    }
+
+    if (!this.nombreLista.trim()) {
+      this.snackBar.open('El nombre no puede estar vacío', 'Cerrar', { duration: 3000 });
+      return;
+    }
+
+    this.loading = true;
+
+    this.playlistService.crearLista(this.nombreLista.trim(), this.acceso, this.userId).subscribe({
+      next: (response) => {
+        const nuevaLista = response?.data;
+        this.snackBar.open('Lista creada correctamente', 'OK', { duration: 3000 });
+
+        if (this.data?.videoId && nuevaLista?.id) {
+          this.agregarVideoALista(nuevaLista.id, this.data.videoId);
+        } else {
+          this.dialogRef.close(nuevaLista);
+        }
+      },
+      error: (err) => {
+        console.error('Error al crear lista', err);
+        this.snackBar.open('Error al crear la lista', 'Cerrar', { duration: 3000 });
+        this.loading = false;
+      }
+    });
+  }
+
+  private agregarVideoALista(listaId: number, videoId: number): void {
+    this.playlistService.agregarVideoALista(listaId, videoId).subscribe({
+      next: () => {
+        this.snackBar.open('Video agregado a la lista', 'OK', { duration: 3000 });
+        this.dialogRef.close({ listaId, videoAgregado: true });
+      },
+      error: () => {
+        this.snackBar.open('Error al agregar video', 'Cerrar', { duration: 3000 });
+        this.dialogRef.close();
+      }
+    });
   }
 
   onNoClick(): void {

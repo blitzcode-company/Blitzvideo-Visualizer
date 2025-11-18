@@ -63,8 +63,20 @@ import Pusher from 'pusher-js';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatListModule } from '@angular/material/list';
 import { TiempoPipe } from './pipes/tiempo.pipe';
-
-
+import { ChatDeStreamComponent } from './componentes/chat-de-stream/chat-de-stream.component';
+import { HistorialComponent } from './componentes/historial/historial.component';
+import { TendenciasComponent } from './componentes/tendencias/tendencias.component';
+import { NuevosComponent } from './componentes/nuevos/nuevos.component';
+import { VideosDeEtiquetaComponent } from './componentes/videos-de-etiqueta/videos-de-etiqueta.component';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatCheckbox, MatCheckboxChange } from '@angular/material/checkbox';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { SafeHtmlPipe } from './pipes/safe-html.pipe';
+import { DragDropModule } from '@angular/cdk/drag-drop';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { LoadingBarComponent } from './componentes/shared/loading-bar/loading-bar.component';
+import { LoadingBarService } from './servicios/loading-bar.service';
+import { LoadingInterceptor } from './servicios/core/interceptors/loading.service';
 
 @NgModule({
   declarations: [
@@ -101,6 +113,13 @@ import { TiempoPipe } from './pipes/tiempo.pipe';
     ConfiguracionStreamComponent,
     SidebarComponent,
     TiempoPipe,
+    ChatDeStreamComponent,
+    HistorialComponent,
+    TendenciasComponent,
+    NuevosComponent,
+    VideosDeEtiquetaComponent,
+    SafeHtmlPipe,
+    LoadingBarComponent
     
   ],
   imports: [
@@ -122,26 +141,33 @@ import { TiempoPipe } from './pipes/tiempo.pipe';
     VgOverlayPlayModule,
     VgBufferingModule,
     MatFormFieldModule,
+    MatMenuModule,
     MatInputModule,
     MatIconModule,
     MatTooltipModule,
     MatButtonModule,
+    MatMenuModule,
     MatSelectModule,
     MatOption,
     MatSnackBarModule,
     MatSidenavModule,
     MatListModule,
+    MatCheckboxModule,
+    DragDropModule,
 
   ],
   exports: [
     VerVideoComponent,
     ContenidoDeComentariosComponent,
     ComentariosComponent,
-    SidebarComponent
+    SidebarComponent, 
+    ChatDeStreamComponent
     
   ],
   providers: [
     CookieService, 
+    LoadingBarService,
+    { provide: HTTP_INTERCEPTORS, useClass: LoadingInterceptor, multi: true },
     provideAnimationsAsync(),
     ComentariosService, 
     ModocineService,

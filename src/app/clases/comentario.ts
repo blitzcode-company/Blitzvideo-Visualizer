@@ -1,23 +1,25 @@
 import { Usuario } from "./usuario";
 
 export class Comentario {
-    id?: number;
-    user?: Usuario;
-    usuario?: Usuario;
-    usuario_id: any;
-    video_id: any;
-    respuesta_id?: any;
-    mensaje: any;
-    created_at:any;
-    bloqueado: boolean = false;
-    respuestas?: Comentario[] = [];
-    mostrarRespuestas: boolean = false; 
-    likedByUser: boolean = false;  
-    puedeBorrar: boolean = false;
-    meGustaId: number | null = null;
-    contadorDeLikes: number | null = null; 
-    constructor(user: Usuario) {
-        this.user = user;
-        this.usuario = user;
+  id?: number;
+  user?: Usuario;
+  usuario?: Usuario;
+  usuario_id!: number;
+  video_id!: number;
+  respuesta_id?: number;
+  mensaje!: string;
+  created_at!: any;
+  bloqueado!: boolean;
+  respuestas?: Comentario[];
+  mostrarRespuestas?: boolean;
+  likedByUser?: boolean;
+  puedeBorrar?: boolean;
+  meGustaId?: number | null;
+  contadorDeLikes?: number | null;
+
+    constructor(data?: Partial<Comentario>) {
+        if (data) {
+            Object.assign(this, data); // copia todos los campos del backend
+        }
     }
 }

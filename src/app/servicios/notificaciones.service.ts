@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, Subscription, interval } from 'rxjs';
 import { CookieService } from 'ngx-cookie-service';
 import { environment } from '../../environments/environment.prod';
 
@@ -11,12 +11,17 @@ import { environment } from '../../environments/environment.prod';
 })
 export class NotificacionesService {
 
-  constructor(private httpClient: HttpClient, private cookie:CookieService) { }
+  constructor(private httpClient: HttpClient, private cookie:CookieService, ) { }
 
   private apiUrl = environment.apiUrl
+  private pollingSubscription?: Subscription;
+  private ultimaCantidad = 0;
 
   private notificaciones = new BehaviorSubject<number>(0);
   public notificaciones$ = this.notificaciones.asObservable();
+
+
+  
 
   marcarNotificacionComoVista(notificacionId: number, usuarioId: number): Observable<any> {
     const httpOptions = {
@@ -49,11 +54,12 @@ export class NotificacionesService {
   
   actualizarCantidadDesdeApi(usuarioId: number): void {
     this.listarNotificaciones(usuarioId).subscribe((respuesta) => {
-  
       const cantidadNoLeidas = Array.isArray(respuesta?.notificaciones)
         ? respuesta.notificaciones.filter((n: any) => n.leido === 0).length
         : 0;
-  
+
+
+      this.ultimaCantidad = cantidadNoLeidas;
       this.notificaciones.next(cantidadNoLeidas);
     });
   }

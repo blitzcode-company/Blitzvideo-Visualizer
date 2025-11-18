@@ -1,18 +1,39 @@
-<h2 mat-dialog-title>Crear nueva lista de reproducción</h2>
-<div mat-dialog-content>
-  <mat-form-field>
+<h2 mat-dialog-title>
+  <mat-icon>add</mat-icon>
+  Crear nueva lista de reproducción
+</h2>
+
+<mat-dialog-content>
+  <mat-form-field appearance="outline" class="full-width">
     <mat-label>Nombre de la lista</mat-label>
-    <input matInput [(ngModel)]="nombreLista" />
+    <input 
+      matInput 
+      [(ngModel)]="nombreLista" 
+      placeholder="Ej: Mis favoritos, Rock 2025..."
+      required
+      maxlength="100"
+    >
+    <mat-hint align="end">{{ nombreLista?.length || 0 }}/100</mat-hint>
   </mat-form-field>
-  <mat-form-field appearance="fill">
+
+  <mat-form-field appearance="outline" class="full-width">
     <mat-label>Acceso</mat-label>
-    <mat-select [(ngModel)]="acceso" name="acceso" required>
+    <mat-select [(ngModel)]="acceso" required>
       <mat-option [value]="true">Pública</mat-option>
       <mat-option [value]="false">Privada</mat-option>
     </mat-select>
   </mat-form-field>
-</div>
-<div mat-dialog-actions>
-  <button mat-button (click)="onNoClick()">Cancelar</button>
-  <button mat-button (click)="crearLista(this.userId)" cdkFocusInitial>Crear</button>
-</div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onNoClick()" [disabled]="loading">Cancelar</button>
+  <button 
+    mat-raised-button 
+    color="primary" 
+    (click)="crearLista()"
+    [disabled]="loading || !nombreLista?.trim() || !userId"
+  >
+    <mat-spinner diameter="20" *ngIf="loading"></mat-spinner>
+    <span *ngIf="!loading">Crear</span>
+  </button>
+</mat-dialog-actions>

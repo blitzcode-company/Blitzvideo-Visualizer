@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CanalService } from '../../servicios/canal.service';
 import { AuthService } from '../../servicios/auth.service';
@@ -39,10 +39,12 @@ export class VerCanalComponent implements OnInit {
   usuarioConCanal: any;
   idCanal: any;
   canales: any[] = [];
+  isMobile = false;
 
   sidebarCollapsed = false;
   sidebarCollapsed$ = this.usuarioGlobal.sidebarCollapsed$;
   sidebarVisible: boolean = true;
+  tieneContenido: boolean = true;
 
 
   constructor(
@@ -68,12 +70,23 @@ export class VerCanalComponent implements OnInit {
 
     this.obtenerCanal(this.canalId);
     this.obtenerUsuario();
+    this.checkMobile();
+
   }
 
   toggleSidebar() {
     this.sidebarCollapsed = !this.sidebarCollapsed;
   }
-  
+
+  checkMobile() {
+    this.isMobile = window.innerWidth <= 767;
+  }
+
+  @HostListener('window:resize', ['$event'])
+  onResize(event: any) {
+    this.isMobile = event.target.innerWidth <= 768;
+  }
+
 
   obtenerEstadoDeNotificaciones() {
     this.notificacionesService.obtenerEstado(this.canalId, this.userId).subscribe({
@@ -206,9 +219,13 @@ export class VerCanalComponent implements OnInit {
               if (this.ultimoVideo) {
                 this.ultimoVideo.indice = this.videos.findIndex(video => video.id === this.ultimoVideo.id) + 1;
               }
+              this.tieneContenido = true
+
             } else {
               console.log('No se encontraron videos para este canal');
               this.videos = [];
+              this.tieneContenido = false
+
               this.ultimoVideo = null;
             }
             this.cargando = false;

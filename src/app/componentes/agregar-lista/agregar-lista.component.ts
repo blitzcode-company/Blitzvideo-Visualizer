@@ -1,23 +1,23 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, OnDestroy } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialog } from '@angular/material/dialog';
 import { PlaylistService } from '../../servicios/playlist.service';
 import { AuthService } from '../../servicios/auth.service';
-import { CrearListaComponent } from '../crear-lista/crear-lista.component'; 
+import { CrearListaComponent } from '../crear-lista/crear-lista.component';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Playlist } from '../../clases/playlist';
-
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-agregar-lista',
   templateUrl: './agregar-lista.component.html',
-  styleUrls: ['./agregar-lista.component.css'] 
+  styleUrls: ['./agregar-lista.component.css']
 })
-export class AgregarListaComponent {
+export class AgregarListaComponent implements OnDestroy {
   listas: Playlist[] = [];
-  
   listaSeleccionada: number | null = null;
-  usuario: any;
-  userId: any;
+  userId: number | null = null;
+  loading = false;
+  private sub?: Subscription;
 
   constructor(
     public dialogRef: MatDialogRef<AgregarListaComponent>,
@@ -25,64 +25,70 @@ export class AgregarListaComponent {
     private playlistService: PlaylistService,
     private authService: AuthService,
     private dialog: MatDialog,
-    private snackBar: MatSnackBar 
+    private snackBar: MatSnackBar
   ) {
-    this.obtenerUsuario(); 
+    this.obtenerUsuario();
+  }
+
+  ngOnDestroy() {
+    this.sub?.unsubscribe();
   }
 
   obtenerUsuario(): void {
-    this.authService.usuario$.subscribe(res => {
-      this.usuario = res;
-      this.userId = this.usuario.id;
-      this.listarListas(this.userId); 
-    });
-
-    this.authService.mostrarUserLogueado().subscribe();
-  }
-
-  listarListas(userId:number): void {
-    this.playlistService.obtenerListasDeReproduccion(userId).subscribe(
-      res => {
-        console.log('Respuesta transformada:', res);
-        this.listas = res; 
-        console.log('Listas asignadas:', this.listas);
-      },
-      error => {
-        console.error('Error al cargar las lista:', error);
+    this.sub = this.authService.usuario$.subscribe(usuario => {
+      if (usuario?.id) {
+        this.userId = usuario.id;
+        this.cargarListas(this.userId!);
       }
-    );
+    });
   }
+
+  cargarListas(userId: number): void {
+      this.loading = true;
+      this.playlistService.obtenerListasDeReproduccion(userId).subscribe({
+        next: (listas) => {
+          this.listas = listas;
+          this.loading = false;
+        },
+        error: (err) => {
+          console.error('Error al cargar listas', err);
+          this.snackBar.open('Error al cargar listas', 'Cerrar', { duration: 3000 });
+          this.loading = false;
+        }
+      });
+    }
 
   agregarVideo(): void {
-    if (this.listaSeleccionada !== null) {
-      this.playlistService.agregarVideoALista(this.listaSeleccionada, this.data.videoId).subscribe(
-        response => {
-          this.snackBar.open('Video agregado a la lista con éxito.', 'Cerrar', {
-            duration: 3000, 
-          });
-          this.dialogRef.close(response);
-        },
-        error => {
-          console.error('Error al agregar video a la lista:', error);
-          this.dialogRef.close();
-        }
-      );
-    } else {
-      alert('Por favor, selecciona una lista.');
+    if (!this.listaSeleccionada) {
+      this.snackBar.open('Selecciona una lista', 'OK', { duration: 3000 });
+      return;
     }
+
+    this.loading = true;
+    this.playlistService.agregarVideoALista(this.listaSeleccionada, this.data.videoId).subscribe({
+      next: (res) => {
+        this.snackBar.open('Video agregado correctamente', 'OK', { duration: 3000 });
+        this.dialogRef.close({ agregado: true });
+      },
+      error: (err) => {
+        this.snackBar.open(err.error.message, 'Cerrar', { duration: 3000 });
+        this.loading = false;
+      }
+    });
   }
 
   abrirCrearListaModal(): void {
     const dialogRef = this.dialog.open(CrearListaComponent, {
-      width: '400px',
-      data: { videoId: this.data.videoId } 
+      width: '500px',
+      maxWidth: '90vw',
+      data: { videoId: this.data.videoId }
     });
-  
-    const instance = dialogRef.componentInstance;
-  
-    instance.listaCreada.subscribe((nuevaLista: any) => {
-      this.listas.push(nuevaLista);      
-      this.listaSeleccionada = nuevaLista.id; 
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.cargarListas(this.userId!);
+        this.listaSeleccionada = result.id;
+      }
     });
   }
 

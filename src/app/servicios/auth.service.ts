@@ -55,8 +55,6 @@ export class AuthService {
   
 
   obtenerCanalDelUsuario(id:number) {
-
-    
     const url = `${this.apiUrl}api/v1/usuario/${id}`
     const httpOptions = {
       headers: new HttpHeaders({
@@ -67,6 +65,10 @@ export class AuthService {
     return this.http.get(url, httpOptions);
   }
 
+  logout() {
+  return this.http.post(this.authApiUrl + 'api/v1/logout', {});
+ 
+}
   editarUsuario(id: number, formData: FormData): Observable<any> {
     const url = `${this.apiUrl}api/v1/usuario/${id}`;
     const headers = { 'Authorization': 'Bearer ' + this.cookie.get('accessToken') };
@@ -77,6 +79,13 @@ export class AuthService {
         return of(null);
       })
     );
+  }
+
+  obtenerHistorialDelUsuario(userId: number): Observable<any>  {
+    const url = `${this.apiUrl}api/v1/usuario/${userId}/historial`;
+    const headers = { 'Authorization': 'Bearer ' + this.cookie.get('accessToken') };
+    return this.http.get(url, {headers});
+
   }
 
   actualizarUsuarioPremium(userId: number): Observable<any> {

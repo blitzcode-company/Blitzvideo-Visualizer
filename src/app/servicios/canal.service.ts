@@ -17,12 +17,8 @@ export class CanalService {
 
   listarVideosDeCanal(canalId: any): Observable<any> {
     const url = `${this.apiUrl}api/v1/canal/${canalId}/videos`;
-    const httpOptions = {
-      headers: new HttpHeaders({
-          'Authorization' : 'Bearer ' + this.cookie.get('accessToken')
-      })
-    }
-    return this.httpClient.get(url, httpOptions);
+
+    return this.httpClient.get(url);
   }
 
   crearCanal(userId: any, canal:any): Observable<any> {

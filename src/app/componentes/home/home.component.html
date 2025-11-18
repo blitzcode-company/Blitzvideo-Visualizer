@@ -1,11 +1,13 @@
 <app-header (toggleSidebar)="toggleSidebar()"></app-header>
 <div class="containerHome" [class.collapsed]="sidebarCollapsed$ | async">
-  <div class="sidebar-container">
+  <div class="sidebar-container"  [class.bottom-mobile]="isMobile" >
     <app-sidebar 
     [collapsed]="!!(sidebarCollapsed$ | async)"
-
-    ></app-sidebar>
+    [class.bottom-mobile]="isMobile"
+    [isMobile]="isMobile"
+        ></app-sidebar>
   </div>
+
 
   <div class="content-wrapper" >
     <div class="stream-grid" *ngIf="!errorStreams; else errorStreamsTemplate">
@@ -38,7 +40,7 @@
                   <img
                     *ngIf="!stream.canal.user?.foto"
                     class="fotoUserDefault"
-                    src="/assets/images/user.png"
+                    src="/assets/images/user.svg"
                     alt="Foto del canal"
                   >
                   {{ stream.canal.nombre }}
@@ -89,7 +91,7 @@
                     <img
                       *ngIf="!video.canal.user?.foto"
                       class="fotoUserDefault"
-                      src="/assets/images/user.png"
+                      src="/assets/images/user.svg"
                       alt="Foto del canal"
                     >
                     {{ video.canal.nombre }}
@@ -109,3 +111,4 @@
     </div>
   </div>
 </div>
+

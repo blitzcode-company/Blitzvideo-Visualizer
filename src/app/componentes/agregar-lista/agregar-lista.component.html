@@ -1,17 +1,50 @@
-<h2 mat-dialog-title>Agregar video a lista de reproducción</h2>
-<div mat-dialog-content>
-  <mat-form-field>
+<h2 mat-dialog-title>
+  <mat-icon>add_to_queue</mat-icon>
+  Agregar a lista de reproducción
+</h2>
+
+<mat-dialog-content>
+  <div *ngIf="loading" class="loading">
+    <mat-spinner diameter="30"></mat-spinner>
+  </div>
+
+  <div *ngIf="!loading && listas.length === 0" class="no-lists">
+    <p class="text-center">
+      <mat-icon>playlist_add</mat-icon><br>
+      No tienes listas de reproducción creadas.
+    </p>
+  </div>
+
+  <mat-form-field appearance="outline" class="full-width" *ngIf="!loading && listas.length > 0">
     <mat-label>Selecciona una lista</mat-label>
-    <mat-select [(ngModel)]="listaSeleccionada">
+    <mat-select [(ngModel)]="listaSeleccionada" placeholder="Elige una lista">
       <mat-option *ngFor="let lista of listas" [value]="lista.id">
-        {{ lista.nombre }}
+        {{ lista.nombre }} ({{ lista.videos?.length || 0 }} videos)
       </mat-option>
     </mat-select>
   </mat-form-field>
-  <br>
-  <button mat-button (click)="abrirCrearListaModal()">Crear nueva lista</button> 
-</div>
-<div mat-dialog-actions>
-  <button mat-button (click)="onNoClick()">Cancelar</button>
-  <button mat-button (click)="agregarVideo()" cdkFocusInitial>Agregar</button>
-</div>
+
+  <button 
+    mat-stroked-button 
+    color="primary" 
+    (click)="abrirCrearListaModal()"
+    class="full-width"
+    [disabled]="loading"
+  >
+    <mat-icon>add</mat-icon>
+    Crear nueva lista
+  </button>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onNoClick()" [disabled]="loading">Cancelar</button>
+  <button 
+    mat-raised-button 
+    color="primary" 
+    (click)="agregarVideo()"
+    [disabled]="loading || !listaSeleccionada"
+  >
+    <mat-spinner diameter="20" *ngIf="loading"></mat-spinner>
+    <span *ngIf="!loading">Agregar</span>
+  </button>
+</mat-dialog-actions>

@@ -1,49 +1,61 @@
-<app-header></app-header>
-<div class="search-results">
-  <h2>Resultados de búsqueda para "{{ nombre }}"</h2>
-  <div class="container">
-    <div *ngIf="videos.length === 0" class="no-results">
-      <p>No se encontraron resultados para "{{ nombre }}"</p>
+<app-header (toggleSidebar)="toggleSidebar()"></app-header>
+<div class="containerHome" [class.collapsed]="sidebarCollapsed$ | async">
+  <div class="sidebar-container"  [class.bottom-mobile]="isMobile" >
+    <app-sidebar 
+    [collapsed]="!!(sidebarCollapsed$ | async)"
+    [class.bottom-mobile]="isMobile"
+    [isMobile]="isMobile"
+        ></app-sidebar>
+  </div>
+
+
+<div class="content-wrapper">
+  <div class="search-results">
+    <div class="results-header">
+      <h2>{{ videos.length }} resultados para "{{ nombre }}"</h2>
     </div>
-        <div *ngIf="videos.length > 0" class="results-container">
-      <div class="video-search-result" *ngFor="let video of videos">
-        <a [routerLink]="['/video', video.id]">
-          <div class="miniatura-container">
-            <img class="thumbnail" [src]="video.miniatura" (error)="onImageError($event)" alt="Miniatura del video">
-            <p class="duracionVideo"> {{  video.duracionFormateada  }}</p>
+
+    <div class="container">
+      <div *ngIf="videos.length === 0" class="no-results">
+        <mat-icon style="font-size: 64px; color: #ccc;">search_off</mat-icon>
+        <h3>No se encontraron resultados</h3>
+        <p>Intenta con otras palabras como "{{ nombre }}"</p>
+      </div>
+
+      <div *ngIf="videos.length > 0" class="results-grid">
+        <a *ngFor="let video of videos" 
+          [routerLink]="['/video', video.id]" 
+          class="video-card">
+          
+          <div class="thumbnail-container">
+            <img class="thumbnail" 
+                [src]="video.miniatura" 
+                (error)="onImageError($event)" 
+                alt="{{ video.titulo }}">
+            <span class="duration">{{ video.duracionFormateada }}</span>
+            <div class="play-overlay">
+              <mat-icon>play_circle_filled</mat-icon>
+            </div>
           </div>
-    
+
           <div class="video-info">
             <h3 class="title">{{ video.titulo }}</h3>
-            <p class="description">{{ video.descripcion }}</p>
-            <div class="details">
-              <a [routerLink]="['/canal', video.canal.id]">
-              <div class="fotoycanal">
-
-                <img
-                *ngIf="video.canal.user?.foto"
-                class="fotoCanal"
-                [src]="video.canal.user.foto"
-                alt="Foto del canal"
-                width="30px"
-              >
-              <img
-                *ngIf="!video.canal.user?.foto"
-                class="fotoCanal"
-                src="/assets/images/user.png"
-                alt="Foto del canal"
-                width="30px"
-              >
-                <span class="channel">{{ video.canal.nombre }}</span>
+            <div class="channel-info">
+              <img class="channel-avatar" 
+                  [src]="video.canal.user?.foto || '/assets/images/user.svg'" 
+                  alt="Canal">
+              <div>
+                <p class="channel-name">{{ video.canal.nombre }}</p>
+                <p class="views-date">
+                  {{ video.visitas_count }} vistas • {{ video.created_at }}
+                </p>
               </div>
-            </a>
-              <span class="views">{{ video.visitas_count }} visualizaciones</span>
-              <span class="date">{{ video.created_at }}</span>
             </div>
+            <p class="description">{{ video.descripcion }}</p>
           </div>
         </a>
       </div>
     </div>
+    </div>
   </div>
-</div>
-
+</div> 

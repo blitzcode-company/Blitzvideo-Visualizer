@@ -1,99 +1,156 @@
-<div #videoContainer
-    class="contenedor"
+<div #videoContainer class="reproductor-video-container"
+ [style.aspect-ratio]="aspectRatio"
+  [style.max-height.px]="maxHeight"
+  [style.min-height.px]="minHeight"  
      (mousemove)="showControls()" 
      (mouseleave)="hideControls()" 
-     [ngClass]="{'cinema-mode': isCinemaMode}">
+     [ngClass]="{'cinema-mode': isCinemaMode, 'fullscreen': isFullscreen}">
+<div class="video-wrapper">
 
-  <div class="reproductor-video-container">
 
-    <div class="video-overlay" [class.show]="showOverlay" (click)="togglePlayPause()">
-      <i [class]="isPlaying ? 'fas fa-play' : 'fas fa-pause'"></i>
-    </div>
-    <div class="controls">
-      <div class="progress-container">
-        <input #progressBar type="range" min="0" max="100" step="0.1"
-               (input)="seekVideo($event)"
-               (mousemove)="showPreview($event)"
-               (mouseleave)="hidePreview()"
-                      [ngClass]="{'publicidad': reproduciendoPublicidad}"
-               class="progreso">
-      
-        <div #previewThumbnail class="preview-thumbnail">
-          <canvas #previewCanvas width="160" height="90"></canvas>
-        </div>
+  
+<div class="thumbnail-placeholder" 
+     *ngIf="!videoReady" 
+     (click)="playVideoOnClick()">
+  
+  <img [src]="miniaturaUrl || 'assets/images/video-default.png'" 
+       alt="Miniatura del video" 
+       class="thumbnail-img"
+       (error)="onThumbnailError($event)">
+  
+  <div class="play-button-overlay">
+    <i class="fas fa-play"></i>
+  </div>
+</div>
+
+<div class="ambient-wrapper">
+  <canvas #ambientCanvas class="ambient-canvas" [style.aspect-ratio]="aspectRatio"></canvas>
+  <div class="ambient-gradient-overlay"></div>
+  <video #videoPlayer  
+          class="vjs-matrix video-js vjs-default-skin" 
+          [src]="videoUrl" 
+          preload="auto"
+          playsinline
+          (waiting)="onWaiting()"
+          (playing)="onPlaying()"
+          (loadedmetadata)="setDuration(); onMetadataLoaded($event)"
+          (click)="togglePlayPause()" 
+          (timeupdate)="updateProgressBar()" 
+          (ended)="onVideoEnd()" 
+
+          >
+      Tu navegador no soporta la etiqueta de video.
+    </video>
+  
+</div>
+
+
+
+    <div class="video-spinner" *ngIf="showSpinner">
+        <mat-spinner diameter="50"></mat-spinner>
       </div>
-      
-      <video #previewVideo [src]="videoUrl" style="display:none;"></video>
+
+
+     <div class="skip-button left" (click)="skipBackward($event)" #skipLeft>
+
+      <i class="fa fa-backward" aria-hidden="true"></i>
+    </div>
     
-      <div class="controls-buttons">
-        <div class="left-controls">
-          <button *ngIf="!isVideoEnded || isAutoplayEnabled || isFromPlaylist"
-          [matTooltip]="isPlaying ? 'Pausar' : 'Reproducir'" 
-          (click)="togglePlayPause()">
+    <div class="skip-button right" (click)="skipForward($event)"  #skipRight>
+      <i class="fa fa-forward" aria-hidden="true"></i>
+    </div>
+
+  <div class="video-overlay" [class.show]="showOverlay" (click)="togglePlayPause()">
+    <i [class]="isPlaying ? 'fas fa-pause' : 'fas fa-play'"></i>
+
+  </div>
+  <div class="controls" [class.hide]="!showControlsActive">
+    <div class="progress-container">
+      <input #progressBar type="range" min="0" max="100" step="0.1"
+             (input)="seekVideo($event)"
+             (mousemove)="showPreview($event)"
+             (mouseleave)="hidePreview()"
+             [ngClass]="{'publicidad': reproduciendoPublicidad, 'progreso': true}"
+             class="progreso">
+      
+      <div #previewThumbnail class="preview-thumbnail">
+        <canvas #previewCanvas width="160" height="90"></canvas>
+      </div>
+    </div>
+    
+    <video #previewVideo [src]="videoUrl" style="display:none;"></video>
+    
+    <div class="controls-buttons" >
+      <div class="left-controls">
+        <button *ngIf="!isVideoEnded || autoplayActivado  || isFromPlaylist"
+            [matTooltip]="isPlaying ? 'Pausar (Espacio)' : 'Reproducir (Espacio)'" 
+            (click)="togglePlayPause()">
             <i [class]="isPlaying ? 'fas fa-pause' : 'fas fa-play'"></i>
         </button>
-        <button *ngIf="isVideoEnded && (!isAutoplayEnabled || !isFromPlaylist)" 
-                [matTooltip]="isLooping ? 'Desactivar repetición' : 'Repetir video'" 
-                (click)="toggleLoop()"
-                [ngClass]="{'active-loop': isLooping}">
-          <i class="fas fa-redo"></i>
+        <button *ngIf="isVideoEnded && (!autoplayActivado || !isFromPlaylist)" 
+            [matTooltip]="isLooping ? 'Desactivar repetición (L)' : 'Repetir video (L)'" 
+            (click)="toggleLoop()"
+            [ngClass]="{'active-loop': isLooping}">
+             <i class="fas fa-redo"></i>
+        </button>
+        <button matTooltip="Retroceder 5s (J)" (click)="skipBackward($event)">
+          <i class="fas fa-backward"></i>
+        </button>
+        <button matTooltip="Adelantar 5s (L)" (click)="skipForward($event)">
+          <i class="fas fa-forward"></i>
+        </button>
+        <span>{{ formatTime(currentTime) }}</span> / <span>{{ formatTime(duration) }}</span>
+      </div>
+
+      <div class="right-controls">
+        <button [matTooltip]="isMuted ? 'Activar sonido (M)' : 'Silenciar (M)'" (click)="toggleMute()">
+          <i [class]="isMuted ? 'fas fa-volume-mute' : 'fas fa-volume-up'"></i>
+        </button>
+        <input type="range" #volumeSlider class="volume" value="100" min="0" max="100"
+               (input)="changeVolume(volumeSlider)" matTooltip="Cambiar volumen">
+      <button 
+        [matTooltip]="autoplayActivado ? 'Desactivar reproducción automática' : 'Activar reproducción automática'"
+        (click)="toggleAutoplay()"
+        [ngClass]="{'active-autoplay': autoplayActivado }">
+        <i [class]="autoplayActivado  ? 'fas fa-play-circle' : 'fas fa-pause-circle'"></i>
+      </button>
+        <button matTooltip="Pantalla completa (F)" (click)="toggleFullscreen(videoContainer)">
+          <i class="fas fa-expand"></i>
         </button>
 
-          <span>{{ formatTime(currentTime) }}</span> / <span>{{ formatTime(duration) }}</span>
-        </div>
-
-        <div class="right-controls">
-          <button [matTooltip]="isMuted ? 'Activar sonido' : 'Silenciar'" (click)="toggleMute()">
-            <i [class]="isMuted ? 'fas fa-volume-mute' : 'fas fa-volume-up'"></i>
-          </button>
-          <input type="range" #volumeSlider class="volume" value="100" min="0" max="100"
-                 (input)="changeVolume(volumeSlider)" matTooltip="Cambiar volumen">
-
-          <button [matTooltip]="isAutoplayEnabled ? 'Desactivar reproducción automática' : 'Activar reproducción automática'"
-                  (click)="toggleAutoplay()"
-                  [ngClass]="{'active-autoplay': isAutoplayEnabled}">
-            <i [class]="isAutoplayEnabled ? 'fas fa-sync' : 'fas fa-sync-alt'"></i>
-          </button>
-          
-          <button matTooltip="Pantalla completa" (click)="toggleFullscreen(videoContainer)">
-            <i class="fas fa-expand"></i>
-          </button>
-
-          <button [hidden]="isFullscreen" [matTooltip]="isCinemaMode ? 'Vista predeterminada' : 'Modo cine'" (click)="toggleMode()">
-            <mat-icon>{{ isCinemaMode ? 'fullscreen_exit' : 'theaters' }}</mat-icon>
-          </button>
-        </div>
+      <button matTooltip="Picture-in-Picture (P)" 
+          (click)="togglePictureInPicture()"
+          [ngClass]="{'active-pip': isPipMode}">
+          <i class="fas fa-external-link-alt"></i>
+      </button>
+        <button [hidden]="isFullscreen" [matTooltip]="isCinemaMode ? 'Vista predeterminada (C)' : 'Modo cine (C)'" 
+                (click)="toggleMode()">
+          <i [class]="isCinemaMode ? 'fa fa-compress' : 'fa fa-video'"></i>
+        </button>
       </div>
-    
     </div>
-    <div class="end-screen-overlay" *ngIf="mostrarEndScreen && !reproduciendoPublicidad" [ngClass]="{'mostrar': mostrarEndScreen}">
-      <div class="recomendaciones-grid">
-        <div class="thumbnail-container" *ngFor="let recVideo of videosRecomendados | slice:0:12; let i = index"
-             [style.animation-delay]="i * 0.05 + 's'"
-             (click)="seleccionarRecomendacion(recVideo)"
-             role="button"
-             [attr.aria-label]="'Ver video ' + recVideo.titulo">
-          <img [src]="recVideo.miniatura || 'assets/images/default-thumbnail.png'" alt="Miniatura de {{ recVideo.titulo }}"
-               (error)="onImageError($event, recVideo)" class="thumbnail-image">
-          <div class="info-overlay">
-            <p class="info-titulo">{{ recVideo.titulo }}</p>
-            <p class="info-canal">{{ recVideo.canal?.nombre || 'Sin canal' }}</p>
-            <p class="info-duracion" *ngIf="recVideo.duracion">{{ formatTime(recVideo.duracion) }}</p>
-          </div>
-        </div>
-      </div>
-      <button class="cerrar-overlay" (click)="cerrarEndScreen()" aria-label="Cerrar recomendaciones">✖</button>
-    </div>
-    
-      <video #videoPlayer class="video" [src]="videoUrl" muted 
-      [style.width]="videoWidth ? videoWidth + 'px' : '100%'"
-      (loadedmetadata)="setDuration()" 
-      (click)="togglePlayPause()" 
-      (timeupdate)="updateProgressBar()" 
-      (ended)="onVideoEnd()" 
-      autoplay>
-      <source [src]="videoUrl" type="video/mp4">
-      Tu navegador no soporta la etiqueta de video.
-      </video>
   </div>
+  <div class="end-screen-overlay" *ngIf="mostrarEndScreen && !reproduciendoPublicidad" [ngClass]="{'mostrar': mostrarEndScreen}">
+    <div class="recomendaciones-grid">
+      <div class="thumbnail-container" *ngFor="let recVideo of videosRecomendados | slice:0:12; let i = index"
+           [style.animation-delay]="i * 0.05 + 's'"
+           (click)="seleccionarRecomendacion(recVideo)"
+           role="button"
+           [attr.aria-label]="'Ver video ' + recVideo.titulo">
+        <img [src]="recVideo.miniatura || 'assets/images/video-default.png'" alt="Miniatura de {{ recVideo.titulo }}"
+             (error)="onImageError($event, recVideo)" class="thumbnail-image">
+        <div class="info-overlay">
+          <p class="info-titulo">{{ recVideo.titulo }}</p>
+          <p class="info-canal">{{ recVideo.canal?.nombre || 'Sin canal' }}</p>
+          <p class="info-duracion" *ngIf="recVideo.duracion">{{ formatTime(recVideo.duracion) }}</p>
+        </div>
+      </div>
+    </div>
+    <button class="cerrar-overlay" (click)="cerrarEndScreen()" aria-label="Cerrar recomendaciones">✖</button>
+  </div>
+
+
+  
+ </div>
+
 </div>

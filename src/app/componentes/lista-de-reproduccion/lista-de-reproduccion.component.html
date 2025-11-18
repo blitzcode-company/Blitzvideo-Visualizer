@@ -6,32 +6,123 @@
   </div>
 
   <div class="main-content">
-    <div class="playlist">
-      <h1>Listas de reproducción</h1>
+    <div class="playlist-header">
+      <h1>
+        <mat-icon class="title-icon">playlist_play</mat-icon>
+        Mis listas de reproducción
+      </h1>
+      <button class="button-add-list" mat-raised-button (click)="abrirModalCrear()">
+        <mat-icon>add</mat-icon> Nueva lista
+      </button>
+    </div>
 
-      <div class="video-grid">
-        <div class="video-card" *ngFor="let lista of listas; let i = index; trackBy: trackById">
+    <div class="tabs">
+      <button 
+        class="tab" 
+        [class.active]="pestana === 'creadas'"
+        (click)="pestana = 'creadas'; actualizarLista()"
+      >
+        Creadas ({{ listasCreadas.length }})
+      </button>
+      <button 
+        class="tab" 
+        [class.active]="pestana === 'guardadas'"
+        (click)="pestana = 'guardadas'; actualizarLista()"
+      >
+        Guardadas ({{ listasGuardadas.length }})
+      </button>
+    </div>
 
-          <a [routerLink]="['/playlists', lista.id]" class="video-link">
-            <div class="miniatura-container">
-              <img class="miniatura" [src]="lista.imagen" (error)="onImageError($event)" alt="Miniatura de la lista">
-            </div>
-            <div class="video-info">
-              <h3>{{ lista.nombre }}</h3>
-              <p>{{ lista.videos.length }} videos • {{ lista.creador }}</p>
-            </div>
-          </a>
+    <div *ngIf="loading" class="loading-state">
+      <mat-spinner diameter="50"></mat-spinner>
+      <p>Cargando {{ pestana === 'creadas' ? 'tus listas' : 'listas guardadas' }}...</p>
+    </div>
 
-          <div class="playlist-actions">
-            <button class="menu-button">⋮</button>
-            <div class="menu-dropdown">
-              <button (click)="abrirModalEditar(lista)">Editar</button>
-              <button (click)="borrarPlaylist(lista.id)">Eliminar</button>
+    <div *ngIf="!loading && listas.length === 0" class="empty-state">
+      <mat-icon class="empty-icon">playlist_add</mat-icon>
+      <h3>
+        {{ pestana === 'creadas' 
+            ? 'No tienes listas creadas' 
+            : 'No tienes listas guardadas' }}
+      </h3>
+      <p>
+        {{ pestana === 'creadas' 
+            ? 'Crea una para organizar tus videos favoritos' 
+            : 'Guarda playlists de otros usuarios para verlas aquí' }}
+      </p>
+    </div>
+
+    <div class="playlists-grid" *ngIf="!loading && listas.length > 0">
+      <div 
+        *ngFor="let lista of listas; trackBy: trackById" 
+        class="playlist-card"
+        (click)="verPlaylist(lista.id)"
+      >
+        <div class="thumbnail-mosaic">
+          <img 
+            *ngFor="let img of lista.imagenesMosaico; let i = index"
+            [src]="img"
+            (error)="onImageError($event)"
+            [class]="'thumb-' + i"
+            alt="Miniatura {{ i + 1 }}"
+            loading="lazy"
+          >
+          <div 
+            *ngIf="lista.imagenesMosaico.length === 0" 
+            class="thumb-placeholder"
+          >
+            <mat-icon>video_library</mat-icon>
+          </div>
+        </div>
+
+        <div class="playlist-info">
+          <h3 class="title">{{ lista.nombre }}</h3>
+          <div class="meta">
+            <mat-icon class="icon-small">video_library</mat-icon>
+            <span>{{ lista.videos.length }} video{{ lista.videos.length !== 1 ? 's' : '' }}</span>
+            <span class="sep">•</span>
+            <div class="creator">
+              <img 
+                [src]="lista.creadorFoto || 'assets/images/user.svg'" 
+                class="avatar"
+                [alt]="lista.creador"
+              >
+              <span>{{ lista.creador }}</span>
             </div>
           </div>
-
         </div>
+
+        <button 
+          mat-icon-button 
+          class="menu-btn"
+          [matMenuTriggerFor]="menu"
+          (click)="$event.stopPropagation()"
+          [matMenuTriggerData]="{ lista: lista, pestana: pestana }"
+        >
+          <mat-icon>more_vert</mat-icon>
+        </button>
       </div>
     </div>
   </div>
 </div>
+
+<mat-menu #menu="matMenu">
+  <ng-template matMenuContent let-lista="lista" let-pestana="pestana">
+    
+    <ng-container *ngIf="pestana === 'creadas'">
+      <button mat-menu-item (click)="abrirModalEditar(lista)">
+        <mat-icon>edit</mat-icon> Editar
+      </button>
+      <button mat-menu-item (click)="borrarPlaylist(lista.id)" class="danger">
+        <mat-icon>delete</mat-icon> Eliminar
+      </button>
+    </ng-container>
+
+    <ng-container *ngIf="pestana === 'guardadas'">
+      <button mat-menu-item (click)="quitarDeGuardadas(lista.id)">
+        <mat-icon>bookmark_remove</mat-icon> Quitar de guardadas
+      </button>
+    </ng-container>
+
+  </ng-template>
+</mat-menu>

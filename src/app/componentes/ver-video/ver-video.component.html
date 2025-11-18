@@ -1,20 +1,12 @@
 <app-header (toggleSidebar)="toggleSidebar()"></app-header>
 
-
-
 <div class="sidebar-container" *ngIf="sidebarVisible" [class.open]="sidebarVisible">
   <app-sidebar></app-sidebar>
 </div>
 
-
 <div class="overlay" [class.active]="sidebarVisible" (click)="toggleSidebar()"></div>
 
-
-<div class="containerHome"
-[style.transform]="escalaTransform" 
-     [style.width]="anchoEscala" 
-     [style.height]="alturaEscala"
->
+<div class="containerHome">
 
 <div *ngIf="isBlocked || errorMessage" class="error-message">
   <mat-card>
@@ -36,19 +28,23 @@
     <div class="tituloyvideo" *ngIf="!isCinemaMode">
       <h1>{{ video.titulo }}</h1>
     </div>
-
-    <div #videoWrapper class="video-wrapper" >
+    
+    <div class="video-page-wrapper" [ngClass]="{'cinema-mode': isCinemaMode}">
+      <div class="reproductor-wrapper">
         <app-reproductor-video 
           [videoUrl]="reproduciendoPublicidad ? videoPublicidadUrl : videoUrl"
+          [miniaturaUrl]="miniaturaUrl"
           [reproduciendoPublicidad]="reproduciendoPublicidad"
           [isCinemaMode]="isCinemaMode" 
-          [videosRecomendados]="videosRecomendados"
+          [siguienteVideoDatos]="siguienteVideoDatos" 
+          (autoplayFinish)="siguienteVideo()"
+          [videosRecomendados]="videosRecomendadosParaReproductor"
+          [isFromPlaylist]="fromPlaylist"
+          [playlistVideos]="videosDePlaylist"
+          [mostrarEndScreen]="mostrarEndScreen"
           (toggleCinemaMode)="handleCinemaMode($event)"
-          (videoTerminado)="reproduciendoPublicidad ? finalizarPublicidad() : siguienteVideo()"
-        >
+          (videoTerminado)="onVideoTerminado()">
         </app-reproductor-video>
-    </div>    
-        <div class="reproductor-video-container" [ngClass]="{'cinema-mode': isCinemaMode}">
 
         <div *ngIf="reproduciendoPublicidad" class="publicidad-overlay">
           <img class="fotopublicidad" [src]="publicidad?.canal.user.foto" alt="Foto canal publicidad">
@@ -57,151 +53,180 @@
             <p>Publicidad: {{ publicidadDuracionRestante }} segundos restantes</p>
           </div>
           <button *ngIf="mostrarBotonSaltar" (click)="saltarPublicidad()">Saltar</button>
-        </div> 
-      </div>
-    <div class="puntuaryguardar">
-      <div class="puntuar">
-        <button *ngFor="let val of [5, 4, 3, 2, 1]"
-        [ngClass]="{'selected': puntuacionSeleccionada === val}"
-        (click)="puntuar(val)">
-        <img [src]="'assets/images/' + val + '.png'" [alt]="'Puntuación ' + val">
-      </button>
-      </div>
-      <div class="options">
-        <i class="fa-solid fa-ellipsis-vertical botonTresPuntos" (click)="toggleDropdown()" aria-hidden="true"></i>
-        <div *ngIf="dropdownVisible" [class.show]="dropdownVisible" class="dropdown-menu">
-          <a (click)="agregarAVideoALista()"> <mat-icon> format_list_bulleted</mat-icon>
-            Guardar Video</a>
-          <a (click)="openReportModal()"><mat-icon>flag</mat-icon>
-            Reportar Video</a>
         </div>
       </div>
+
     </div>
+    <div class="video-info-alineado">
+    <div class="info-y-acciones-header">
+      <div class="info-container">
+        <a *ngIf="video.canal" [routerLink]="['/canal', video.canal.id]">
+          <div class="info-canal">
+            <img *ngIf="!video.canal.user.foto" class="fotodeperfil" src="assets/images/user.svg" alt="Logo del canal del usuario" srcset="">
+            <img *ngIf="video.canal.user.foto" class="fotodeperfil" [src]="video.canal.user.foto" alt="Logo del canal del usuario" srcset="">
+          </div>
+        </a>
 
-    <div class="info-container">
-      <a *ngIf="video.canal" [routerLink]="['/canal', video.canal.id]">
-        <div class="info-canal">
-          <img *ngIf="!video.canal.user.foto" class="fotodeperfil" src="assets/images/user.png" alt="Logo del canal del usuario" srcset="">
-          <img *ngIf="video.canal.user.foto" class="fotodeperfil" [src]="video.canal.user.foto" alt="Logo del canal del usuario" srcset="">
+        <div class="nombreysubs">
+          <a *ngIf="video.canal" class="nombrecanal" [routerLink]="['/canal', video.canal.id]">
+            {{ video.canal.nombre }}</a>
+          <p class="suscriptores" *ngIf="numeroDeSuscriptores">
+            {{ numeroDeSuscriptores.numero_suscripciones }} suscriptores
+          </p>
         </div>
-      </a>
-
-      <div class="nombreysubs">
-        <a *ngIf="video.canal" class="nombrecanal" [routerLink]="['/canal', video.canal.id]">
-          {{ video.canal.nombre }}</a>
-        <p class="suscriptores" *ngIf="numeroDeSuscriptores">
-          {{ numeroDeSuscriptores.numero_suscripciones }} suscriptores
-        </p>
-      </div>
-    
-      <button *ngIf="suscrito !== 'propietario'" class="boton" 
-              [ngClass]="{'suscrito': suscrito === 'suscrito'}" 
-              (click)="suscrito === 'suscrito' ? anularSuscripcion() : suscribirse()">
-        {{ suscrito === 'suscrito' ? 'Suscrito' : 'Suscribirse' }}
-      </button>
-      <ng-container *ngIf="suscrito === 'suscrito'">
-        <button mat-icon-button 
-                [matTooltip]="notificacionesActivas ? 'Desactivar notificaciones' : 'Activar notificaciones'" 
-                (click)="toggleNotificaciones()" 
-                [disabled]="cargando"
-                aria-label="Notificaciones">
-          <mat-icon color="primary">
-            {{ notificacionesActivas ? 'notifications' : 'notifications_off' }}
-          </mat-icon>
+      
+        <button *ngIf="suscrito !== 'propietario'" class="boton" 
+                [ngClass]="{'suscrito': suscrito === 'suscrito'}" 
+                (click)="suscrito === 'suscrito' ? anularSuscripcion() : suscribirse()">
+          {{ suscrito === 'suscrito' ? 'Suscrito' : 'Suscribirse' }}
         </button>
-      </ng-container>
+        <ng-container *ngIf="suscrito === 'suscrito'">
+          <button mat-icon-button 
+                  [matTooltip]="notificacionesActivas ? 'Desactivar notificaciones' : 'Activar notificaciones'" 
+                  (click)="toggleNotificaciones()" 
+                  [disabled]="cargando"
+                  aria-label="Notificaciones">
+            <mat-icon color="primary">
+              {{ notificacionesActivas ? 'notifications' : 'notifications_off' }}
+            </mat-icon>
+          </button>
+        </ng-container>
 
-      <div class="editarvideo"  *ngIf="puedeEditarVideo">
-        <a class="boton" [href]="serverIp + '3001' + '/#/editarVideo/' + video.id">Editar video</a>
+        <div class="editarvideo" *ngIf="puedeEditarVideo">
+          <a 
+            class="boton-editar-video"
+            [href]="serverIp + '3001' + '/#/editarVideo/' + video.id"
+            target="_blank"
+            rel="noopener"
+           
+          >
+            <svg class="icono-editar" viewBox="0 0 24 24" width="18" height="18">
+              <path fill="currentColor" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a.996.996 0 0 0 0-1.41l-2.34-2.34a.996.996 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+            </svg>
+            <span>Editar video</span>
+          </a>
+        </div>
+
+       
+      </div>
+      <div class="acciones-derechas">
+        
+        <div class="puntuaryguardar">
+          
+      <div class="puntuar-container">
+        <div class="puntuar">
+          <button *ngFor="let val of [5, 4, 3, 2, 1]"
+                  [ngClass]="{'selected': puntuacionSeleccionada === val}"
+                  (click)="puntuar(val)">
+            <img [src]="'assets/images/' + val + '.svg'" [alt]="'Puntuación ' + val">
+          </button>
+        </div>
+
+        <div class="hover-panel">
+          <div class="promedio-visual">
+            Promedio: <span>{{ video.promedio_puntuaciones | number:'1.1-1' }}/5</span>
+          </div>
+
+            <div class="distribucion-puntuaciones" *ngIf="totalVotos > 0">
+            <div *ngFor="let val of [5,4,3,2,1]" class="fila">
+              <img [src]="'assets/images/' + val + '.svg'" [alt]="'Puntuación ' + val" class="emoji-bar">
+              <div class="barra-container">
+                <div class="barra" [style.width.%]="(video['puntuacion_' + val] / totalVotos) * 100"></div>
+              </div>
+              <span class="numero">{{ video['puntuacion_' + val] }}</span>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div class="visitas">
-        <p>{{ video.visitas_count }} visualizaciones</p>
+            
+            <div class="options">
+              <i class="fa-solid fa-ellipsis-vertical botonTresPuntos" (click)="toggleDropdown()" aria-hidden="true"></i>
+              <div *ngIf="dropdownVisible" [class.show]="dropdownVisible" class="dropdown-menu">
+                <a (click)="agregarAVideoALista()"> <mat-icon> format_list_bulleted</mat-icon>
+                  Guardar Video</a>
+                <a (click)="openReportModal()"><mat-icon>flag</mat-icon>
+                  Reportar Video</a>
+              </div>
+            </div>
+        </div>
+         <div class="visitas">
+                <p>{{ video.visitas_count }} visualizaciones</p>
+          </div>
       </div>
     </div>
- 
-    <div #descripcion class="descripcion" [ngClass]="{'expanded': isExpanded}">
+    <div #descripcion class="descripcion" *ngIf="!isCinemaMode" [ngClass]="{'expanded': isExpanded}">
       <p class="fechadescripcion">Fecha de subida: {{ video.created_at }}</p>
-      <p>{{ video.descripcion }}</p>
-      <div class="toggle-container">
-        <a *ngIf="!isExpanded" class="toggle-link" (click)="toggleExpand($event)">Ver más</a>
-        <a *ngIf="isExpanded" class="toggle-link" (click)="toggleExpand($event)">Ver menos</a>
-      </div>
+      <p [innerHTML]="video.descripcion | safeHtml"></p>
+     <div class="toggle-container" *ngIf="showToggleLink">
+    <a class="toggle-link" 
+       (click)="toggleExpand($event)"
+       [innerText]="isExpanded ? 'Ver menos' : 'Ver más'">
+    </a>
+  </div>
     </div>
 
     <div class="comments-section" *ngIf="!isCinemaMode">
       <br>
-      <app-comentarios [videoId]="videoId" [usuario]="usuario"></app-comentarios>
+      <app-comentarios [videoId]="videoId" [usuario]="usuario" [highlightId]="highlightCommentId"></app-comentarios>
     </div>
+     </div>
   </div>
-
-  <div class="columnaLateral" *ngIf="!isCinemaMode">
-    <div *ngIf="fromPlaylist" class="playlist-videos">
-      <h3>Videos de la playlist - {{ nombrePlaylist }}</h3>
-      <div *ngFor="let video of videosDePlaylist" 
-           class="video-playlist" 
-           [ngClass]="{'highlight': video.id === +videoIdPlaylist}">
-        <a [routerLink]="['/video', video.id]" class="video-link">
-          <div class="miniatura-container">
-            <img [src]="video.miniatura" alt="Miniatura del video" class="miniatura" (error)="onImageError($event)">
-            <span class="duracionVideo">{{ video.duracionFormateadaPlaylist }}</span>
+      <div class="columnaLateral"  *ngIf="!isCinemaMode">
+        <div *ngIf="videosDePlaylist.length > 0" class="playlist-sidebar">
+          <div class="playlist-header">
+            <h3 class="playlist-title">
+              <i class="fas fa-list-ul"></i> {{ nombrePlaylist }}
+            </h3>
+            <span class="playlist-count">{{ videosDePlaylist.length }} videos</span>
           </div>
-          <div class="info-video">
-            <h4 class="titulo">{{ video.titulo || 'Sin título' }}</h4>
-            <p class="canal">{{ video.canal?.nombre || 'Sin canal' }}</p>
-            <p class="visitaslateral">
-              {{ (video.visitas_count ?? 0) }} vistas • {{ (video.created_at | tiempo ) || 'Sin fecha' }}
-            </p>
-          </div>
-        </a>
-      </div>
-    </div>
 
-    <div *ngFor="let video of videosRecomendados" class="video-recomendado">
-      <a [routerLink]="['/video', video.id]"  (click)="reloadPage($event)" class="video-link">
-        <div class="miniatura-container">
-          <img [src]="video.miniatura" alt="Miniatura del video" class="miniatura" (error)="onImageError($event)">
-          <span class="duracionVideo">{{ video.duracionFormateada }}</span>
-        </div>
+          <div class="playlist-scroll-container">
+            <div *ngFor="let video of videosDePlaylist; let i = index" 
+                class="playlist-item"
+                [ngClass]="{ 'current': video.id === +videoIdPlaylist }"
+                #videoItem
+                [attr.data-index]="i + 1">
 
-        <div class="info-video">
-          <h4 class="titulo">{{ video.titulo }}</h4>
-          <p class="canal">{{ video.canal.nombre }}</p>
-          <p class="visitaslateral">{{ video.visitas_count }} vistas • {{ video.created_at | tiempo }}</p>
-        </div>
-      </a>
-    </div>
-    
+              <a [routerLink]="['/video', video.id, 'playlist', playlistId]" 
+                class="playlist-link"
+                (click)="scrollToCurrentVideo()">
+                
+                <div class="thumbnail-wrapper">
+                  <img [src]="video.miniatura" 
+                      alt="Miniatura de {{ video.titulo }}" 
+                      class="thumbnail"
+                      (error)="onImageError($event)">
+                  
+                  <span class="duration-badge">{{ video.duracionFormateadaPlaylist }}</span>
+                  
+                  <div class="current-indicator" *ngIf="video.id === +videoIdPlaylist">
+                    <i class="fas fa-play"></i>
+                  </div>
+                </div>
 
-  </div>
-  <div class="video-footer" *ngIf="isCinemaMode">
-    <div class="content-wrapper">
-      <app-comentarios [videoId]="videoId" [usuario]="usuario"></app-comentarios>
-
-      
-      <div class="columnaLateral">
-        <div *ngIf="fromPlaylist" class="playlist-videos">
-          <h3>Videos de la playlist - {{ nombrePlaylist }}</h3>
-          <div *ngFor="let video of videosDePlaylist" class="video-playlist" [ngClass]="{'highlight': video.id === +videoIdPlaylist}">
-            <a [routerLink]="['/video', video.id]" class="video-link">
-              <div class="miniatura-container">
-                <img [src]="video.miniatura" alt="Miniatura del video" class="miniatura" (error)="onImageError($event)">
-                <span class="duracionVideo">{{ video.duracionFormateadaPlaylist }}</span>
-              </div>
-                <div class="info-video">
-                <h4 class="titulo">{{ video.titulo || 'Sin título' }}</h4>
-                <p class="canal">{{ video.canal?.nombre || 'Sin canal' }}</p>
-                <p class="visitaslateral">{{ (video.visitas_count ?? 0) }} vistas • {{ (video.created_at | tiempo) || 'Sin fecha' }}</p>
-              </div>
-            </a>
+                <div class="video-info">
+                  <div class="video-index">{{ i + 1 }}</div>
+                  <div class="video-details">
+                    <h4 class="video-title">{{ video.titulo || 'Sin título' }}</h4>
+                    <p class="video-channel">{{ video.canal?.nombre || 'Sin canal' }}</p>
+                    <p class="video-meta">
+                      {{ (video.visitas_count ?? 0) | number }} vistas • 
+                      {{ (video.created_at | tiempo) || 'Reciente' }}
+                    </p>
+                  </div>
+                </div>
+              </a>
+            </div>
           </div>
         </div>
     
-        <div *ngFor="let video of videosRecomendados" class="video-recomendado">
+        <div *ngFor="let video of videosRecomendadosColumnaLateral" class="video-recomendado">
           <a [routerLink]="['/video', video.id]" (click)="reloadPage($event)" class="video-link">
-            <img [src]="video.miniatura" alt="Miniatura del video" class="miniatura" (error)="onImageError($event)">
-            <p class="duracionVideo">{{ video.duracionFormateada }}</p>
-
+            <div class="thumbnail-container">
+              <img [src]="video.miniatura" alt="Miniatura del video" class="miniatura" (error)="onImageError($event)">
+              <p class="duracionVideo">{{ video.duracionFormateada }}</p>
+            </div>
             <div class="info-video">
               <h4 class="titulo">{{ video.titulo }}</h4>
               <p class="canal">{{ video.canal.nombre }}</p>
@@ -209,10 +234,90 @@
             </div>
           </a>
         </div>
-        
+      </div>
+  
 
+  
+<div class="video-footer" *ngIf="isCinemaMode">
+  <div class="cinema-footer-grid">
+    <div class="cinema-footer-left">
+        <div #descripcion class="descripcion" [ngClass]="{ 'expanded': isExpanded }">
+          <p class="fechadescripcion">Fecha de subida: {{ video.created_at }}</p>
+          <p [innerHTML]="video.descripcion | safeHtml"></p>
+          
+          <div class="toggle-container" *ngIf="showToggleLink">
+            <a class="toggle-link" (click)="toggleExpand($event)">
+              {{ isExpanded ? 'Ver menos' : 'Ver más' }}
+            </a>
+          </div>
+        </div>
+
+        <div class="comments-section">
+          <app-comentarios [videoId]="videoId" [usuario]="usuario" [highlightId]="highlightCommentId"></app-comentarios>
+        </div>
+    </div>
+
+    <div class="cinema-footer-right">
+      <div *ngIf="videosDePlaylist.length > 0" class="playlist-sidebar">
+        <div class="playlist-header">
+          <h3 class="playlist-title">Lista {{ nombrePlaylist }}</h3>
+          <span class="playlist-count">{{ videosDePlaylist.length }} videos</span>
+        </div>
+        <div class="playlist-scroll-container">
+            <div *ngFor="let video of videosDePlaylist; let i = index" 
+                class="playlist-item"
+                [ngClass]="{ 'current': video.id === +videoIdPlaylist }"
+                #videoItem
+                [attr.data-index]="i + 1">
+
+              <a [routerLink]="['/video', video.id, 'playlist', playlistId]" 
+                class="playlist-link"
+                (click)="scrollToCurrentVideo()">
+                
+                <div class="thumbnail-wrapper">
+                  <img [src]="video.miniatura" 
+                      alt="Miniatura de {{ video.titulo }}" 
+                      class="thumbnail"
+                      (error)="onImageError($event)">
+                  
+                  <span class="duration-badge">{{ video.duracionFormateadaPlaylist }}</span>
+                  
+                  <div class="current-indicator" *ngIf="video.id === +videoIdPlaylist">
+                    <i class="fas fa-play"></i>
+                  </div>
+                </div>
+
+                <div class="video-info">
+                  <div class="video-index">{{ i + 1 }}</div>
+                  <div class="video-details">
+                    <h4 class="video-title">{{ video.titulo || 'Sin título' }}</h4>
+                    <p class="video-channel">{{ video.canal?.nombre || 'Sin canal' }}</p>
+                    <p class="video-meta">
+                      {{ (video.visitas_count ?? 0) | number }} vistas • 
+                      {{ (video.created_at | tiempo) || 'Reciente' }}
+                    </p>
+                  </div>
+                </div>
+              </a>
+            </div>
+          </div>
+      </div>
+
+      <div *ngFor="let video of videosRecomendadosColumnaLateral" class="video-recomendado">
+        <a [routerLink]="['/video', video.id]" (click)="reloadPage($event)" class="video-link">
+         <div class="thumbnail-container">
+              <img [src]="video.miniatura" alt="Miniatura del video" class="miniatura" (error)="onImageError($event)">
+              <p class="duracionVideo">{{ video.duracionFormateada }}</p>
+            </div>
+          <div class="info-video">
+            <h4 class="titulo">{{ video.titulo }}</h4>
+            <p class="canal">{{ video.canal.nombre }}</p>
+            <p class="visitaslateral">{{ video.visitas_count }} vistas • {{ video.created_at | tiempo }}</p>
+          </div>
+        </a>
       </div>
     </div>
   </div>
+</div>
 </div>
 </div>

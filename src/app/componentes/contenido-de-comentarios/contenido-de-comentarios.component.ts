@@ -38,6 +38,7 @@ export class ContenidoDeComentariosComponent implements OnInit{
   usuarioBloqueado = false;
   mensaje = '';
   contadorDeMegustas = '';
+  enviandoRespuesta = false;
 
   @Output() reportar = new EventEmitter<void>();
 
@@ -49,7 +50,20 @@ export class ContenidoDeComentariosComponent implements OnInit{
 
   }
 
- 
+ @HostListener('document:click', ['$event'])
+onDocumentClick(event: Event) {
+  const target = event.target as HTMLElement;
+
+if (target.closest('.respuesta-container') || target.closest('.btn-responder')) {
+    return;
+  }
+
+  if (this.selectedComentarioId !== null) {
+    this.cancelarRespuesta();
+  }
+
+}
+
   obtenerUsuario() {
     this.authService.usuario$.subscribe(res => {
       this.usuario = res;
@@ -86,28 +100,93 @@ export class ContenidoDeComentariosComponent implements OnInit{
 
   
 
-  toggleResponder(comentario: Comentario): void {
-    this.selectedComentarioId = comentario.id ?? null;
-    this.respuestaComentario.mensaje = '';
+toggleResponder(comentario: Comentario | null, event: Event): void {
+  event.preventDefault();
+  event.stopPropagation();
+
+  if (!comentario || !comentario.id) {
+    console.error('Comentario inválido o sin ID.');
+    return;
   }
 
-  enviarRespuesta(): void {
-    if (this.selectedComentarioId !== null) {
-      this.respuestaComentario.video_id = this.videoId;
-      this.respuestaComentario.usuario_id = this.usuario.id;
-      this.respuestaComentario.respuesta_id = this.selectedComentarioId;
+  if (this.selectedComentarioId === comentario.id) {
+    this.cancelarRespuesta();
+  } else {
+    this.selectedComentarioId = comentario.id;
+    this.respuestaComentario.mensaje = `${ ''} `;
 
-      this.comentariosService.responderComentario(this.selectedComentarioId, this.respuestaComentario).subscribe(() => {
-        this.nuevoComentario.emit();
-        this.respuestaComentario.mensaje = '';
-        this.selectedComentarioId = null;
-      }, error => {
-        console.error('Error al responder comentario:', error);
-      });
+    setTimeout(() => {
+      const input = document.querySelector('.input-respuesta') as HTMLInputElement;
+      input?.focus();
+    }, 0);
+  }
+}
+
+
+onKeydownRespuesta(event: KeyboardEvent): void {
+  if (event.key === 'Enter' && !event.shiftKey) {
+    event.preventDefault();
+    this.enviarRespuesta();
+  } else if (event.key === 'Escape') {
+    this.cancelarRespuesta();
+  }
+}
+
+
+cancelarRespuesta(): void {
+  this.limpiarRespuesta();
+}
+
+enviarRespuesta(): void {
+  if (!this.selectedComentarioId) {
+    console.error('No hay comentario seleccionado para responder.');
+    return;
+  }
+
+  if (!this.usuario?.id) {
+    console.error('Usuario no definido.');
+    return;
+  }
+
+  if (!this.respuestaComentario.mensaje?.trim()) {
+    console.error('Mensaje vacío, no se puede enviar.');
+    return;
+  }
+
+  const datos = {
+    mensaje: this.respuestaComentario.mensaje.trim(),
+    usuario_id: this.usuario.id,
+    video_id: this.videoId
+  };
+
+  console.log('Enviando respuesta:', {
+    comentarioPadreId: this.selectedComentarioId,
+    datos
+  });
+
+  
+  this.enviandoRespuesta = true;
+
+  this.comentariosService.responderComentario(Number(this.selectedComentarioId), datos).subscribe({
+    next: () => {
+      
+      this.nuevoComentario.emit();
+      this.limpiarRespuesta();
+    },
+    error: (err) => {
+      console.error('Error al responder:', err);
+      this.enviandoRespuesta = false;
     }
-  }
-
+  });
+}
  
+ 
+private limpiarRespuesta(): void {
+  this.respuestaComentario.mensaje = '';
+  this.selectedComentarioId = null;
+  this.enviandoRespuesta = false;
+}
+
 
 
   toggleEdit(comentario: Comentario | null): void {
@@ -168,15 +247,7 @@ export class ContenidoDeComentariosComponent implements OnInit{
   }
 
  
-  @HostListener('document:click', ['$event'])
-  onClick(event: MouseEvent): void {
-    const target = event.target as HTMLElement;
-    if (target.closest('.responderComentario') === null && target.closest('a') === null) {
-      this.selectedComentarioId = null;
-      this.respondingTo = '';
-      this.respuestaComentario.mensaje = '';
-    }
-  }
+
 
   reportarComentario(comentarioId: number) {
     const dialogRef = this.dialog.open(ModalReporteComentarioComponent, {

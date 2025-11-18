@@ -1,180 +1,465 @@
 .comentario {
-  margin-top: 20px;
-  margin-bottom: 35px;
-  padding-left: 10px;
+  margin: 20px 0;
+  padding: 3px 0;
   position: relative;
-  max-width: 1234px;
+  font-family: 'Roboto', Arial, sans-serif;
+  transition: background-color 0.2s ease;
+  z-index: 500;
 }
 
-.megustas {
-  display: flex;
-  flex-direction: row;
-}
 
-.botonEnviar {
-
-  background-color: #32b1f9;
-    
-  }
-  
-  .toggle-respuestas {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px; 
-    text-decoration: none;
-  }
-  
-  .toggle-respuestas mat-icon {
-    font-size: 18px; 
-  }
-
-a {
-  text-decoration: none;
-}
 
 .comentario-header {
   display: flex;
-  align-items: flex-start; 
-  position: relative; 
+  align-items: flex-start;
+  gap: 12px;
+  position: relative;
 }
 
 .fotoUsuario {
   width: 40px;
   height: 40px;
-  border-radius: 100px;
+  border-radius: 50%;
   object-fit: cover;
+  flex-shrink: 0;
+  border: 1px solid #ddd;
 }
 
 .comentario-info {
-  margin-left: 10px;
   flex: 1;
+  min-width: 0;
 }
 
 .nombreyfecha {
   display: flex;
-  gap: 10px;
-  font-size: 14px; 
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  margin-bottom: 4px;
+}
+
+.nombreyfecha strong {
+  font-weight: 500;
+  color: #0f0f0f;
+  font-size: 14px;
 }
 
 .date {
-  color: #7a7a7a;
+  color: #606060;
+  font-size: 12.5px;
 }
 
-.edit-comentario-form {
-  margin-bottom: 10px;
+.comentario p {
+  margin: 6px 0 10px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #030303;
+  word-wrap: break-word;
+}
+
+.megustas {
   display: flex;
-  flex-direction: row;
-  gap:5px
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+  font-size: 13px;
 }
 
-.edit-comentario-form input {
-  padding: 5px;
-  background-color: #f1f1f1;
-  border: 1px solid #ccc;
+.megustas a {
+  color: black;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.2s;
 }
+
+.megustas a:hover {
+  color: black;
+  text-decoration: underline;
+}
+
+.botonLike {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 50%;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.botonLike:hover {
+  background-color: rgba(0, 0, 0, 0.08);
+}
+
+.botonLike i {
+  font-size: 18px;
+  color: #606060;
+  transition: color 0.2s;
+}
+
+.botonLike.liked i,
+.botonLike:hover i {
+  color: #065fd4;
+}
+
+.contador {
+  font-weight: 500;
+  color: #606060;
+  font-size: 13px;
+}
+
+.comentario-actions-menu {
+  position: absolute;
+  top: 4px;
+  right: 0;
+}
+
 .menu-button {
   background: none;
   border: none;
   font-size: 20px;
   cursor: pointer;
-  color: #333;
-  position: absolute;
-  top: 10px;
-  right: 10px;
+  color: #606060;
+  padding: 4px;
+  border-radius: 50%;
+  transition: background 0.2s;
+}
+
+.menu-button:hover {
+  background-color: rgba(0, 0, 0, 0.1);
 }
 
 .menu-dropdown {
-  display: flex;
-  flex-direction: column;
   position: absolute;
-  top: 40px;
-  right: 10px;
-  background-color: #fff;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-  border-radius: 4px;
+  top: 32px;
+  right: 0;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
   z-index: 1000;
+  min-width: 180px;
+  font-size: 13.5px;
 }
 
 .menu-dropdown button {
-  display: flex;        
+  display: flex;
   align-items: center;
-  gap: 10px;          
+  gap: 12px;
+  width: 100%;
   padding: 10px 16px;
-  border: none;
   background: none;
+  border: none;
+  text-align: left;
+  color: #030303;
   cursor: pointer;
-  font-size: 14px;
-  color: #333;
+  transition: background 0.2s;
 }
-
 
 .menu-dropdown button:hover {
-  background-color: #f0f0f0;
+  background-color: #f5f5f5;
 }
 
+.menu-dropdown mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  color: #606060;
+}
+
+.edit-comentario-form {
+  display: flex;
+  gap: 8px;
+  margin: 12px 0;
+  align-items: center;
+}
+
+.edit-comentario-form input {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  font-size: 14px;
+  outline: none;
+  transition: border 0.2s;
+}
+
+.edit-comentario-form input:focus {
+  border-color: #065fd4;
+}
+
+.edit-comentario-form button {
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.btn-secondary {
+  background: #f2f2f2;
+  color: #606060;
+}
+
+.btn-primary {
+  background: #065fd4;
+  color: white;
+}
 
 .comentario-footer {
-  margin-top: 5px;
-  margin-left: 50px;
+  margin-left: 52px;
+  margin-top: 8px;
 }
 
-.botonResponder {
-  background-color: #0282e5;
-  color: white;
-  border: none;
-  padding: 5px 10px;
+.toggle-respuestas {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: black;
+  font-size: 13.5px;
+  font-weight: 500;
+  text-decoration: none;
   cursor: pointer;
-  text-align: center; 
-}
-.botonLike {
-  margin-left: 10px;
-  margin-bottom: 12px;
-
-  background:none;
-  border: none;
-  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background 0.2s;
 }
 
-.liked {
-  color: #007bff;
+.toggle-respuestas:hover {
+  background-color: rgba(6, 93, 212, 0.1);
 }
 
-.botonLike:hover {
-  color: #0056b3; 
+.toggle-respuestas mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
 }
 
 .responderComentario {
+  margin: 16px 0 0 52px;
   display: flex;
   flex-direction: column;
-  margin-top: 10px;
+  gap: 8px;
 }
 
-.responderComentario input[type="text"] {
-  width: calc(50% - 80px); 
-  height: 40px;
-  border: none; 
-  padding-left: 10px;
-  margin-bottom: 10px;
-  transition: background-color 0.3s ease, padding-bottom 0.3s ease, border-bottom 0.3s ease; 
-
-}
-
-.responderComentario button {
-   border: none;
+.responderComentario input {
+  width: 100%;
+  max-width: 600px;
+  padding: 10px 12px;
+  border: none;
+  border-bottom: 1px solid #ddd;
+  font-size: 14px;
   outline: none;
-  cursor: pointer;
+  transition: border 0.3s;
+  background: transparent;
 }
 
 .responderComentario input:focus {
-  background-color: #fff; 
-  padding-bottom: 12px; 
-  border-bottom: 1px solid #0282e5;
-  outline: none; 
+  border-bottom: 2px solid #065fd4;
+}
 
+.responderComentario button {
+  align-self: flex-end;
+  background: #065fd4;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 18px;
+  font-weight: 500;
+  cursor: pointer;
+  font-size: 13px;
+  transition: background 0.2s;
+}
+
+.responderComentario button:hover {
+  background: #03449b;
 }
 
 .respuestas {
-  margin-top: 10px;
-  margin-left: 50px;
+  margin-left: 52px;
+  margin-top: 12px;
+  padding-left: 12px;
+}
 
+
+.respuesta-container{
+  margin: 16px 0 0 52px;
+  max-width: 680px;
+  animation: slideUp 0.2s ease;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.input-group {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.avatar-respuesta {
+  flex-shrink: 0;
+}
+
+.avatar-pequeno {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid #ddd;
+}
+
+.input-wrapper {
+  flex: 1;
+  position: relative;
+}
+
+.input-respuesta {
+  width: 100%;
+  padding: 10px 16px;
+  padding-right: 150px;
+  border: none;
+  border-bottom: 1px solid transparent;
+  background: transparent;
+  font-size: 14px;
+  font-family: 'Roboto', sans-serif;
+  outline: none;
+  transition: all 0.2s ease;
+  min-height: 40px;
+  resize: none;
+}
+
+.input-respuesta::placeholder {
+  color: #606060;
+}
+
+.input-respuesta:focus {
+  border-bottom: 2px solid #042234;
+  background: #f8f9fa;
+  border-radius: 8px 8px 0 0;
+}
+
+.input-respuesta.active {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding-bottom: 40px;
+}
+
+.botones-accion {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  display: flex;
+  gap: 8px;
+  z-index: 10;
+}
+
+.btn-cancelar,
+.btn-responder {
+  padding: 6px 16px;
+  border-radius: 18px;
+  font-size: 14px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 80px;
+}
+
+.btn-cancelar {
+  background: transparent;
+  color: #606060;
+}
+
+.btn-cancelar:hover:not(:disabled) {
+  background: rgba(0,0,0,0.08);
+}
+
+.btn-responder {
+  background: #32b1f9;
+  color: white;
+}
+
+.btn-responder:hover:not(:disabled) {
+  background: rgb(7, 63, 97);
+}
+
+.btn-responder:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+@media (max-width: 600px) {
+  .respuesta-container {
+    margin-left: 16px;
+    margin-right: 16px;
+  }
+
+  .input-group {
+    gap: 8px;
+  }
+
+  .avatar-pequeno {
+    width: 28px;
+    height: 28px;
+  }
+
+  .botones-accion {
+    flex-direction: column;
+    right: 4px;
+    bottom: 4px;
+    gap: 4px;
+  }
+
+  .btn-cancelar,
+  .btn-responder{
+    padding: 5px 12px;
+    font-size: 13px;
+  }
+}
+
+
+
+@media (max-width: 600px) {
+  .comentario:hover {
+    margin: 20px 0;
+    padding: 12px 0;
+    border-radius: 0;
+  }
+
+  .nombreyfecha {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+
+  .megustas {
+    flex-wrap: wrap;
+  }
+
+  .edit-comentario-form {
+    flex-direction: column;
+  }
+
+  .edit-comentario-form button {
+    width: 100%;
+  }
+}
+
+.comentario-resaltado {
+  animation: resaltarComentario 4s ease-in-out;
+  background-color: rgba(50, 177, 249, 0.2) !important;
+  border-left: 5px solid #32b1f9 !important;
+  padding-left: 12px !important;
+  border-radius: 0 8px 8px 0;
+}
+
+@keyframes resaltarComentario {
+  0%   { background-color: rgba(50, 177, 249, 0.4); transform: scale(1.01); }
+  50%  { background-color: rgba(50, 177, 249, 0.25); }
+  100% { background-color: transparent; }
 }

@@ -1,7 +1,7 @@
-<div class="comentario">
+<div class="comentario" [id]="'comentario-' + comentario.id">
   <div class="comentario-header">
     <img *ngIf="comentario.user?.foto" [src]="comentario.user?.foto" class="fotoUsuario" alt="Foto del usuario">
-    <img *ngIf="!comentario.user?.foto" src="assets/images/user.png" class="fotoUsuario" alt="Foto del usuario">
+    <img *ngIf="!comentario.user?.foto" src="assets/images/user.svg" class="fotoUsuario" alt="Foto del usuario">
 
     <div class="comentario-info">
       <div class="nombreyfecha">
@@ -39,7 +39,7 @@
     
 
       <div class="megustas">
-        <a href="#" *ngIf="!usuarioBloqueado" (click)="toggleResponder(comentario); $event.preventDefault()">Responder</a>
+        <a href="#" *ngIf="!usuarioBloqueado" (click)="toggleResponder(comentario, $event)">Responder</a>
 
         <button *ngIf="!usuarioBloqueado && !comentario.likedByUser" (click)="darMeGusta()" class="botonLike" aria-label="Dar Me Gusta">
           <i class="fas fa-thumbs-up"></i>
@@ -71,13 +71,56 @@
     </a>
   </div>
 
-  <form *ngIf="selectedComentarioId === comentario.id" (ngSubmit)="enviarRespuesta()">
-    <div class="responderComentario">
-      <input type="text" [(ngModel)]="respuestaComentario.mensaje" name="respuestaComentarioMensaje" placeholder="Escribe una respuesta" required>
-    </div>
-    <button class="btn btn-primary" type="button">Enviar</button>
+<div *ngIf="selectedComentarioId === comentario.id" 
+     class="respuesta-container"
+     (click)="$event.stopPropagation()">
+  
+  <form (ngSubmit)="enviarRespuesta()" #respuestaForm="ngForm" class="respuesta-form">
+    <div class="input-group">
+      <div class="avatar-respuesta">
+        <img [src]="usuario?.foto || 'assets/images/user.svg'" 
+             class="avatar-pequeno" 
+             alt="Tu foto">
+      </div>
 
+      <div class="input-wrapper">
+        <input 
+          #inputRespuesta
+          type="text"
+          [(ngModel)]="respuestaComentario.mensaje"
+          name="mensaje"
+          placeholder="Añade una respuesta..."
+          required
+          autocomplete="off"
+          (keydown)="onKeydownRespuesta($event)"
+          class="input-respuesta"
+          [class.active]="respuestaComentario.mensaje?.length > 0"
+          [disabled]="enviandoRespuesta"
+        >
+
+        <div class="botones-accion" *ngIf="respuestaComentario.mensaje?.length > 0">
+          <button 
+            type="button" 
+            class="btn-cancelar" 
+            (click)="cancelarRespuesta()"
+            [disabled]="enviandoRespuesta"
+            tabindex="-1">
+            Cancelar
+          </button>
+          <button 
+            type="submit" 
+            class="btn-responder"
+            (click)="$event.stopPropagation()"
+            [disabled]="!respuestaForm.valid || enviandoRespuesta">
+            <span *ngIf="!enviandoRespuesta">Responder</span>
+            <mat-spinner *ngIf="enviandoRespuesta" diameter="16"></mat-spinner>
+          </button>
+        </div>
+
+      </div>
+    </div>
   </form>
+</div>
 
   <div class="respuestas" *ngIf="comentario.mostrarRespuestas">
     <app-contenido-de-comentarios

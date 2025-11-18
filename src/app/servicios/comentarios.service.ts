@@ -17,7 +17,7 @@ export class ComentariosService {
   private apiUrl = environment.apiUrl
   constructor(private http: HttpClient, private cookie:CookieService) { }
 
-  traerComentariosDelVideo(idVideo: any, usuarioId?: number): Observable<any> {
+  traerComentariosDelVideo(idVideo: any, usuarioId: number): Observable<any> {
     let url = `${this.apiUrl}api/v1/videos/${idVideo}/comentarios`;
     if (usuarioId) {
       url += `?usuario_id=${usuarioId}`;
@@ -25,7 +25,7 @@ export class ComentariosService {
     return this.http.get<any[]>(url);
   }
 
-  crearComentario(idVideo: any, comentario:any): Observable<any> {
+  crearComentario(idVideo: number, comentario:any): Observable<any> {
     const url = `${this.apiUrl}api/v1/videos/${idVideo}/comentarios`
     const httpOptions = {
       headers: new HttpHeaders({
@@ -35,7 +35,15 @@ export class ComentariosService {
     return this.http.post<any[]>(url, comentario, httpOptions)
   }
 
-  responderComentario(idComentario: any, respuesta:any): Observable<any> {
+  responderComentario(idComentario:number, respuesta:any): Observable<any> {
+   console.log('LLAMADA A responderComentario:', {
+    idComentario,
+    usuario_id: respuesta?.usuario_id,
+    video_id: respuesta?.video_id,
+    mensaje: respuesta?.mensaje,
+    url: `${this.apiUrl}api/v1/videos/comentarios/respuesta/${idComentario}`
+  });
+
     const url = `${this.apiUrl}api/v1/videos/comentarios/respuesta/${idComentario}`
     const httpOptions = {
       headers: new HttpHeaders({

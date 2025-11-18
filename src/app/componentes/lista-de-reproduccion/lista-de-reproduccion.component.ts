@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy} from '@angular/core';
 import { PlaylistService } from '../../servicios/playlist.service';
 import { AuthService } from '../../servicios/auth.service';
 import { Subscription } from 'rxjs';
@@ -10,11 +10,16 @@ import { ModalEditarlistaComponent } from '../modal-editarlista/modal-editarlist
 import { MatDialog } from '@angular/material/dialog';
 import { Title } from '@angular/platform-browser';
 import { UsuarioGlobalService } from '../../servicios/usuario-global.service';
+import { Videos } from '../../clases/videos';
+import { CrearListaComponent } from '../crear-lista/crear-lista.component';
+import { EstadoPlaylistService } from '../../servicios/estado-playlist.service';
+import { ActivatedRoute, Router } from '@angular/router';
+
 
 @Component({
   selector: 'app-lista-de-reproduccion',
   templateUrl: './lista-de-reproduccion.component.html',
-  styleUrls: ['./lista-de-reproduccion.component.css']
+  styleUrls: ['./lista-de-reproduccion.component.css'],
 })
 export class ListaDeReproduccionComponent implements OnInit, OnDestroy {
 
@@ -27,17 +32,26 @@ export class ListaDeReproduccionComponent implements OnInit, OnDestroy {
   showMenuIndex: number | null = null; 
   usuarioConCanal:any;
   idCanal:any;
+  loading = true;
+
+  pestana: 'creadas' | 'guardadas' = 'creadas';
+  listasCreadas: any[] = [];
+  listasGuardadas: any[] = [];
   sidebarCollapsed = false;
   sidebarCollapsed$ = this.usuarioGlobal.sidebarCollapsed$;
 
   constructor(
     private playlistService: PlaylistService,
     private authService: AuthService,
+    private route: ActivatedRoute,
+    private router: Router,
+
     private titleService: Title,
     public status:StatusService,
     private usuarioGlobal: UsuarioGlobalService,
     private snackBar: MatSnackBar,
     private dialog: MatDialog,
+    private playlistState: EstadoPlaylistService,
 
     private suscripcionService: SuscripcionesService,
   ) {}
@@ -69,7 +83,7 @@ export class ListaDeReproduccionComponent implements OnInit, OnDestroy {
         this.userId = this.usuario.id; 
   
         if (this.userId) {
-          this.obtenerListasDeReproduccion(this.userId); 
+          this.cargarListas(this.userId); 
         }
       } 
     });
@@ -85,19 +99,56 @@ export class ListaDeReproduccionComponent implements OnInit, OnDestroy {
   onImageError(event: any) {
     event.target.src = 'assets/images/video-default.png';
   }
+  
 
-  obtenerListasDeReproduccion(userId: number) {
-    this.playlistService.obtenerListasDeReproduccion(userId).subscribe(
-      listas => {
-        this.listas = listas.map(lista => ({
-          ...lista,
-          imagen: this.obtenerMiniaturaDelUltimoVideo(lista.videos)
-        }));
-      },
-      error => {
-        console.error('Error al obtener listas de reproducción', error);
-      }
-    );
+quitarDeGuardadas(playlistId: number): void {
+  this.playlistService.quitarPlaylistGuardada(playlistId, this.userId).subscribe({
+    next: () => {
+      this.snackBar.open('Quitada de guardadas', 'OK', { duration: 3000 });
+      this.cargarListas(this.userId);
+    },
+    error: () => {
+      this.snackBar.open('Error', 'Cerrar', { duration: 4000 });
+    }
+  });
+}
+
+cargarListas(userId: number): void {
+  this.loading = true;
+
+  this.playlistService.obtenerListasDeReproduccion(userId).subscribe({
+    next: (listas: any[]) => {
+      this.listasCreadas = this.procesarListas(listas);
+      this.actualizarLista();
+    }
+  });
+
+  this.playlistService.obtenerPlaylistsGuardadasDeUsuario(userId).subscribe({
+    next: (res: any) => {
+      this.listasGuardadas = this.procesarListas(res.data.playlists);
+      this.actualizarLista();
+    }
+  });
+}
+
+procesarListas(listas: any[]): any[] {
+  return listas.map(lista => ({
+    ...lista,
+    videos: lista.videos || [],
+    imagenesMosaico: this.obtenerMosaicoVideos(lista.videos)
+  }));
+}
+
+actualizarLista(): void {
+  this.listas = this.pestana === 'creadas' ? this.listasCreadas : this.listasGuardadas;
+  this.loading = false;
+}
+
+  obtenerMosaicoVideos(videos: Videos[]): string[] {
+    if (!videos?.length) return Array(4).fill('assets/images/cover-default.png');
+    return videos
+      .slice(0, 4)
+      .map(v => v.miniatura || 'assets/images/cover-default.png');
   }
 
 
@@ -106,7 +157,7 @@ export class ListaDeReproduccionComponent implements OnInit, OnDestroy {
       this.playlistService.borrarPlaylist(playlistId).subscribe(
         response => {
           this.snackBar.open(response.message, 'Cerrar', { duration: 3000 });
-          this.obtenerListasDeReproduccion(this.userId); 
+          this.cargarListas(this.userId); 
         },
         error => {
           console.error('Error al borrar la playlist:', error);
@@ -120,13 +171,34 @@ export class ListaDeReproduccionComponent implements OnInit, OnDestroy {
     this.playlistService.modificarPlaylist(playlistId, nuevoNombre, nuevoAcceso).subscribe(
       response => {
         this.snackBar.open(response.message, 'Cerrar', { duration: 3000 });
-        this.obtenerListasDeReproduccion(this.userId); 
+        this.cargarListas(this.userId); 
       },
       error => {
         console.error('Error al modificar la playlist:', error);
         this.snackBar.open('Error al modificar la playlist.', 'Cerrar', { duration: 3000 });
       }
     );
+  }
+
+  verPlaylist(playlistId: number): void {
+    this.playlistService.obtenerPlaylistConVideos(playlistId, 0, false).subscribe({
+      next: (response) => {
+        const playlist = response.data.playlist;
+        const videos = response.data.playlist.videos ?? [];
+
+        this.playlistState.establecerPlaylist({
+          id: playlist.id,
+          nombre: playlist.nombre,
+          videos: videos
+        });
+  
+        this.router.navigate(['/playlists', playlistId]);
+      },
+      error: (err) => {
+        console.error('Error al cargar playlist:', err);
+        this.snackBar.open('Error al abrir playlist', 'Cerrar', { duration: 3000 });
+      }
+    });
   }
 
 
@@ -137,18 +209,31 @@ export class ListaDeReproduccionComponent implements OnInit, OnDestroy {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        this.obtenerListasDeReproduccion(this.userId); 
+        this.cargarListas(this.userId); 
       }
     });
   }
 
+  abrirModalCrear(videoId?: number): void {
+    const dialogRef = this.dialog.open(CrearListaComponent, {
+      width: '500px',
+      maxWidth: '90vw',
+      data: { videoId } 
+    });
+  
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.cargarListas(this.userId); 
+      }
+    });
+  }
  
   
   private obtenerMiniaturaDelUltimoVideo(videos: any[]): string {
     if (videos.length > 0) {
       const ultimoVideo = videos[videos.length - 1];
-      return ultimoVideo.miniatura || 'assets/images/miniaturaDefault.png';
+      return ultimoVideo.miniatura || 'assets/images/cover-default.png';
     }
-    return 'assets/images/miniaturaDefault.png';
+    return 'assets/images/cover-default.png';
   }
 }

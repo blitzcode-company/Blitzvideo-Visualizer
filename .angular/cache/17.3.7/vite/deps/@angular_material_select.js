@@ -8,26 +8,7 @@ import {
   MatLabel,
   MatPrefix,
   MatSuffix
-} from "./chunk-Z5S4PJWL.js";
-import {
-  FormGroupDirective,
-  NgControl,
-  NgForm,
-  Validators
-} from "./chunk-M5VJT3DO.js";
-import {
-  CdkConnectedOverlay,
-  CdkOverlayOrigin,
-  Overlay,
-  OverlayModule
-} from "./chunk-QCCXKLDK.js";
-import {
-  CdkScrollableModule,
-  ViewportRuler
-} from "./chunk-RU4MDNHM.js";
-import {
-  SelectionModel
-} from "./chunk-SFITUO6V.js";
+} from "./chunk-55X4MLR2.js";
 import {
   animate,
   animateChild,
@@ -36,11 +17,28 @@ import {
   style,
   transition,
   trigger
-} from "./chunk-FHKPG7MO.js";
+} from "./chunk-NAWLD42I.js";
 import {
-  ActiveDescendantKeyManager,
+  CdkConnectedOverlay,
+  CdkOverlayOrigin,
+  Overlay,
+  OverlayModule
+} from "./chunk-RHATR3J4.js";
+import {
+  CdkScrollableModule,
+  ViewportRuler
+} from "./chunk-ZVF5BIB5.js";
+import {
+  SelectionModel
+} from "./chunk-LKAEJG42.js";
+import {
+  FormGroupDirective,
+  NgControl,
+  NgForm,
+  Validators
+} from "./chunk-AXMZTHXA.js";
+import {
   ErrorStateMatcher,
-  LiveAnnouncer,
   MAT_OPTGROUP,
   MAT_OPTION_PARENT_COMPONENT,
   MatCommonModule,
@@ -49,10 +47,15 @@ import {
   MatOptionModule,
   _ErrorStateTracker,
   _countGroupLabelsBeforeOption,
-  _getOptionScrollPosition,
+  _getOptionScrollPosition
+} from "./chunk-LU5MQOXD.js";
+import {
+  ActiveDescendantKeyManager,
+  LiveAnnouncer,
   addAriaReferencedId,
   removeAriaReferencedId
-} from "./chunk-KPIQDDOI.js";
+} from "./chunk-2K7RDVXK.js";
+import "./chunk-ZRCKYYPP.js";
 import {
   A,
   DOWN_ARROW,
@@ -63,11 +66,12 @@ import {
   SPACE,
   UP_ARROW,
   hasModifierKey
-} from "./chunk-F2STH7QZ.js";
+} from "./chunk-76Q2ACRQ.js";
+import "./chunk-MOQAGIF4.js";
 import {
   CommonModule,
   NgClass
-} from "./chunk-UMX244V2.js";
+} from "./chunk-TFSXVW2B.js";
 import {
   Attribute,
   ChangeDetectionStrategy,
@@ -128,7 +132,7 @@ import {
   ɵɵtext,
   ɵɵtextInterpolate,
   ɵɵviewQuery
-} from "./chunk-6H7B67QN.js";
+} from "./chunk-5DWDHDVP.js";
 import {
   defer,
   merge
@@ -144,7 +148,7 @@ import {
   take,
   takeUntil
 } from "./chunk-PQ7O3X3G.js";
-import "./chunk-X6JV76XL.js";
+import "./chunk-PZQZAEDH.js";
 
 // node_modules/@angular/material/fesm2022/select.mjs
 var _c0 = ["trigger"];

@@ -1,10 +1,10 @@
 import {
   VgApiService,
   VgCoreModule
-} from "./chunk-PS4QCNTM.js";
+} from "./chunk-6AM5RRNF.js";
 import {
   CommonModule
-} from "./chunk-UMX244V2.js";
+} from "./chunk-TFSXVW2B.js";
 import {
   Component,
   ElementRef,
@@ -21,11 +21,11 @@ import {
   ɵɵelement,
   ɵɵelementEnd,
   ɵɵelementStart
-} from "./chunk-6H7B67QN.js";
+} from "./chunk-5DWDHDVP.js";
 import "./chunk-SG3BCSKH.js";
 import "./chunk-SAVXX6OM.js";
 import "./chunk-PQ7O3X3G.js";
-import "./chunk-X6JV76XL.js";
+import "./chunk-PZQZAEDH.js";
 
 // node_modules/@videogular/ngx-videogular/fesm2022/videogular-ngx-videogular-buffering.mjs
 var _VgBufferingComponent = class _VgBufferingComponent {

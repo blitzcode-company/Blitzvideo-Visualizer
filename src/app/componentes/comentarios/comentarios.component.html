@@ -3,12 +3,12 @@
 </div>
 
 <div class="comentarios-container">
-  <form (ngSubmit)="crearComentario(this.userId)">
+  <form (ngSubmit)="crearComentario()">
     <div class="comentarista">
       <div class="inputyenvio">
        
         <img *ngIf="usuario?.foto" [src]="usuario?.foto" class="fotoInput" alt="Foto del usuario">
-        <img *ngIf="!usuario?.foto" src="assets/images/user.png" class="fotoInput" alt="Foto del usuario">
+        <img *ngIf="!usuario?.foto" src="assets/images/user.svg" class="fotoInput" alt="Foto del usuario">
         <div class="input-container">
           <input type="text" id="nuevoComentario" [(ngModel)]="nuevoComentario.mensaje" name="nuevoComentarioMensaje"
             placeholder="Escribe un comentario..." required [disabled]="usuarioBloqueado">
@@ -25,6 +25,7 @@
   <br>
   
   <div id="comentarios">
+    
     <app-contenido-de-comentarios
       *ngFor="let comentario of comentarios"
       [comentario]="comentario"
@@ -32,8 +33,24 @@
       [usuario]="usuario"
       (reportar)="abrirModalReporte(comentario.id)"
       (nuevoComentario)="traerComentarios()"
-      (comentarioEliminado)="onComentarioEliminado($event)"
-      (comentarioEditado)="onComentarioEditado($event)"
+      (comentarioEliminado)="onComentarioEliminado()"
+      (comentarioEditado)="onComentarioEditado()"
     ></app-contenido-de-comentarios>
+
+
+
+    <div *ngIf="comentarios && comentarios.length === 0 && !cargandoComentarios" class="sin-comentarios">
+    <div class="icono-comentario-vacio">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+      </svg>
+    </div>
+    <p class="texto-vacio">Aún no hay comentarios</p>
+    <p class="subtexto-vacio">¡Sé el primero en comentar!</p>
+  </div>
+
+  <div *ngIf="cargandoComentarios" class="cargando-comentarios">
+    <p>Cargando comentarios...</p>
+  </div>
   </div>
 </div>

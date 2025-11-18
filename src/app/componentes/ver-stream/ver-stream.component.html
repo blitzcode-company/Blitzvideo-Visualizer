@@ -24,8 +24,8 @@
       </div>
     
       <app-reproductor-stream
-        [activoStream]="stream?.activo"
-        [streamUrl]="streamUrl"
+      [activoStream]="stream?.activo ?? 0"
+      [streamUrl]="streamUrl"
         [isCinemaMode]="isCinemaMode"
         (toggleCinemaMode)="handleCinemaMode($event)"
       ></app-reproductor-stream>
@@ -34,7 +34,7 @@
     <div class="info-container">
       <a *ngIf="stream.canal" [routerLink]="['/canal', stream.canal.id]">
         <div class="info-canal">
-          <img *ngIf="!stream.canal.user.foto" class="fotodeperfil" src="assets/images/user.png" alt="Logo del canal del usuario" srcset="">
+          <img *ngIf="!stream.canal.user.foto" class="fotodeperfil" src="assets/images/user.svg" alt="Logo del canal del usuario" srcset="">
           <img *ngIf="stream.canal.user.foto" class="fotodeperfil" [src]="stream.canal.user.foto" alt="Logo del canal del usuario" srcset="">
         </div>
       </a>
@@ -85,24 +85,10 @@
   </div>
 
   <div class="columnaLateral">
-    <div class="chat-container">
-      <h3>Chat en vivo</h3>
-      <div  #chatMessages class="chat-messages">
-        <div *ngFor="let message of chatMessagesList" class="chat-message">
-          <img *ngIf="message.user_photo" class="chat-user-photo" [src]="message.user_photo" alt="User photo">
-          <img *ngIf="!message.user_photo" class="chat-user-photo" src="assets/images/user.png" alt="User photo">
-          <span class="chat-user">{{ message.user }}:</span>
-          <span class="chat-text">{{ message.text }}</span>
-          <small>{{ message.created_at | date:'shortTime' }}</small>
-
-        </div>
-      </div>
-      <div class="chat-input">
-        <form (submit)="enviarMensaje()" class="chat-input-form">
-          <input [(ngModel)]="mensaje" name="mensaje" class="chat-input" placeholder="Escribe un mensaje..." required>
-          <button type="submit" class="chat-send-btn">Enviar</button>
-        </form>
-      </div>
-    </div>
-  </div>
+   <app-chat-de-stream
+   [streamId]="streamId"
+   [userId]="userId"
+   
+   
+   ></app-chat-de-stream>
 </div>

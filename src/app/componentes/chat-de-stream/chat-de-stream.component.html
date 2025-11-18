@@ -1,0 +1,20 @@
+ <div class="chat-container">
+      <h3>Chat en vivo</h3>
+      <div  #chatMessages class="chat-messages">
+        <div *ngFor="let message of chatMessagesList" class="chat-message">
+          <img *ngIf="message.user_photo" class="chat-user-photo" [src]="message.user_photo" alt="User photo">
+          <img *ngIf="!message.user_photo" class="chat-user-photo" src="assets/images/user.svg" alt="User photo">
+          <span class="chat-user">{{ message.user }}:</span>
+          <span class="chat-text">{{ message.text }}</span>
+
+        </div>
+      </div>
+      <br>
+      <div class="chat-input">
+        <form (submit)="enviarMensaje()" class="chat-input-form">
+            <input [(ngModel)]="mensaje" name="mensaje" class="chat-input" placeholder="Escribe un mensaje..." required>        
+            <br>
+             <button type="submit" class="chat-send-btn">Enviar</button>
+        </form>
+      </div>
+    </div>

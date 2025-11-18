@@ -1,6 +1,15 @@
-.canalynombre, .comentarios-container, .comentarios-contador {
 
+:host {
+  display: block;
+  width: 100%;
+  min-width: 0; 
+  box-sizing: border-box;
 }
+.comentarios-contador {
+  margin-bottom: 20px;
+}
+
+
 .btn .btn-primary {
 
 background-color: #32b1f9;
@@ -9,24 +18,28 @@ background-color: #32b1f9;
 
 
 .fotoInput {
-  width: 80px;
-  height: 80px;
-  border-radius: 100px;
+  width: 70px; 
+  height: 70px;
+  border-radius: 50%; 
   object-fit: cover;
-
+  flex-shrink: 0; 
 }
-
 .mensaje-bloqueado {
-  color: red;
+  color: #d32f2f; 
   font-weight: bold;
   margin-top: 10px;
+  padding: 10px;
+  background-color: #fce4e4;
+  border-radius: 4px;
 }
+
 
 .comentarios-container {
-  margin-top: -120px;
-  
-}
+  width: 100%;
+  min-width: 0; 
+  margin-top: 10px;
 
+}
 
 .comentarista {
   display: flex;
@@ -36,42 +49,60 @@ background-color: #32b1f9;
 .inputyenvio {
   display: flex;
   align-items: center;
-  margin-top: 150px;
-
+  margin-top: 20px;
+  margin-bottom: 20px;
+  width: 100%; 
 }
 
 .inputyenvio img.fotoInput {
-  margin-right: 10px;
+  margin-right: 15px; 
 }
 
 .inputyenvio input[type="text"] {
-  width: 1000px;
+  width: 100%; 
+  flex-grow: 1;
+  
   height: 50px;
   padding-left: 10px;
   border: none; 
-  transition: background-color 0.3s ease, padding-bottom 0.3s ease, border-bottom 0.3s ease; 
-}
-.input-container {
-  position: relative; 
+  background-color: transparent;
+  border-bottom: 1px solid #ccc; 
+  transition: all 0.3s ease; 
 }
 
+.input-container {
+  position: relative; 
+  flex-grow: 1; 
+  min-width: 0;
+}
 .inputyenvio input[type="text"]:focus {
   background-color: #fff; 
   padding-bottom: 12px; 
-  border-bottom: 1px solid #0282e5;
+  border-bottom: 2px solid #0282e5;
   outline: none; 
 }
 
 
-.inputyenvio button {
+.inputyenvio .botonEnviar {
   margin-top: 0;
   margin-left: 20px;
   border: none;
-  padding: 10px 20px;
+  padding: 8px 16px;
+  font-weight: 600;
+  background-color: #32b1f9;
+  color: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.inputyenvio .botonEnviar:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
 }
 
 .enviarComentario {
-  margin-left: 910px;
+  margin-left: 0;
   background-color: #0282e5;
   color: white;
   border: none;
@@ -133,7 +164,9 @@ background-color: #32b1f9;
 }
 
 .responderComentario input[type="text"] {
-  width: 100%;
+  width: 100%; 
+  min-width: 0;
+  box-sizing: border-box; 
   height: 40px;
   background-color: #f1f1f1;
   border: 1px solid #ccc;
@@ -149,4 +182,56 @@ background-color: #32b1f9;
 
 .respuestas {
   margin-top: 10px;
+}
+
+.sin-comentarios {
+  text-align: center;
+  padding: 60px 20px;
+  color: #606060;
+  font-family: 'Roboto', sans-serif;
+}
+
+.icono-comentario-vacio {
+  margin-bottom: 16px;
+  opacity: 0.6;
+}
+
+.icono-comentario-vacio svg {
+  width: 64px;
+  height: 64px;
+  color: #32b1f9;
+  opacity: 0.7;
+}
+
+.texto-vacio {
+  font-size: 18px;
+  font-weight: 500;
+  margin: 0 0 8px 0;
+  color: #333;
+}
+
+.subtexto-vacio {
+  font-size: 14px;
+  margin: 0;
+  color: #666;
+}
+
+.cargando-comentarios {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+  font-size: 14px;
+}
+.comentario-resaltado {
+  animation: resaltarComentario 3s ease-in-out;
+  background-color: rgba(50, 177, 249, 0.15) !important;
+  border-left: 4px solid #32b1f9 !important;
+  padding-left: 12px !important;
+  transition: all 0.3s ease;
+}
+
+@keyframes resaltarComentario {
+  0%   { background-color: rgba(50, 177, 249, 0.3); }
+  70%  { background-color: rgba(50, 177, 249, 0.15); }
+  100% { background-color: transparent; }
 }

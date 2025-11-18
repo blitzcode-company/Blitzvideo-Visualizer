@@ -15,13 +15,6 @@ interface PlaylistResponse {
   };
 }
 
-interface PlaylistWithVideosResponse {
-  message: string;
-  data: {
-    playlist: Playlist;
-    videos?: any[];
-  };
-}
 
 
 @Injectable({
@@ -42,13 +35,63 @@ export class PlaylistService {
     );
   }
 
- obtenerPlaylistConVideos(playlistId: number, videoId: number, fromPlaylist: boolean): Observable<PlaylistWithVideosResponse> {
+  obtenerSiguienteVideo(playlistId: number, videoId: number) {
+    const url = `${this.apiUrl}api/v1/playlists/${playlistId}/siguiente/${videoId}`;
+    console.log('URL GENERADA:', url); 
+    return this.http.get(url);
+  }
+
+  actualizarOrdenVideos(playlistId: number, orden: any[]) {
+    const url = `${this.apiUrl}api/v1/playlists/${playlistId}/orden`;
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Authorization': 'Bearer ' + this.cookie.get('accessToken'),
+        'Content-Type': 'application/json'
+      })
+    };
+
+    return this.http.post(url, { orden }, httpOptions);
+  }
+
+
+guardarPlaylist(playlistId: number, userId: number) {
+  const url = `${this.apiUrl}api/v1/playlists/${playlistId}/guardar`;
+  const body = { user_id: userId };
+  const httpOptions = {
+    headers: new HttpHeaders({
+      'Authorization': 'Bearer ' + this.cookie.get('accessToken'),
+      'Content-Type': 'application/json'
+    })
+  };
+  return this.http.post(url, body, httpOptions);
+}
+
+estaGuardada(playlistId: number, userId: number) {
+  const url = `${this.apiUrl}api/v1/playlists/${playlistId}/guardada`;
+  const params = new HttpParams().set('user_id', userId.toString());
+  const httpOptions = {
+    headers: new HttpHeaders({
+      'Authorization': 'Bearer ' + this.cookie.get('accessToken')
+    }),
+    params
+  };
+  return this.http.get<{ guardada: boolean }>(url, httpOptions);
+}
+
+  obtenerPlaylistsGuardadasDeUsuario(userId: number) {
+    const url = `${this.apiUrl}api/v1/playlists/${userId}/playlists-guardadas`;
+    return this.http.get(url);
+  }
+
+  
+
+ obtenerPlaylistConVideos(playlistId: number, videoId: number, fromPlaylist: boolean): Observable<any> {
     const url = `${this.apiUrl}api/v1/playlists/${playlistId}/videos`;
     const params = new HttpParams()
       .set('video_id', videoId.toString())
       .set('fromPlaylist', fromPlaylist.toString());
 
-    return this.http.get<PlaylistWithVideosResponse>(url, { params }).pipe(
+    return this.http.get<any>(url, { params }).pipe(
       map(response => ({
         ...response,
         data: {
@@ -111,5 +154,16 @@ export class PlaylistService {
       })
     };
     return this.http.post(url, { video_ids: [videoId] }, httpOptions);
+  }
+
+  quitarPlaylistGuardada(playlistId: number, userId: number) {
+  const url = `${this.apiUrl}api/v1/playlists/${playlistId}/guardar`;
+  const httpOptions = {
+    headers: new HttpHeaders({
+      'Authorization': 'Bearer ' + this.cookie.get('accessToken')
+    }),
+    body: { user_id: userId } // <-- aquí envías el body en DELETE
+  };
+    return this.http.delete(url, httpOptions);
   }
 }

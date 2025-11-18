@@ -1,0 +1,39 @@
+.full-width {
+    width: 100%;
+    margin-bottom: 20px;
+  }
+  
+
+
+  .loading {
+    display: flex;
+    justify-content: center;
+    padding: 20px 0;
+  }
+
+  mat-form-field {
+    margin-bottom: 20px;
+  }
+  
+  mat-dialog-title {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-weight: 500;
+  }
+
+  .no-lists {
+    text-align: center;
+    padding: 20px 0;
+    color: #666;
+    font-size: 0.95rem;
+  }
+  
+  .no-lists mat-icon {
+    font-size: 36px;
+    width: 36px;
+    height: 36px;
+    color: #999;
+    margin-bottom: 8px;
+  }
+  

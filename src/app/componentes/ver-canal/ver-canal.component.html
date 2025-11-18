@@ -1,8 +1,12 @@
 <app-header (toggleSidebar)="toggleSidebar()"></app-header>
-
 <div class="containerHome" [class.collapsed]="sidebarCollapsed$ | async">
-  <div class="sidebar-container">
-    <app-sidebar [collapsed]="!!(sidebarCollapsed$ | async)"></app-sidebar>
+  <div class="sidebar-container"  [class.bottom-mobile]="isMobile">
+    <app-sidebar 
+    [collapsed]="!!(sidebarCollapsed$ | async)"
+    [class.bottom-mobile]="isMobile"
+    [isMobile]="isMobile"
+    
+    ></app-sidebar>
   </div>
 
   <div class="main-content">
@@ -16,7 +20,7 @@
     <header>
       <div class="profile">
         <img
-          [src]="usuarioCanal?.foto ? usuarioCanal.foto : 'assets/images/user.png'"
+          [src]="usuarioCanal?.foto ? usuarioCanal.foto : 'assets/images/user.svg'"
           alt="Foto de perfil"
           class="profile-pic"
         />
@@ -59,13 +63,12 @@
       </div>
     </header>
 
-    <nav>
+    <nav *ngIf="tieneContenido">
       <ul>
         <li><a [routerLink]="['/canal', canalId]">Inicio</a></li>
         <li><a [routerLink]="['/canal', canalId, 'videos']">Videos</a></li>
       </ul>
     </nav>
-
     <main>
       <section class="ultimo-video" *ngIf="ultimoVideo">
         <h2>Último video subido</h2>
@@ -96,6 +99,10 @@
           </div>
         </div>
       </section>
+      <div class="no-content-message" *ngIf="!tieneContenido">
+        <i class="fas fa-video-slash no-content-icon"></i>
+          <h2>Este canal no tiene contenido</h2>
+      </div>
     </main>
   </div>
 </div>

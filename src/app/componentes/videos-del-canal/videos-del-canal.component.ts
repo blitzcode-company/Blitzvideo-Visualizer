@@ -1,4 +1,4 @@
-import { Component, OnInit} from '@angular/core';
+import { Component, OnInit, HostListener} from '@angular/core';
 import { CanalService } from '../../servicios/canal.service';
 import { ActivatedRoute } from '@angular/router';
 import { SuscripcionesService } from '../../servicios/suscripciones.service';
@@ -9,6 +9,7 @@ import { NotificacionesService } from '../../servicios/notificaciones.service';
 import { Title } from '@angular/platform-browser';
 import { StatusService } from '../../servicios/status.service';
 import { UsuarioGlobalService } from '../../servicios/usuario-global.service';
+import { switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-videos-del-canal',
@@ -17,30 +18,31 @@ import { UsuarioGlobalService } from '../../servicios/usuario-global.service';
 })
 export class VideosDelCanalComponent {
 
-  usuario:any;
-  usuarioCanal:any;
-
-  canal:any;
-  canalId:any;
+  usuario: any = {};
+  
+  usuarioCanal: any = {};
+  canal: any = {};
+  canalId: any = null;
   mensaje: string = '';
   public suscrito: string = '';
   cargando: boolean = true;
 
-  videos:any;
-  canalNombre:any
-  userId:any;
-  numeroDeSuscriptores:any;
+  videos: any[] = [];
+  canalNombre: string = '';
+  userId: any = null;
+  numeroDeSuscriptores: any = { numero_suscripciones: 0 };
   notificacionesActivas: boolean = false;
   cargandoNotificacion: boolean = false;
-  usuarioConCanal: any;
-  idCanal: any;
+  usuarioConCanal: any = {};
+  idCanal: any = null;
   canales: any[] = [];
+  isMobile = window.innerWidth <= 767;
 
 
   sidebarCollapsed = false;
   sidebarCollapsed$ = this.usuarioGlobal.sidebarCollapsed$;
   sidebarVisible: boolean = true;
-
+  tieneContenido: boolean = true;
 
 
   ngOnInit() {
@@ -53,6 +55,7 @@ export class VideosDelCanalComponent {
               private route: ActivatedRoute,
               private notificacionesService: NotificacionesService,
               private authService:AuthService,
+              
               private titleService: Title,
               private usuarioGlobal: UsuarioGlobalService,
               private suscripcionService: SuscripcionesService,
@@ -76,6 +79,16 @@ export class VideosDelCanalComponent {
   }
   
 
+  checkMobile() {
+    this.isMobile = window.innerWidth <= 767;
+  }
+
+  @HostListener('window:resize', ['$event'])
+  onResize(event: any) {
+    this.isMobile = event.target.innerWidth <= 768;
+  }
+
+
   toggleNotificaciones(): void {
     this.cargandoNotificacion = true;
     this.notificacionesService.cambiarEstado(this.canalId, this.userId, !this.notificacionesActivas).subscribe({
@@ -89,7 +102,7 @@ export class VideosDelCanalComponent {
 
 
   obtenerUsuario(): void {
-    this.authService.usuario$.subscribe(res => {
+    this.usuarioGlobal.usuario$.subscribe(res => {
       this.usuario = res;
       if (this.usuario) { 
         this.userId = this.usuario.id;
@@ -101,35 +114,44 @@ export class VideosDelCanalComponent {
   }
 
   obtenerCanal() {
-    this.canalService.listarVideosDeCanal(this.canalId).subscribe(
+    this.cargando = true; 
+    this.canalService.obtenerCanalPorId(this.canalId).pipe(
+      switchMap((canalData: any) => {
+        this.canal = canalData || {};
+        this.canalNombre = this.canal.nombre || 'Sin nombre';
+        this.canalId = this.canal.id || this.canalId;
+        this.usuarioCanal = this.canal.user || {};
+        this.setTitle(this.canalNombre);
+        this.userId = this.canal.user_id || null;
+
+        this.listarNumeroDeSuscriptores(this.canalId);
+
+        return this.canalService.listarVideosDeCanal(this.canalId);
+      })
+    ).subscribe(
       (res: any) => {
-        console.log('Datos del canal:', res); 
-
+        console.log('Datos del canal y videos:', res);
         if (res.length > 0) {
-          this.canal = res[0].canal;
-          this.canalNombre = this.canal.nombre;
-          this.canalId = this.canal.id
-          this.usuarioCanal = this.canal.user;  
-          this.setTitle(this.canal.nombre);
-
-
-          this.listarNumeroDeSuscriptores(this.canalId); 
-
-
-          this.videos = res.map((videoData: any) => {
-            return {
-              ...videoData,
-              duracionFormateada: this.convertirDuracion(videoData.duracion)
-            };
-          });
-
-          this.userId = this.canal.user_id;  
+          this.videos = res.map((videoData: any) => ({
+            ...videoData,
+            duracionFormateada: this.convertirDuracion(videoData.duracion)
+          }));
+         this.tieneContenido = true
         } else {
-          console.error('No se encontraron videos para este canal');
+          this.videos = [];
+          this.tieneContenido = false
+          console.log('No se encontraron videos para este canal');
         }
+        this.cargando = false; 
       },
       error => {
-        console.error('Error al obtener el canal:', error);
+        console.error('Error al obtener el canal o videos:', error);
+        this.canal = { nombre: 'Error al cargar', id: this.canalId, user: {} };
+        this.canalNombre = 'Error al cargar';
+        this.usuarioCanal = {};
+        this.videos = [];
+        this.setTitle('Error - BlitzVideo');
+        this.cargando = false; 
       }
     );
   }

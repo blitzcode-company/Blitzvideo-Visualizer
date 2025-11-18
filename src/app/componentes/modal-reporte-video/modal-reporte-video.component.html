@@ -1,48 +1,77 @@
-<div mat-dialog-content>
-<h2>Reportar Video</h2>
-<form (ngSubmit)="enviarReporteVideo(reportForm.value)" #reportForm="ngForm">
- 
+<div class="container">
+<h2 mat-dialog-title>
+  <mat-icon >flag</mat-icon>
+  Reportar video
+</h2>
 
-  <label>
-    <input type="checkbox" name="contenido_inapropiado" ngModel>
-    Contenido inapropiado
-  </label>
-  <br>
-  <label>
-    <input type="checkbox" name="spam" ngModel>
-    Spam
-  </label>
-  <br>
-  <label>
-    <input type="checkbox" name="contenido_enganoso" ngModel>
-    Contenido engañoso
-  </label>
-  <br>
-  <label>
-    <input type="checkbox" name="violacion_derechos_autor" ngModel>
-    Violación de derechos de autor
-  </label>
-  <br>
-  <label>
-    <input type="checkbox" name="incitacion_al_odio" ngModel>
-    Incitación al odio
-  </label>
-  <br>
-  <label>
-    <input type="checkbox" name="violencia_grafica" ngModel>
-    Violencia gráfica
-  </label>
-  <br>
-  <label>
-    <input type="checkbox" name="otros" ngModel>
-    Otros
-  </label>
-  <br>
-  <label for="detalle">Detalle:</label>
-  <br>
-  <textarea id="detalle" name="detalle" ngModel></textarea>
-  <br><br>
+<mat-dialog-content class="report-content">
+  <form (ngSubmit)="enviarReporteVideo()" #reportForm="ngForm">
 
-  <button type="submit" [disabled]="reportForm.invalid">Enviar Reporte</button>
-</form>
+    <div class="report-options">
+      <mat-checkbox [(ngModel)]="reporte.contenido_inapropiado" name="contenido_inapropiado">
+        Contenido sexual o explícito
+      </mat-checkbox>
+
+      <mat-checkbox [(ngModel)]="reporte.spam" name="spam">
+        Spam o estafa
+      </mat-checkbox>
+
+      <mat-checkbox [(ngModel)]="reporte.contenido_enganoso" name="contenido_enganoso">
+        Contenido engañoso
+      </mat-checkbox>
+
+      <mat-checkbox [(ngModel)]="reporte.violacion_derechos_autor" name="violacion_derechos_autor">
+        Violación de derechos de autor
+      </mat-checkbox>
+
+      <mat-checkbox [(ngModel)]="reporte.incitacion_al_odio" name="incitacion_al_odio">
+        Incitación al odio
+      </mat-checkbox>
+
+      <mat-checkbox [(ngModel)]="reporte.violencia_grafica" name="violencia_grafica">
+        Violencia gráfica
+      </mat-checkbox>
+        <mat-checkbox 
+        [(ngModel)]="reporte.otros" 
+        name="otros"
+        (ngModelChange)="onOtrosChange($event)"
+      >
+      Otros
+     </mat-checkbox>
+    </div>
+    <mat-form-field appearance="outline" class="full-width" *ngIf="mostrarDetalle">
+      <mat-label>Describe el problema</mat-label>
+      <textarea 
+        matInput 
+        [(ngModel)]="reporte.detalle" 
+        name="detalle"
+        rows="3"
+        required
+        placeholder="Proporciona más detalles para ayudarnos a revisar..."
+      ></textarea>
+      <mat-error>Este campo es obligatorio</mat-error>
+    </mat-form-field>
+
+    <mat-dialog-actions align="end">
+      <button 
+        mat-button 
+        type="button" 
+        (click)="cerrar()" 
+        [disabled]="loading"
+      >
+        Cancelar
+      </button>
+      <button 
+        mat-raised-button 
+        color="warn" 
+        type="submit"
+        [disabled]="!esValido() || loading"
+      >
+        <mat-spinner diameter="20" *ngIf="loading"></mat-spinner>
+        <span *ngIf="!loading">Enviar reporte</span>
+      </button>
+    </mat-dialog-actions>
+  </form>
+</mat-dialog-content>
+
 </div>
