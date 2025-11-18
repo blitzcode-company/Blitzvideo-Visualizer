@@ -286,6 +286,7 @@
 @media (max-width: 768px) {
   .containerHome {
     margin-top: 60px;
+    display: block;              
   }
 
   .sidebar-container {
@@ -340,11 +341,58 @@
     display: none !important;
   }
 
-  .main-content {
+ .main-content {
     margin-left: 0 !important;
-    padding-bottom: 90px !important;
+    padding-bottom: 90px !important;  
+  }
+
+  .playlists-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px;
+    padding: 16px 12px !important;     
+    margin: 0;
+  }
+
+  .playlist-header {
+    padding: 16px 12px !important;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .tabs {
+    margin: 0 12px;
+    padding: 0 0 8px;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+
+
+}
+
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .sidebar-container { width: 72px; }        
+  .main-content { margin-left: 72px; }
+
+  .playlists-grid {
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 20px;
+    padding: 20px;
   }
 }
+
+@media (min-width: 1025px) {
+  .playlists-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+    padding: 24px;
+    max-width: 1600px;
+    margin: 0 auto;
+  }
+}
+
 
 @media (min-width: 769px) {
   .sidebar p,
@@ -439,4 +487,26 @@
   .sidebar a span {
     display: inline !important;
   }
+}
+
+@media (max-width: 768px) {
+  .playlist-card {
+    border-radius: 0 !important;
+  }
+  .thumbnail-mosaic img {
+    border-radius: 0 !important;
+  }
+}
+
+.tabs::-webkit-scrollbar {
+  height: 4px;
+}
+.tabs::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 2px;
+}
+
+@media (max-width: 480px) {
+  .playlist-header h1 { font-size: 1.4rem; }
+  .button-add-list { width: 100%; justify-content: center; }
 }

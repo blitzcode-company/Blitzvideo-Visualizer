@@ -65,10 +65,10 @@ import {
   ɵɵinject,
   ɵɵlistener
 } from "./chunk-5DWDHDVP.js";
+import "./chunk-SAVXX6OM.js";
 import {
   fromEvent
 } from "./chunk-SG3BCSKH.js";
-import "./chunk-SAVXX6OM.js";
 import {
   EMPTY,
   Subject,

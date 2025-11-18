@@ -64,11 +64,11 @@ import {
   ɵɵdirectiveInject,
   ɵɵinject
 } from "./chunk-5DWDHDVP.js";
+import "./chunk-SAVXX6OM.js";
 import {
   animationFrameScheduler,
   merge
 } from "./chunk-SG3BCSKH.js";
-import "./chunk-SAVXX6OM.js";
 import {
   BehaviorSubject,
   Observable,
