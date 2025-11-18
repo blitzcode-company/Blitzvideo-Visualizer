@@ -1,1 +1,78 @@
-<p>tendencias works!</p>
+<app-header (toggleSidebar)="toggleSidebar()"></app-header>
+
+<div class="containerHome" [class.collapsed]="sidebarCollapsed$ | async">
+  <div class="sidebar-container" [class.bottom-mobile]="isMobile">
+    <app-sidebar 
+      [collapsed]="!!(sidebarCollapsed$ | async)"
+      [isMobile]="isMobile">
+    </app-sidebar>
+  </div>
+
+  <div class="content-wrapper">
+    
+    <div class="trending-container">
+      <div class="trending-header">
+        <h2>En tendencia esta semana</h2>
+      
+      </div>
+
+      <div class="videos-grid" *ngIf="isLoading">
+        <div class="video-card skeleton" *ngFor="let n of [1,2,3,4,5,6,7,8]"></div>
+      </div>
+
+      <div class="empty-state" *ngIf="error">
+        <span class="material-icons">error_outline</span>
+        <p>No se pudieron cargar los videos en tendencia</p>
+        <button class="btn-retry" (click)="cargarTendencias()">Reintentar</button>
+      </div>
+
+      <div class="videos-grid" *ngIf="!isLoading && !error && videos.length > 0">
+        <div class="video-card" *ngFor="let video of videos; trackBy: trackByVideoId">
+          <a [routerLink]="['/video', video.id]" class="video-link" [title]="video.titulo">
+            <div class="miniatura-container">
+              <img
+                class="miniatura"
+                [src]="video.miniatura || 'assets/images/video-default.png'"
+                alt="Miniatura del video"
+                (error)="onImgError($event)"
+                loading="lazy"
+              >
+              <p class="duracionVideo">{{ video.duracionFormateada }}</p>
+            </div>
+
+            <div class="video-info">
+              <h3 class="titulo-video">{{ video.titulo }}</h3>
+              <p class="meta">
+                {{ video.visitas_count | number }} vistas • {{ video.created_at | tiempo }}
+              </p>
+              <hr>
+              <div class="canalNombre">
+                <a [routerLink]="['/canal', video.canal.id]" class="canal-link" [title]="video.canal.nombre">
+                  <img
+                    *ngIf="video.canal.user?.foto"
+                    class="fotoUser"
+                    [src]="video.canal.user.foto"
+                    alt="Foto de {{ video.canal.nombre }}"
+                  >
+                  <img
+                    *ngIf="!video.canal.user?.foto"
+                    class="fotoUserDefault"
+                    src="/assets/images/user.svg"
+                    alt="Avatar por defecto"
+                  >
+                  {{ video.canal.nombre }}
+                </a>
+              </div>
+            </div>
+          </a>
+        </div>
+      </div>
+
+      <div class="empty-state" *ngIf="!isLoading && videos.length === 0 && !error">
+        <span class="material-icons">local_fire_department</span>
+        <p>No hay videos en tendencia en este momento</p>
+      </div>
+    </div>
+
+  </div>
+</div>

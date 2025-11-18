@@ -17,6 +17,7 @@ import { autenticacionGuard } from './guards/autenticacion.guard';
 import { VerStreamComponent } from './componentes/ver-stream/ver-stream.component';
 import { ConfiguracionStreamComponent } from './componentes/configuracion-stream/configuracion-stream.component';
 import { HistorialComponent } from './componentes/historial/historial.component';
+import { TendenciasComponent } from './componentes/tendencias/tendencias.component';
 
 const routes: Routes = [
   {path: '', component: HomeComponent},
@@ -32,6 +33,7 @@ const routes: Routes = [
   {path: 'ajustes/perfil', component: ConfiguracionDePerfilComponent, canActivate: [autenticacionGuard]},
   {path: 'ajustes/streams', component: ConfiguracionStreamComponent, canActivate: [autenticacionGuard]},
   {path: 'historial', component: HistorialComponent, canActivate: [autenticacionGuard]},
+  {path: 'explorar/tendencias', component: TendenciasComponent},
   {path: 'stream/:id', component: VerStreamComponent},
   
   { path: '**', component: NoEncontradoComponent }, 

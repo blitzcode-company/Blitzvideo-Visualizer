@@ -21,7 +21,7 @@ export class VideosService {
           'Content-Type' : 'application/json',
       })
     }
-    const url = `${this.apiUrl}api/v1/videos/`;
+    const url = `${this.apiUrl}api/v1/videos`;
     return this.httpClient.get<Videos>(url, httpOptions);
   }
 
@@ -65,6 +65,18 @@ export class VideosService {
     const url = `${this.apiUrl}api/v1/videos/nombre/${nombre}`;
     return this.httpClient.get<any[]>(url, httpOptions);
   }
+  
+
+    listarVideosPorTendencias():Observable<any> {
+    const httpOptions = {
+      headers: new HttpHeaders({
+          'Content-Type' : 'application/json',
+      })
+    }
+    const url = `${this.apiUrl}api/v1/videos/tendencia/semana`;
+    return this.httpClient.get<Videos>(url, httpOptions);
+  }
+
 
   listarVideosRelacionados(idVideo: any) {
     const url = `${this.apiUrl}api/v1/videos/${idVideo}/relacionados`;

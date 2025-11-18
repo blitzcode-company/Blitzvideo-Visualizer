@@ -77,8 +77,10 @@
                 <p class="duracionVideo">{{ video.duracionFormateada }}</p>
               </div>
               <div class="video-info">
-                <h3>{{ video.titulo }}</h3>
-                <p>{{ video.visitas_count }} vistas • {{ video.created_at | tiempo }}</p>
+                <h3 class="titulo-video">{{ video.titulo }}</h3>
+                <p class="meta">
+                  {{ video.visitas_count | number }} vistas • {{ video.created_at | tiempo }}
+                </p>
                 <hr>
                 <div class="canalNombre">
                   <a [routerLink]="['/canal', video.canal.id]"  (click)="reloadPage($event)" [title]="video.canal.nombre" class="canal-link">
