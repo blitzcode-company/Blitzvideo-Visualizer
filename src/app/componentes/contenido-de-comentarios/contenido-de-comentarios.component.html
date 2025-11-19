@@ -16,7 +16,7 @@
             <button *ngIf="comentario.user?.id === usuario?.id" (click)="toggleEdit(comentario)">
               <mat-icon>create</mat-icon> Editar
             </button>
-            <button (click)="eliminarComentario(comentario.id!)">
+            <button (click)="eliminarComentario()">
               <mat-icon>delete</mat-icon> Eliminar
             </button>
           </ng-container>
@@ -129,7 +129,7 @@
       [videoId]="videoId"
       [usuario]="usuario"
       (nuevoComentario)="nuevoComentario.emit()"
-      (comentarioEliminado)="eliminarComentario($event.id)"
+      (comentarioEliminado)="comentarioEliminado.emit($event)"
       (comentarioEditado)="editarComentario($event)"
       
     ></app-contenido-de-comentarios>

@@ -33,7 +33,7 @@
       [usuario]="usuario"
       (reportar)="abrirModalReporte(comentario.id)"
       (nuevoComentario)="traerComentarios()"
-      (comentarioEliminado)="onComentarioEliminado()"
+      (comentarioEliminado)="onComentarioEliminado($event)"
       (comentarioEditado)="onComentarioEditado()"
     ></app-contenido-de-comentarios>
 

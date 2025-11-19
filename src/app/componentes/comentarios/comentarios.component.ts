@@ -43,7 +43,7 @@ export class ComentariosComponent implements OnInit {
   totalComentarios: number = 0; 
   cargandoComentarios = true;
   private yaResaltado = false;
-
+  comentarioEliminado:any
 
   constructor(private comentariosService: ComentariosService, 
               private cdr: ChangeDetectorRef,
@@ -219,37 +219,33 @@ private abrirHilosHastaComentario(idBuscado: number, comentarios: any[]): boolea
   }
 
 
-traerComentarios(): void {
-  if (!this.videoId) {
-    this.cargandoComentarios = false;
-    return;
+traerComentarios() {
+    if (!this.videoId) {
+      this.cargandoComentarios = false;
+      return;
+    }
+
+    this.cargandoComentarios = true;
+    this.comentariosService.traerComentariosDelVideo(this.videoId, this.usuario?.id)
+      .subscribe({
+        next: (res: any[]) => {
+          const visibles = this.organizarComentarios(res).filter(c => !c.bloqueado);
+          this.comentarios = visibles;
+
+          this.totalComentarios = visibles.reduce((total, c) => {
+            const respuestasVisibles = c.respuestas?.filter(r => !r.bloqueado).length || 0;
+            return total + 1 + respuestasVisibles;
+          }, 0);
+        },
+        error: (err) => {
+          console.error('Error al cargar comentarios:', err);
+          this.comentarios = [];
+          this.totalComentarios = 0;
+        },
+        complete: () => this.cargandoComentarios = false
+      });
   }
 
-  this.cargandoComentarios = true;
-  this.comentarios = [];
-
-  this.comentariosService.traerComentariosDelVideo(this.videoId, this.usuario?.id).subscribe({
-    next: (res: any[]) => {
-      const visibles = this.organizarComentarios(res).filter(c => !c.bloqueado);
-
-      this.totalComentarios = visibles.reduce((total, c) => {
-        const respuestasVisibles = c.respuestas?.filter((r: any) => !r.bloqueado).length || 0;
-        return total + 1 + respuestasVisibles;
-      }, 0);
-
-      this.comentarios = visibles;
-    },
-    error: (err) => {
-      console.error('Error al cargar comentarios:', err);
-      this.comentarios = [];
-      this.totalComentarios = 0;
-      this.cargandoComentarios = false;
-    },
-    complete: () => {
-      this.cargandoComentarios = false;
-    }
-  });
-}
 crearComentario(): void {
   if (this.usuarioBloqueado || !this.nuevoComentario.mensaje?.trim()) return;
 
@@ -266,21 +262,16 @@ crearComentario(): void {
 
 
 
-  eliminarComentario(idComentario: number, usuario_id: number) {
-    if (this.usuario.id !== usuario_id) {
-      console.error('No tienes permiso para eliminar este comentario.');
-      return;
-    }
+eliminarComentario(idComentario: number): void {
+  if (!this.usuario?.id) return;
 
-    this.comentariosService.eliminarComentario(idComentario, usuario_id).subscribe(
-      response => {
-        this.traerComentarios();  
-      },
-      error => {
-        console.error('Error al eliminar comentario:', error);
-      }
-    );
-  }
+  this.comentariosService.eliminarComentario(idComentario, this.usuario.id).subscribe(
+    () => {
+      this.comentarioEliminado.emit({ id: idComentario, usuario_id: this.usuario.id });
+    },
+    error => console.error('Error al eliminar comentario:', error)
+  );
+}
 
   editarComentario(comentario: Comentario) {
     this.editingComentarioId = comentario.id ?? null;
@@ -303,28 +294,27 @@ crearComentario(): void {
     comentario.mostrarRespuestas = !comentario.mostrarRespuestas;
   }
 
-  organizarComentarios(comentarios: Comentario[]): Comentario[] {
-    const comentarioMap = new Map<number, Comentario>();
-    const comentariosRaiz: Comentario[] = [];
+ organizarComentarios(comentarios: Comentario[]): Comentario[] {
+    const map = new Map<number, Comentario>();
+    const raices: Comentario[] = [];
 
-    comentarios.forEach(comentario => {
-      comentario.respuestas = comentario.respuestas || [];
-      comentarioMap.set(comentario.id!, comentario);
-      comentario.created_at = moment(comentario.created_at).fromNow();
+    comentarios.forEach(c => {
+      c.respuestas = c.respuestas || [];
+      map.set(c.id!, c);
+      c.created_at = moment(c.created_at).fromNow();
     });
 
-    comentarios.forEach(comentario => {
-      if (comentario.respuesta_id) {
-        const padre = comentarioMap.get(comentario.respuesta_id);
-        padre?.respuestas?.push(comentario);
+    comentarios.forEach(c => {
+      if (c.respuesta_id) {
+        const padre = map.get(c.respuesta_id);
+        padre?.respuestas?.push(c);
       } else {
-        comentariosRaiz.push(comentario);
+        raices.push(c);
       }
     });
 
-    return comentariosRaiz;
+    return raices;
   }
-
 
 
   darMeGusta(comentarioId: number): void {
@@ -374,6 +364,23 @@ crearComentario(): void {
   }
 
   
-  onComentarioEliminado() { this.traerComentarios(); }
-  onComentarioEditado() { this.traerComentarios(); }
+onComentarioEliminado(event: { id: number; usuario_id: number }) {
+  const eliminarRecursivo = (comentarios: Comentario[]): Comentario[] => {
+    return comentarios
+      .map(c => ({
+        ...c,
+        respuestas: c.respuestas ? eliminarRecursivo(c.respuestas) : []
+      }))
+      .filter(c => c.id !== event.id); 
+  };
+
+  this.comentarios = eliminarRecursivo(this.comentarios);
+
+  this.totalComentarios = this.comentarios.reduce((total, c) => {
+    const respuestasVisibles = c.respuestas?.length || 0;
+    return total + 1 + respuestasVisibles;
+  }, 0);
+}
+
+onComentarioEditado() { this.traerComentarios(); }
 }

@@ -6,7 +6,7 @@ import { AuthService } from '../../servicios/auth.service';
 import { ModalReporteComentarioComponent } from '../modal-reporte-comentario/modal-reporte-comentario.component';
 import { MatDialog } from '@angular/material/dialog';
 import { ModalReportarUsuarioComponent } from '../modal-reportar-usuario/modal-reportar-usuario.component';
-
+import { UsuarioGlobalService } from '../../servicios/usuario-global.service';
 
 
 
@@ -20,10 +20,11 @@ export class ContenidoDeComentariosComponent implements OnInit{
   @Input() comentario!: Comentario;
   @Input() videoId: any;
   @Input() usuario: any;
-  @Output() nuevoComentario = new EventEmitter<void>();
+
   @Output() comentarioEliminado = new EventEmitter<{ id: number, usuario_id: number }>();
   @Output() comentarioEditado = new EventEmitter<Comentario>();
-  
+  @Output() nuevoComentario = new EventEmitter<void>();
+
   showMenu: boolean = false;
   selectedComentarioId: number | null = null;
   respondingTo: any;
@@ -42,11 +43,13 @@ export class ContenidoDeComentariosComponent implements OnInit{
 
   @Output() reportar = new EventEmitter<void>();
 
-  constructor(private comentariosService: ComentariosService, private authService: AuthService,     public dialog: MatDialog,
+  constructor(private comentariosService: ComentariosService, private usuarioGlobal: UsuarioGlobalService, private authService: AuthService,     public dialog: MatDialog,
   ) {}
 
   ngOnInit(): void {
-
+    if (!this.usuario) {
+      this.usuarioGlobal.usuario$.subscribe(res => this.usuario = res);
+    }
 
   }
 
@@ -65,12 +68,13 @@ if (target.closest('.respuesta-container') || target.closest('.btn-responder')) 
 }
 
   obtenerUsuario() {
-    this.authService.usuario$.subscribe(res => {
+    this.usuarioGlobal.usuario$.subscribe(res => {
       this.usuario = res;
       if (this.usuario) {
         this.userId = this.usuario.id;
         console.log("User ID obtenido:", this.userId);
         
+
         if (this.usuario.bloqueado) {
           this.usuarioBloqueado = true;  
           this.mensaje = 'Tu cuenta está bloqueada, no puedes comentar.';
@@ -83,18 +87,12 @@ if (target.closest('.respuesta-container') || target.closest('.btn-responder')) 
     this.authService.mostrarUserLogueado();
   }
 
-  eliminarComentario(idComentario: number): void {
-    if (!this.usuario || !this.usuario.id) {
-      return;
-    }
+  eliminarComentario() {
+    if (!this.usuario?.id) return;
 
-    this.comentariosService.eliminarComentario(idComentario, this.usuario.id).subscribe(
-      () => {
-        this.comentarioEliminado.emit({ id: idComentario, usuario_id: this.usuario.id });
-      },
-      error => {
-        console.error('Error al eliminar comentario:', error);
-      }
+    this.comentariosService.eliminarComentario(this.comentario.id!, this.usuario.id).subscribe(
+      () => this.comentarioEliminado.emit({ id: this.comentario.id!, usuario_id: this.usuario.id }),
+      error => console.error('Error al eliminar comentario:', error)
     );
   }
 
