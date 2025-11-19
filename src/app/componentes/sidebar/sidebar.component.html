@@ -121,8 +121,15 @@
     <div class="etiquetasContainer">
       <ng-container *ngIf="!loadingEtiquetas; else loadingEtiquetasTemplate">
         <ng-container *ngIf="etiquetas.length > 0; else noEtiquetas">
-          <a *ngFor="let etiqueta of etiquetas | slice:0:5" class="etiquetaItem" [title]="etiqueta.nombre" [routerLink]="['/etiqueta', etiqueta.id]" routerLinkActive="active">
-            <mat-icon class="etiqueta-icon">label</mat-icon>
+         <a 
+              *ngFor="let etiqueta of etiquetas | slice:0:5" 
+              class="etiquetaItem" 
+              [title]="etiqueta.nombre"
+              [routerLink]="'/etiqueta/' + etiqueta.id"
+              (click)="navegarEtiqueta(etiqueta.id, $event)"
+              routerLinkActive="active"
+            >
+            
             <span class="etiqueta-nombre text-label">{{ etiqueta.nombre }}</span>
           </a>
         </ng-container>

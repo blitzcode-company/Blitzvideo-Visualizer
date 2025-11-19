@@ -18,6 +18,7 @@ import { VerStreamComponent } from './componentes/ver-stream/ver-stream.componen
 import { ConfiguracionStreamComponent } from './componentes/configuracion-stream/configuracion-stream.component';
 import { HistorialComponent } from './componentes/historial/historial.component';
 import { TendenciasComponent } from './componentes/tendencias/tendencias.component';
+import { VideosDeEtiquetaComponent } from './componentes/videos-de-etiqueta/videos-de-etiqueta.component';
 
 const routes: Routes = [
   {path: '', component: HomeComponent},
@@ -27,15 +28,15 @@ const routes: Routes = [
   { path: 'buscar', component: ResultadoDeBusquedaComponent}, 
   { path: 'canal/:id', component: VerCanalComponent},
   { path: 'canal/:id/videos', component: VideosDelCanalComponent},
-  { path: 'playlists', component: ListaDeReproduccionComponent, canActivate: [autenticacionGuard]},
-  { path: 'playlists/:id', component: ContenidoListaDeReproduccionComponent, canActivate: [autenticacionGuard]},
+  { path: 'playlists', component: ListaDeReproduccionComponent},
+  { path: 'playlists/:id', component: ContenidoListaDeReproduccionComponent},
   {path: 'ajustes/pagos', component: SeleccionPagoComponent, canActivate: [autenticacionGuard]},
   {path: 'ajustes/perfil', component: ConfiguracionDePerfilComponent, canActivate: [autenticacionGuard]},
   {path: 'ajustes/streams', component: ConfiguracionStreamComponent, canActivate: [autenticacionGuard]},
   {path: 'historial', component: HistorialComponent, canActivate: [autenticacionGuard]},
   {path: 'explorar/tendencias', component: TendenciasComponent},
   {path: 'stream/:id', component: VerStreamComponent},
-  
+  {path: 'etiqueta/:id', component: VideosDeEtiquetaComponent},
   { path: '**', component: NoEncontradoComponent }, 
 ];
 

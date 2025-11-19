@@ -169,6 +169,16 @@ p {
   transition: border-left-width 0.3s ease, padding-left 0.3s ease;
 }
 
+.sidebar a.active,
+.sidebar a:not(.active) {
+  transition: 
+    background-color 0.28s ease,
+    color 0.28s ease,
+    border-left 0.28s ease,
+    padding-left 0.28s ease,
+    box-shadow 0.28s ease;
+}
+
 .sidebar a i {
   min-width: 20px;
   font-size: 18px;

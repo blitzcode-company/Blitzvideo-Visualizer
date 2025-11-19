@@ -66,6 +66,8 @@ duracionFormateada: any
         console.log('Tendencias:', res);
         this.videos = res.map((video: any) => ({
           ...video,
+          mostrarPreview: false,
+
           duracionFormateada: this.convertirDuracion(video.duracion)
         }));
         this.isLoading = false;
@@ -79,6 +81,52 @@ duracionFormateada: any
     });
   }
   
+playPreview(video: any) {
+  video.mostrarPreview = true;
+  
+  setTimeout(() => {
+    const videoEl = document.querySelectorAll('video').item(this.videos.indexOf(video)) as HTMLVideoElement;
+    if (videoEl) {
+      videoEl.load(); 
+    }
+  }, 50);
+}
+
+stopPreview(video: any) {
+  video.mostrarPreview = false;
+}
+
+forceMute(event: any) {
+  const video = event.target as HTMLVideoElement;
+  video.muted = true;
+  video.volume = 0;
+}
+
+onLoadedData(event: any, video: any) {
+  const vid = event.target as HTMLVideoElement;
+  
+  let start = 8;
+  if (video.duracion < 20) start = 2;
+  else if (video.duracion > 60) start = Math.floor(video.duracion * 0.25);
+
+  vid.currentTime = start;
+  vid.play().catch(() => {});
+}
+
+onTimeUpdate(event: any) {
+  const vid = event.target as HTMLVideoElement;
+  
+  if (vid.currentTime > vid.duration - 3 || vid.currentTime < 5) {
+    const start = this.getPreviewStartTime(vid.duration || 60);
+    vid.currentTime = start;
+  }
+}
+
+getPreviewStartTime(duracion: number): number {
+  if (duracion < 20) return 2;
+  if (duracion < 60) return 8;
+  return Math.floor(duracion * 0.25);
+}
 
 
 trackByVideoId(index: number, video: any): number {

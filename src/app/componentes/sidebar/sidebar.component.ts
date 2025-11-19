@@ -8,6 +8,7 @@ import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { trigger, style, animate, transition } from '@angular/animations';
 import { EtiquetaService } from '../../servicios/etiqueta.service';
 import { error } from 'console';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-sidebar',
@@ -40,7 +41,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
   visibleCanales: any[] = [];  
   showExtra = false;
   canalesOcultos: number = 0;
-
+currentEtiquetaId: number | null = null;
 
   private subscriptions = new Subscription();
 
@@ -49,6 +50,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
     private usuarioGlobal: UsuarioGlobalService,
     private breakpointObserver: BreakpointObserver,
     private suscripcionesService: SuscripcionesService,
+    private activatedRoute: ActivatedRoute,
     private etiquetasService: EtiquetaService,
     public status: StatusService
   ) {
@@ -69,7 +71,10 @@ export class SidebarComponent implements OnInit, OnDestroy {
     this.usuarioGlobal.canalesSuscritos$.subscribe(list => { this.canales = list; this.actualizarVisibleCanales();});
     this.obtenerEtiquetas()
     this.updateMobile();
-
+    this.activatedRoute.paramMap.subscribe(params => {
+    const id = params.get('idEtiqueta');
+    this.currentEtiquetaId = id ? +id : null;
+  });
   }
 
   ngOnDestroy() {
@@ -99,6 +104,15 @@ export class SidebarComponent implements OnInit, OnDestroy {
   }
 
 
+navegarEtiqueta(etiquetaId: number, event: Event): void {
+  if (this.currentEtiquetaId === etiquetaId) {
+    return;
+  }
+
+  event.preventDefault();
+  window.location.href = `/etiqueta/${etiquetaId}`;
+}
+
   hayMas(): boolean {
     return this.visibleCanales.length < this.canales.length;
   }
@@ -117,10 +131,20 @@ export class SidebarComponent implements OnInit, OnDestroy {
   }, 150);
 }
 
+recargarPagina(event: Event): void {
+  event.preventDefault();
+  const href = (event.target as HTMLAnchorElement).getAttribute('href');
+  if (href) {
+    window.location.href = href;
+  }
+}
+
+
   obtenerEtiquetas() {
     this.loadingEtiquetas = true;
     this.etiquetasService.listarEtiquetas().subscribe(
       (response: any[]) => {
+        console.log(response)
         this.etiquetas = response;
         this.loadingEtiquetas = false;
       },

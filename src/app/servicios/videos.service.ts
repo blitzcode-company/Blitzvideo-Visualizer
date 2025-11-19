@@ -37,6 +37,18 @@ export class VideosService {
     return this.httpClient.get<Videos>(url, httpOptions);
   }
 
+  listarVideosPorEtiqueta(etiquetaId:any):Observable<any> {
+    const httpOptions = {
+      headers: new HttpHeaders({
+          'Content-Type' : 'application/json',
+
+      })
+    }
+    const url = `${this.apiUrl}api/v1/videos/${etiquetaId}/videos/`;
+    return this.httpClient.get<Videos>(url, httpOptions);
+  }
+
+
 
   obtenerInformacionVideo(idVideo: any): Observable<any> {
     const httpOptions = {

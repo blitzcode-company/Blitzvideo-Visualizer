@@ -34,6 +34,7 @@
   margin-left: 72px;
 }
 
+
 @media (max-width: 768px) {
   .sidebar-container {
     position: fixed !important;
@@ -131,12 +132,17 @@
   color: inherit;
 }
 
+
+
 .miniatura-container {
   position: relative;
   aspect-ratio: 16 / 9;
   background: #000;
   overflow: hidden;
 }
+
+
+
 
 .miniatura {
   width: 100%;

@@ -7,101 +7,122 @@
     [isMobile]="isMobile"
         ></app-sidebar>
   </div>
-
-
   <div class="content-wrapper" >
-    <div class="stream-grid" *ngIf="!errorStreams; else errorStreamsTemplate">
-      <h2>Transmisiones</h2>
-      <ng-container *ngIf="!isLoading && streams.length > 0; else noStreams">
-        <div class="stream-card" *ngFor="let stream of streams">
-          <a [routerLink]="['/stream', stream.id]" (click)="reloadPage($event)" class="stream-link" [title]="stream.titulo">
-            <div class="miniatura-container">
-              <img
-                class="miniatura"
-                [src]="stream.miniatura ? stream.miniatura : 'assets/images/video-default.png'"
-                alt="Miniatura del stream"
-                (error)="onImageError($event)"
-              >
-              <span class="live-badge" *ngIf="stream.activo === 1">EN VIVO</span>
-              <p class="duracionVideo" *ngIf="stream.duracionFormateada">{{ stream.duracionFormateada }}</p>
-            </div>
-            <div class="stream-info">
-              <h3>{{ stream.titulo }}</h3>
-              <p>{{ stream.espectadores_count || 0 }} espectadores • {{ stream.started_at | tiempo }}</p>
-              <hr>
-              <div class="canalNombre">
-                <a [routerLink]="['/canal', stream.canal.id]" (click)="reloadPage($event)" [title]="stream.canal.nombre" class="canal-link">
-                  <img
-                    *ngIf="stream.canal.user?.foto"
-                    class="fotoUser"
-                    [src]="stream.canal.user.foto"
-                    alt="Foto del canal"
-                  >
-                  <img
-                    *ngIf="!stream.canal.user?.foto"
-                    class="fotoUserDefault"
-                    src="/assets/images/user.svg"
-                    alt="Foto del canal"
-                  >
-                  {{ stream.canal.nombre }}
-                </a>
-              </div>
-            </div>
-          </a>
-        </div>
-      </ng-container>
-      <ng-template #noStreams>
-        <p *ngIf="!isLoading">No hay transmisiones en vivo en este momento.</p>
-        <p *ngIf="isLoading">Cargando transmisiones...</p>
-      </ng-template>
-    </div>
-    <ng-template #errorStreamsTemplate>
-      <p>Error al cargar las transmisiones. Por favor, intenta de nuevo.</p>
-    </ng-template>
+<ng-container *ngIf="streams.length > 0; else bloqueSinStreams">
+  
+  <div class="stream-grid">
+    <h2>Transmisiones en vivo</h2>
 
-    <hr class="lineadivisoria">
+    <div class="stream-card" *ngFor="let stream of streams; trackBy: trackByStreamId">
+      <a [routerLink]="['/stream', stream.id]" 
+         (click)="reloadPage($event)" 
+         class="stream-link" 
+         [title]="stream.titulo">
+
+        <div class="miniatura-container">
+          <img class="miniatura"
+               [src]="stream.miniatura || 'assets/images/video-default.png'"
+               alt="Miniatura del stream"
+               (error)="onImageError($event)"
+               loading="lazy">
+
+          <span class="live-badge" *ngIf="stream.activo === 1">EN VIVO</span>
+          <p class="duracionVideo" *ngIf="stream.duracionFormateada">
+            {{ stream.duracionFormateada }}
+          </p>
+        </div>
+
+        <div class="stream-info">
+          <h3>{{ stream.titulo }}</h3>
+          <p>{{ stream.espectadores_count || 0 }} espectadores • {{ stream.started_at | tiempo }}</p>
+          <hr>
+          <div class="canalNombre">
+            <a [routerLink]="['/canal', stream.canal.id]" 
+               (click)="reloadPage($event)" 
+               class="canal-link">
+              <img *ngIf="stream.canal.user?.foto" 
+                   class="fotoUser" 
+                   [src]="stream.canal.user.foto">
+              <img *ngIf="!stream.canal.user?.foto" 
+                   class="fotoUserDefault" 
+                   src="/assets/images/user.svg">
+              {{ stream.canal.nombre }}
+            </a>
+          </div>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <hr class="lineadivisoria">
+
+</ng-container>
+
+
+<ng-template #bloqueSinStreams>
+</ng-template>
+
 
     <div class="video-grid">
       <h2>Videos</h2>
       <ng-container *ngIf="!isLoading; else loadingVideos">
         <ng-container *ngIf="videos.length > 0; else noVideos">
-          <div class="video-card" *ngFor="let video of videos">
-            <a [routerLink]="['/video', video.id]" (click)="reloadPage($event)" class="video-link" [title]="video.titulo">
-              <div class="miniatura-container">
-                <img
-                  class="miniatura"
-                  [src]="video.miniatura ? video.miniatura : 'assets/images/video-default.png'"
-                  alt="Miniatura del video"
-                  (error)="onImageError($event)"
-                >
-                <p class="duracionVideo">{{ video.duracionFormateada }}</p>
+    <div class="video-card" 
+     *ngFor="let video of videos"
+     (mouseenter)="playPreview(video)" 
+     (mouseleave)="stopPreview(video)">
+
+  <a [routerLink]="['/video', video.id]" class="video-link">
+
+    <div class="miniatura-container">
+      <img class="miniatura"
+           [src]="video.miniatura || 'assets/images/video-default.png'"
+           [alt]="video.titulo"
+           loading="lazy"
+           (error)="onImageError($event)">
+
+      <video class="preview-video"
+            [src]="video.link"
+            muted
+            playsinline
+            preload="none"
+            [hidden]="!video.mostrarPreview"
+            (loadeddata)="onLoadedData($event, video)"
+            (timeupdate)="onTimeUpdate($event)"
+            (play)="forceMute($event)"
+            (volumechange)="forceMute($event)"
+            [attr.muted]="true">
+      </video>
+
+      <p class="duracionVideo">{{ video.duracionFormateada }}</p>
+    </div>
+
+    <div class="video-info">
+              <h3 class="titulo-video" [title]="video.titulo">{{ video.titulo }}</h3>
+              <p class="meta">
+                {{ video.visitas_count | number }} vistas • {{ video.created_at | tiempo }}
+              </p>
+              <hr>
+              <div class="canalNombre">
+                <a [routerLink]="['/canal', video.canal.id]" class="canal-link" [title]="video.canal.nombre">
+                  <img
+                    *ngIf="video.canal.user?.foto"
+                    class="fotoUser"
+                    [src]="video.canal.user.foto"
+                    alt="Foto de {{ video.canal.nombre }}"
+                  >
+                  <img
+                    *ngIf="!video.canal.user?.foto"
+                    class="fotoUserDefault"
+                    src="/assets/images/user.svg"
+                    alt="Avatar por defecto"
+                  >
+                  {{ video.canal.nombre }}
+                </a>
               </div>
-              <div class="video-info">
-                <h3 class="titulo-video">{{ video.titulo }}</h3>
-                <p class="meta">
-                  {{ video.visitas_count | number }} vistas • {{ video.created_at | tiempo }}
-                </p>
-                <hr>
-                <div class="canalNombre">
-                  <a [routerLink]="['/canal', video.canal.id]"  (click)="reloadPage($event)" [title]="video.canal.nombre" class="canal-link">
-                    <img
-                      *ngIf="video.canal.user?.foto"
-                      class="fotoUser"
-                      [src]="video.canal.user.foto"
-                      alt="Foto del canal"
-                    >
-                    <img
-                      *ngIf="!video.canal.user?.foto"
-                      class="fotoUserDefault"
-                      src="/assets/images/user.svg"
-                      alt="Foto del canal"
-                    >
-                    {{ video.canal.nombre }}
-                  </a>
-                </div>
-              </div>
-            </a>
-          </div>
+            </div>
+      </a>
+    </div>
         </ng-container>
         <ng-template #noVideos>
           <p>No hay videos disponibles en este momento.</p>

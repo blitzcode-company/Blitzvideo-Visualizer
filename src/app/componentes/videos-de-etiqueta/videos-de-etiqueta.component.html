@@ -1,1 +1,79 @@
-<p>videos-de-etiqueta works!</p>
+<app-header (toggleSidebar)="toggleSidebar()"></app-header>
+<div class="containerHome" [class.collapsed]="sidebarCollapsed$ | async">
+  <div class="sidebar-container"  [class.bottom-mobile]="isMobile" >
+    <app-sidebar 
+    [collapsed]="!!(sidebarCollapsed$ | async)"
+    [class.bottom-mobile]="isMobile"
+    [isMobile]="isMobile"
+        ></app-sidebar>
+  </div>
+
+<div class="content-wrapper">
+    <div class="etiqueta-page">
+      <div class="etiqueta-header">
+        <h1>{{ etiquetaNombre }}</h1>
+        <p>{{ videos.length }} video{{ videos.length !== 1 ? 's' : '' }} con esta etiqueta</p>
+      </div>
+
+      <div class="videos-grid" *ngIf="isLoading">
+        <div class="video-card skeleton" *ngFor="let n of [1,2,3,4,5,6,7,8,9,10]"></div>
+      </div>
+
+      <div class="empty-state" *ngIf="error">
+        <span class="material-icons">error_outline</span>
+        <h3>Etiqueta no encontrada</h3>
+        <p>No se pudo cargar el contenido de esta etiqueta.</p>
+        <button class="btn-retry" (click)="router.navigate(['/'])">Volver al inicio</button>
+      </div>
+
+      <div class="empty-state" *ngIf="!isLoading && !error && videos.length === 0">
+        <span class="material-icons">local_offer</span>
+        <h3>No hay videos con esta etiqueta</h3>
+        <p>Parece que aún no hay contenido con #{{ etiquetaNombre }}</p>
+      </div>
+
+      <div class="videos-grid" *ngIf="!isLoading && !error && videos.length > 0">
+        <div class="video-card" *ngFor="let video of videos; trackBy: trackByVideoId">
+          <a [routerLink]="['/video', video.id]" class="video-link" [title]="video.titulo">
+            
+            <div class="miniatura-container">
+              <img
+                class="miniatura"
+                [src]="video.miniatura || 'assets/images/video-default.png'"
+                [alt]="video.titulo"
+                (error)="onImgError($event)"
+                loading="lazy"
+              >
+              <p class="duracionVideo">{{ video.duracionFormateada }}</p>
+            </div>
+
+            <div class="video-info">
+              <h3 class="titulo-video">{{ video.titulo }}</h3>
+              <p class="meta">
+                {{ video.visitas_count | number }} vistas • {{ video.created_at | tiempo }}
+              </p>
+              <hr>
+              <div class="canalNombre">
+                <a [routerLink]="['/canal', video.canal.id]" class="canal-link" [title]="video.canal.nombre">
+                  <img
+                    *ngIf="video.canal.user?.foto"
+                    class="fotoUser"
+                    [src]="video.canal.user.foto"
+                    alt="Foto de {{ video.canal.nombre }}"
+                  >
+                  <img
+                    *ngIf="!video.canal.user?.foto"
+                    class="fotoUserDefault"
+                    src="/assets/images/user.svg"
+                    alt="Avatar por defecto"
+                  >
+                  {{ video.canal.nombre }}
+                </a>
+              </div>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+</div>
+</div>
