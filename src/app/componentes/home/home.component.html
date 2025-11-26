@@ -33,8 +33,9 @@
         </div>
 
         <div class="stream-info">
-          <h3>{{ stream.titulo }}</h3>
-          <p>{{ stream.espectadores_count || 0 }} espectadores • {{ stream.started_at | tiempo }}</p>
+          <h3 class="titulo-video" [title]="stream.titulo">{{ stream.titulo }}</h3>
+
+          <p>{{ stream.viewers || 0 }} espectadores • {{ stream.created_at | tiempo }}</p>
           <hr>
           <div class="canalNombre">
             <a [routerLink]="['/canal', stream.canal.id]" 
@@ -82,7 +83,7 @@
            (error)="onImageError($event)">
 
       <video class="preview-video"
-            [src]="video.link"
+            [src]="video.previewBlobUrl"
             muted
             playsinline
             preload="none"

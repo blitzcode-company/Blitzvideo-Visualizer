@@ -13,6 +13,10 @@
   box-shadow: rgba(0, 0, 0, 0.2) 0px 2px 4px 0px;
 }
 
+:host-context(.dark-theme) .bg-header{
+  background:  rgb(15 15 15);;
+}
+
 .navbar-container {
   display: flex;
   width: 100%;
@@ -37,6 +41,8 @@
   max-width: 650px;
   margin: 0 1rem;
 }
+
+
 
 .search-form {
   width: 100%;
@@ -77,6 +83,11 @@
   transition: padding 0.2s ease;
 }
 
+:host-context(.dark-theme) .search-input{
+  background-color:  rgb(15 15 15);
+  color: white;
+}
+
 .search-input[placeholder=""] {
   padding-left: 16px !important;
 }
@@ -86,6 +97,10 @@
   padding-left: 4px;
 }
 
+:host-context(.dark-theme) .search-input::placeholder{
+  background-color:  rgb(15 15 15);;
+}
+
 .search-input:focus {
   border-color: #007bff;
   box-shadow: 0 0 0 2px rgba(0,123,255,0.2);
@@ -93,6 +108,94 @@
 
 .search-wrapper:focus-within .search-icon {
   color: #007bff !important;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 32px;
+  text-align: center;
+  color: #5f6368;
+  min-height: 280px;
+}
+
+.empty-icon-wrapper {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.empty-bell {
+  font-size: 64px;
+  width: 64px;
+  height: 64px;
+  color: #dadce0;
+  opacity: 0.8;
+}
+
+.empty-bell {
+  animation: sway 4s ease-in-out infinite;
+  transform-origin: top center;
+}
+
+@keyframes sway {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(8deg); }
+  75% { transform: rotate(-6deg); }
+}
+
+.empty-title {
+  margin: 0 0 12px 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #3c4043;
+  line-height: 1.4;
+}
+
+.empty-text {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #666;
+  max-width: 320px;
+}
+
+.empty-decoration {
+  margin-top: 28px;
+  display: flex;
+  gap: 8px;
+}
+
+.empty-decoration span {
+  width: 6px;
+  height: 6px;
+  background: #e0e0e0;
+  border-radius: 50%;
+  opacity: 0.6;
+  animation: float 3s ease-in-out infinite;
+}
+
+.empty-decoration span:nth-child(1) { animation-delay: 0s; }
+.empty-decoration span:nth-child(2) { animation-delay: 0.5s; }
+.empty-decoration span:nth-child(3) { animation-delay: 1s; }
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@media (max-width: 768px) {
+  .empty-state {
+    padding: 40px 20px;
+    min-height: 60vh;
+  }
+  
+  .empty-bell {
+    font-size: 56px;
+    width: 56px;
+    height: 56px;
+  }
 }
 
 .historial-dropdown {

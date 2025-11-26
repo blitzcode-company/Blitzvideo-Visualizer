@@ -36,12 +36,9 @@
     "express": "^4.18.2",
     "hls.js": "^1.6.14",
     "jquery": "^3.7.1",
-    "laravel-echo": "^2.1.7",
-    "mirax-player": "^7.0.1",
     "moment": "^2.30.1",
     "ngx-cookie-service": "^17.1.0",
     "ngx-paypal": "^11.0.0",
-    "pusher-js": "^8.4.0",
     "rxjs": "~7.8.0",
     "socket.io-client": "^4.8.1",
     "tslib": "^2.3.0",
@@ -64,6 +61,8 @@
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
+    "laravel-echo": "^2.2.6",
+    "pusher-js": "^8.4.0",
     "typescript": "~5.4.2"
   }
 }

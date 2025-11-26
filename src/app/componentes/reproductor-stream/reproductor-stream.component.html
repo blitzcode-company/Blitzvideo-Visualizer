@@ -1,37 +1,59 @@
-<div class="reproductor" [ngClass]="{'cinema-mode': isCinemaMode}">
-  <div class="reproductor-video-container" #videoContainer>
+<div class="reproductor-video-container">
+  <div class="reproductor-video-container" #videoContainer 
+    [style.aspect-ratio]="aspectRatio"
+    [style.max-height.px]="maxHeight"
+    [style.min-height.px]="minHeight"
+    (mousemove)="showControls()" 
+    (mouseleave)="hideControls()"   
+    [ngClass]="{'cinema-mode': isCinemaMode, 'fullscreen': isFullscreen}">
+    <div class="video-wrapper">
+    
   <div *ngIf="!streamUrl" class="offline-message">
+    <img src="assets/images/logo.svg" alt="Logo" class="offline-logo">
     Offline
   </div>
     <div class="video-container" >
       <video #videoPlayer 
-      class="video" 
+      class="vjs-matrix video-js vjs-default-skin" 
       muted 
       (loadedmetadata)="setDuration()" 
       (timeupdate)="updateProgressBar()" 
       autoplay 
       >
 </video>
-<div class="controls">
-  <div class="left-controls">
-    <button (click)="togglePlayPause()">
-      <i [class]="isPlaying ? 'fas fa-pause' : 'fas fa-play'"></i>
-    </button>
-    <span class="live-indicator" *ngIf="activoStream === 1" >🔴 EN DIRECTO</span>
+<div class="controls" [class.hide]="!showControlsActive">
+    <div class="controls-buttons" >
+      <div class="left-controls">
+        <button
+            [matTooltip]="isPlaying ? 'Pausar (Espacio)' : 'Reproducir (Espacio)'" 
+        >
+            <i [class]="isPlaying ? 'fas fa-pause' : 'fas fa-play'"></i>
+        </button>
+      <span class="live-indicator" *ngIf="activoStream === 1" >🔴 EN DIRECTO</span>
+      </div>
+
+      <div class="right-controls">
+        <button [matTooltip]="isMuted ? 'Activar sonido (M)' : 'Silenciar (M)'" (click)="toggleMute()">
+          <i [class]="isMuted ? 'fas fa-volume-mute' : 'fas fa-volume-up'"></i>
+        </button>
+        <input type="range" #volumeSlider class="volume" value="100" min="0" max="100"
+               (input)="changeVolume(volumeSlider)" matTooltip="Cambiar volumen">
+        <button matTooltip="Pantalla completa (F)" (click)="toggleFullscreen(videoContainer)">
+          <i class="fas fa-expand"></i>
+        </button>
+
+      <button matTooltip="Picture-in-Picture (P)" 
+          (click)="togglePictureInPicture()"
+          [ngClass]="{'active-pip': isPipMode}">
+          <i class="fas fa-external-link-alt"></i>
+      </button>
+        <button [hidden]="isFullscreen" [matTooltip]="isCinemaMode ? 'Vista predeterminada (C)' : 'Modo cine (C)'" 
+                (click)="toggleMode()">
+          <i [class]="isCinemaMode ? 'fa fa-compress' : 'fa fa-video'"></i>
+        </button>
+      </div>
+    </div>
   </div>
 
-  <div class="right-controls">
-    <button (click)="toggleMute()">
-      <i [class]="isMuted ? 'fas fa-volume-mute' : 'fas fa-volume-up'"></i>
-    </button>
-    <input type="range" #volumeSlider class="volume" value="100" min="0" max="100" (input)="changeVolume(volumeSlider)">
-
-    <button (click)="toggleFullscreen()">
-      <i class="fas fa-expand"></i>
-    </button>
-    <button (click)="toggleMode()">
-      <i [class]="isCinemaMode ? 'fas fa-compress' : 'fas fa-film'"></i>
-    </button>
   </div>
-</div>
 </div>

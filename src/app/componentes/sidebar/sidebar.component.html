@@ -141,5 +141,42 @@
         <p class="loading-text text-label">Cargando etiquetas...</p>
       </ng-template>
     </div>
+    <div class="theme-selector-desktop" *ngIf="!isMobile">
+  <hr class="lineaSideBar">
+
+  <p class="text-label">Tema</p>
+  
+  <div class="theme-buttons">
+    <button 
+      (click)="cambiarTema('light')"
+      [class.active]="themeService.getTema() === 'light'"
+      class="theme-btn" 
+      title="Modo claro"
+      mat-ripple>
+      <mat-icon svgIcon="sun"></mat-icon>
+      <span class="text-label">Claro</span>
+    </button>
+
+    <button 
+      (click)="cambiarTema('auto')"
+      [class.active]="themeService.getTema() === 'auto'"
+      class="theme-btn" 
+      title="Automático (según sistema)"
+      mat-ripple>
+      <mat-icon>brightness_auto</mat-icon>
+      <span class="text-label">Auto</span>
+    </button>
+
+    <button 
+      (click)="cambiarTema('dark')"
+      [class.active]="themeService.getTema() === 'dark'"
+      class="theme-btn" 
+      title="Modo oscuro"
+      mat-ripple>
+      <mat-icon svgIcon="moon"></mat-icon>
+      <span class="text-label">Oscuro</span>
+    </button>
+  </div>
+</div>
   </ng-template>
 </div>

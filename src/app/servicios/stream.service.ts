@@ -26,7 +26,7 @@ export class StreamService {
     return this.httpClient.get<Streams>(url, httpOptions);
   }
 
-  obtenerInformacionStreams(idStream: any): Observable<any> {
+  obtenerInformacionStreams(idStream: number): Observable<any> {
     const httpOptions = {
       headers: new HttpHeaders({
           'Content-Type' : 'application/json',
@@ -43,6 +43,25 @@ export class StreamService {
     );
   
   }
+
+  heartbeat(streamId: number | string, viewerId: string | number) {
+    return this.httpClient.get(`${this.apiUrl}api/v1/streams/${streamId}/heartbeat`, {
+      params: { user_id: viewerId }
+    });
+  }
+
+    entrarView(streamId: number) {
+    const url = `${this.apiUrl}api/v1/streams/${streamId}/entrar`;
+
+    return this.httpClient.post(url, {});
+    }
+
+    salirView(streamId: number) {
+      const url = `${this.apiUrl}api/v1/streams/${streamId}/salir`;
+
+      return this.httpClient.post(url, {});
+    }
+
   obtenerInformacionRTMP(idCanal: any, userId: number): Observable<any> {
     const params = new HttpParams().set('user_id', userId.toString());
     const httpOptions = {

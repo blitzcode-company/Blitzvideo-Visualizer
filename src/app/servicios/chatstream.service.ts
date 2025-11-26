@@ -1,108 +1,165 @@
-import { Injectable } from '@angular/core';
+import { Injectable, NgZone } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import { CookieService } from 'ngx-cookie-service';
-import { Observable, Subject } from 'rxjs';
-import Pusher, { Channel } from 'pusher-js';
+import { Observable, Subject, BehaviorSubject, filter, shareReplay } from 'rxjs';
+import Pusher from 'pusher-js';
+import Echo from 'laravel-echo';
+
+type PusherChannelWithListen = any; 
+
+export interface ChatMessage {
+  id: number;
+  user: string;
+  user_photo: string | null;
+  text: string;
+  created_at: string;
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class ChatstreamService {
   private apiUrl = environment.apiUrl;
-  private pusher: Pusher;
-  private channel: Channel | null = null;
-  private listeningStreamId: string | null = null;
+  private channel: PusherChannelWithListen = null;
+    private channelPublic: PusherChannelWithListen = null;
 
-  private messagesSubject = new Subject<{
-    id: number;
-    user: string;
-    user_photo: string | null;
-    text: string;
-    created_at: string;
-  }>();
+  private listeningStreamId: number | null = null;
+  private echo!: Echo<any>;
+  private messagesSubject = new BehaviorSubject<ChatMessage[]>([]);
+  public messages$ = this.messagesSubject.asObservable();
+  private viewerCountSubject = new BehaviorSubject<number>(0);
+  public viewerCount$ = this.viewerCountSubject.asObservable();
+  private messageStream$ = new Subject<ChatMessage>();
+  
+  private streamEventsSubject = new Subject<any>();
 
+  constructor(
+    private http: HttpClient,
+    private cookie: CookieService,
+    private ngZone: NgZone
+  ) {
+    this.initEcho();
+  }
 
-  constructor(private http: HttpClient, private cookie: CookieService) {
-    Pusher.logToConsole = true;
+  private initEcho() {
+    Pusher.logToConsole = environment.production === false;
 
-
-    this.pusher = new Pusher('blitzvideo-key', {
+    const pusherClient = new Pusher('blitzvideo-key', {
       wsHost: '172.18.0.17',
       wsPort: 6001,
       wssPort: 6001,
       forceTLS: false,
       enabledTransports: ['ws'],
+      cluster: 'mt1',
       disableStats: true,
-      cluster: '',
       authEndpoint: 'http://172.18.0.2:8000/broadcasting/auth',
       auth: {
         headers: {
-          Authorization: 'Bearer ' + this.cookie.get('accessToken')
+          Authorization: 'Bearer ' + this.cookie.get('accessToken'),
         }
       }
     });
+
+    this.echo = new Echo({
+      broadcaster: 'pusher',
+      client: pusherClient
+    });
+
+    pusherClient.connection.bind('connected', () => {
+      console.log('%c[ECHO] Conectado al WebSocket', 'color: green; font-weight: bold');
+    });
+
+    pusherClient.connection.bind('disconnected', () => {
+      console.log('%c[ECHO] Desconectado del WebSocket', 'color: red; font-weight: bold');
+    });
   }
 
-  cargarMensaje(streamId: string): Observable<any> {
+  cargarMensaje(streamId: number): Observable<any> {
     const url = `${this.apiUrl}api/v1/streams/chat/mensajes/${streamId}`;
     return this.http.get(url);
   }
 
-  mandarMensaje(streamId: string, message: string, usuario_id: number): Observable<any> {
+  mandarMensaje(streamId: number, message: string, usuario_id: number): Observable<any> {
     const url = `${this.apiUrl}api/v1/streams/chat/enviar`;
-    const httpOptions = {
-      headers: new HttpHeaders({
-        Authorization: 'Bearer ' + this.cookie.get('accessToken')
-      })
-    };
-    const body = {
-      message,
-      stream_id: streamId,
-      user_id: usuario_id
-    };
-    return this.http.post(url, body, httpOptions);
+    const headers = new HttpHeaders({
+      Authorization: 'Bearer ' + this.cookie.get('accessToken')
+    });
+
+    const body = { message, stream_id: streamId, user_id: usuario_id };
+    return this.http.post(url, body, { headers });
   }
 
-  startListening(streamId: string): Observable<any> {
-    if (this.listeningStreamId === streamId) {
-      return this.messagesSubject.asObservable();
+  startListening(streamId: number): Observable<ChatMessage> {
+    if (this.listeningStreamId === streamId && this.channel) {
+      return this.messageStream$.asObservable();
     }
-  
-    if (this.channel) {
-      this.channel.unbind_all();
-      this.pusher.unsubscribe('private-stream.' + this.listeningStreamId);
-    }
-  
+
+    this.leaveChannel();
     this.listeningStreamId = streamId;
-  
-    this.channel = this.pusher.subscribe('private-stream.' + streamId);
-  
-    this.channel.bind('chat-message', (e: any) => {
-      console.log('Mensaje recibido vía Pusher:', e);
-  
-      this.messagesSubject.next({
-        id: e.id,
-        user: e.user_name,
-        user_photo: e.user_photo,
-        text: e.message,
-        created_at: e.created_at,
+
+    this.messagesSubject.next([]);
+
+    return new Observable<ChatMessage>(observer => {
+      const channelName = `stream.${streamId}`;
+      this.channel = this.echo.private(channelName);
+      this.channelPublic = this.echo.channel(channelName);
+
+
+      this.channelPublic.listen('.stream-event', (event: any) => {
+        console.log(event)
+        if (event.type === 'viewer_count') {
+
+          this.streamEventsSubject.next(event);
+
+          this.ngZone.run(() => {
+            console.log("[VIEWERS EVENT]", event);
+          });
+        }
       });
-    });
-  
-    return this.messagesSubject.asObservable();
+
+      this.channel.listen('.chat-message', (event: any) => {
+        this.ngZone.run(() => {
+          console.log('Evento recibido:', event);
+          const msg: ChatMessage = {
+            id: event.id ?? Date.now(),
+            user: event.user_name ?? event.user?.name ?? 'Anónimo',
+            user_photo: event.user_photo ?? event.user?.foto ?? null,
+            text: event.message ?? event.mensaje ?? '',
+            created_at: event.created_at ?? new Date().toISOString()
+          };
+
+          const current = this.messagesSubject.getValue();
+          this.messagesSubject.next([...current, msg]);
+
+          observer.next(msg);
+          this.messageStream$.next(msg); 
+        });
+      });
+
+      return () => {
+        this.leaveChannel();
+      };
+    }).pipe(
+      shareReplay(1)
+    );
   }
-  
-  leaveChannel(streamId: string) {
-    if (this.channel) {
-      this.channel.unbind_all();
-      this.pusher.unsubscribe('private-stream.' + streamId);
-      this.channel = null;
+
+  leaveChannel() {
+    if (this.channel && this.listeningStreamId) {
+      try {
+        this.channel.stopListening('.chat-message');
+        this.echo.leave(`private-stream.${this.listeningStreamId}`);
+      } catch (e) {
+        console.warn('Error al dejar el canal:', e);
+      }
     }
+    this.channel = null;
     this.listeningStreamId = null;
   }
 
-  private getPrivateStreamChannel(streamId: string): string {
-    return `private-stream.${streamId}`;
+
+  getStreamEvents(): Observable<any> {
+    return this.streamEventsSubject.asObservable();
   }
 }

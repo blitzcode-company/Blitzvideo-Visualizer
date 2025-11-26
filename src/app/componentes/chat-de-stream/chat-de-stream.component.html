@@ -1,7 +1,7 @@
  <div class="chat-container">
       <h3>Chat en vivo</h3>
       <div  #chatMessages class="chat-messages">
-        <div *ngFor="let message of chatMessagesList" class="chat-message">
+        <div *ngFor="let message of messages" class="chat-message">
           <img *ngIf="message.user_photo" class="chat-user-photo" [src]="message.user_photo" alt="User photo">
           <img *ngIf="!message.user_photo" class="chat-user-photo" src="assets/images/user.svg" alt="User photo">
           <span class="chat-user">{{ message.user }}:</span>

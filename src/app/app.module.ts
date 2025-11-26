@@ -77,6 +77,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { LoadingBarComponent } from './componentes/shared/loading-bar/loading-bar.component';
 import { LoadingBarService } from './servicios/loading-bar.service';
 import { LoadingInterceptor } from './servicios/core/interceptors/loading.service';
+import { provideHttpClient } from '@angular/common/http';
 
 @NgModule({
   declarations: [
@@ -119,7 +120,8 @@ import { LoadingInterceptor } from './servicios/core/interceptors/loading.servic
     NuevosComponent,
     VideosDeEtiquetaComponent,
     SafeHtmlPipe,
-    LoadingBarComponent
+    LoadingBarComponent,
+    
     
   ],
   imports: [
@@ -169,6 +171,7 @@ import { LoadingInterceptor } from './servicios/core/interceptors/loading.servic
     LoadingBarService,
     { provide: HTTP_INTERCEPTORS, useClass: LoadingInterceptor, multi: true },
     provideAnimationsAsync(),
+    provideHttpClient(),
     ComentariosService, 
     ModocineService,
     ReportesService

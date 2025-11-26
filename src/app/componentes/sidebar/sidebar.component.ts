@@ -9,6 +9,7 @@ import { trigger, style, animate, transition } from '@angular/animations';
 import { EtiquetaService } from '../../servicios/etiqueta.service';
 import { error } from 'console';
 import { ActivatedRoute } from '@angular/router';
+import { ThemeService } from '../../servicios/theme.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -52,6 +53,7 @@ currentEtiquetaId: number | null = null;
     private suscripcionesService: SuscripcionesService,
     private activatedRoute: ActivatedRoute,
     private etiquetasService: EtiquetaService,
+    public themeService: ThemeService,
     public status: StatusService
   ) {
     this.detectMobile();
@@ -59,6 +61,9 @@ currentEtiquetaId: number | null = null;
   }
 
 
+cambiarTema(tema: 'light' | 'dark' | 'auto') {
+  this.themeService.setTema(tema);
+}
 
   @HostBinding('class.collapsed') get isCollapsed() {
     return this.collapsed;

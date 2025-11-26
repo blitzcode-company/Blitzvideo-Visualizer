@@ -111,44 +111,42 @@
       </div>
       <div class="acciones-derechas">
         
-        <div class="puntuaryguardar">
+      <div class="puntuaryguardar">
           
-      <div class="puntuar-container">
-        <div class="puntuar">
-          <button *ngFor="let val of [5, 4, 3, 2, 1]"
-                  [ngClass]="{'selected': puntuacionSeleccionada === val}"
-                  (click)="puntuar(val)">
-            <img [src]="'assets/images/' + val + '.svg'" [alt]="'Puntuación ' + val">
-          </button>
-        </div>
-
-        <div class="hover-panel">
-          <div class="promedio-visual">
-            Promedio: <span>{{ video.promedio_puntuaciones | number:'1.1-1' }}/5</span>
+        <div class="puntuar-container">
+          <div class="puntuar">
+            <button *ngFor="let val of [5, 4, 3, 2, 1]"
+                    [ngClass]="{'selected': puntuacionSeleccionada === val}"
+                    (click)="puntuar(val)">
+              <img [src]="'assets/images/' + val + '.svg'" [alt]="'Puntuación ' + val">
+            </button>
           </div>
 
-            <div class="distribucion-puntuaciones" *ngIf="totalVotos > 0">
-            <div *ngFor="let val of [5,4,3,2,1]" class="fila">
-              <img [src]="'assets/images/' + val + '.svg'" [alt]="'Puntuación ' + val" class="emoji-bar">
-              <div class="barra-container">
-                <div class="barra" [style.width.%]="(video['puntuacion_' + val] / totalVotos) * 100"></div>
+          <div class="hover-panel">
+            <div class="promedio-visual">
+              Promedio: <span>{{ video.promedio_puntuaciones | number:'1.1-1' }}/5</span>
+            </div>
+
+              <div class="distribucion-puntuaciones" *ngIf="totalVotos > 0">
+              <div *ngFor="let val of [5,4,3,2,1]" class="fila">
+                <img [src]="'assets/images/' + val + '.svg'" [alt]="'Puntuación ' + val" class="emoji-bar">
+                <div class="barra-container">
+                  <div class="barra" [style.width.%]="(video['puntuacion_' + val] / totalVotos) * 100"></div>
+                </div>
+                <span class="numero">{{ video['puntuacion_' + val] }}</span>
               </div>
-              <span class="numero">{{ video['puntuacion_' + val] }}</span>
             </div>
           </div>
-        </div>
       </div>
-
-            
-            <div class="options">
-              <i class="fa-solid fa-ellipsis-vertical botonTresPuntos" (click)="toggleDropdown()" aria-hidden="true"></i>
-              <div *ngIf="dropdownVisible" [class.show]="dropdownVisible" class="dropdown-menu">
-                <a (click)="agregarAVideoALista()"> <mat-icon> format_list_bulleted</mat-icon>
-                  Guardar Video</a>
-                <a (click)="openReportModal()"><mat-icon>flag</mat-icon>
-                  Reportar Video</a>
-              </div>
+        <div class="options">
+          <i class="fa-solid fa-ellipsis-vertical botonTresPuntos" (click)="toggleDropdown()" aria-hidden="true"></i>
+            <div *ngIf="dropdownVisible" [class.show]="dropdownVisible" class="dropdown-menu">
+              <a (click)="agregarAVideoALista()"> <mat-icon> format_list_bulleted</mat-icon>
+                Guardar Video</a>
+              <a (click)="openReportModal()"><mat-icon>flag</mat-icon>
+                Reportar Video</a>
             </div>
+        </div>
         </div>
          <div class="visitas">
                 <p>{{ video.visitas_count }} visualizaciones</p>
@@ -159,11 +157,11 @@
       <p class="fechadescripcion">Fecha de subida: {{ video.created_at }}</p>
       <p [innerHTML]="video.descripcion | safeHtml"></p>
      <div class="toggle-container" *ngIf="showToggleLink">
-    <a class="toggle-link" 
-       (click)="toggleExpand($event)"
-       [innerText]="isExpanded ? 'Ver menos' : 'Ver más'">
-    </a>
-  </div>
+        <a class="toggle-link" 
+          (click)="toggleExpand($event)"
+          [innerText]="isExpanded ? 'Ver menos' : 'Ver más'">
+        </a>
+      </div>
     </div>
 
     <div class="comments-section" *ngIf="!isCinemaMode">

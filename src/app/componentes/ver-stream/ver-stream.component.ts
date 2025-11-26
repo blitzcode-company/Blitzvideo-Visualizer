@@ -14,7 +14,10 @@ import { ModalReporteVideoComponent } from '../modal-reporte-video/modal-reporte
 import { StreamService } from '../../servicios/stream.service';
 import { NotificacionesService } from '../../servicios/notificaciones.service';
 import { ChatDeStreamComponent } from '../chat-de-stream/chat-de-stream.component';
-
+import { ChatstreamService } from '../../servicios/chatstream.service';
+import { HttpClient } from '@angular/common/http';
+import { UsuarioGlobalService } from '../../servicios/usuario-global.service';
+import { ModocineService } from '../../servicios/modocine.service';
 
 @Component({
   selector: 'app-ver-stream',
@@ -23,11 +26,11 @@ import { ChatDeStreamComponent } from '../chat-de-stream/chat-de-stream.componen
 
 })
 
-export class VerStreamComponent implements OnInit,  AfterViewInit, AfterViewChecked{
+export class VerStreamComponent implements OnInit, OnDestroy,  AfterViewInit, AfterViewChecked{
 
   puntuacionSeleccionada: number | null = null;
   cargando: boolean = false;
-  streamId: any;
+  streamId: number = 0;
   canalId: any;
   userId: any;
   streams = new Streams();
@@ -42,7 +45,7 @@ export class VerStreamComponent implements OnInit,  AfterViewInit, AfterViewChec
   serverIp = environment.serverIp;
   isExpanded = false;
   isContentOverflowing = false;
-  public isCinemaMode = false; 
+  public isCinemaMode = false;
   public suscrito: string = '';
   idDelCanalDelUsuario:any
   usuarioConCanal: any;
@@ -68,42 +71,104 @@ export class VerStreamComponent implements OnInit,  AfterViewInit, AfterViewChec
   notificacionesActivas: boolean = false;
   showToggleLink = false;
   mensaje: string = '';
-
-
+  viewerSub: any;
+  sidebarVisible: boolean = false;
+  private sidebarSubscription!: Subscription;
+  sidebarCollapsed = false;
+  sidebarCollapsed$: Observable<boolean>;
+  viewersCount: number = 0;
   @ViewChild('descripcion') descripcionElement!: ElementRef; 
+  private streamEventsSub: Subscription | undefined;
+  streamActivo:any
+  heartbeatInterval: any;
+  viewerId!: string | number;
+
+  private cinemaModeSubscription!: Subscription;
+
 
   constructor(
     private route: ActivatedRoute,
     private streamService: StreamService,
     private suscripcionService: SuscripcionesService,
+    private chatService:ChatstreamService,
     private authService: AuthService,
     private notificacionesService: NotificacionesService,
     private titleService: Title,
     private cdr: ChangeDetectorRef,
+    private httpClient: HttpClient,
     private router: Router,
+    private cinemaModeService: ModocineService,
     public status: StatusService,
+    private usuarioGlobal: UsuarioGlobalService,
+    private chatstreamService: ChatstreamService,
     public dialog: MatDialog,
     private reporteService: ReportesService
   ) {
-
-
-   
+    this.sidebarCollapsed$ = this.usuarioGlobal.sidebarCollapsed$;
   }
 
-  ngOnInit(): void {
-    this.route.params.subscribe(params => {
-      this.streamId = params['id'];
-      this.mostrarStream();
+ngOnInit(): void {
+  this.route.params.subscribe(params => {
+    this.streamId = params['id'];
+    this.mostrarStream();
 
-    });  
-
+    this.obtenerUsuario(); 
     this.obtenerUsuarioConCanal();
-    this.obtenerUsuario();
-    this.verificarSuscripcion();
-    this.listarNumeroDeSuscriptores();
+
+   this.isCinemaMode = this.cinemaModeService.getCinemaModeValue();
+    this.cinemaModeService.getCinemaMode().subscribe(enabled => {
+      this.isCinemaMode = enabled;
+    });
+    
+    const storedCinemaMode = localStorage.getItem('cinemaMode');
+    this.isCinemaMode = storedCinemaMode ? JSON.parse(storedCinemaMode) : false;
+
+    setTimeout(() => {
+      this.setViewerId();         
+      this.startHeartbeat();       
+      this.marcarEntrada();      
+
+      this.chatService.startListening(this.streamId);
+
+      this.streamEventsSub = this.chatService.getStreamEvents()
+          .subscribe(event => {
+            console.log("[COMPONENT EVENT]", event); 
+            if (event.type === 'viewer_count') {
+              this.viewersCount = event.count;
+            }
+          });
+
+    }, 200); 
+  });
+
+  this.mostrarSidebar();
+  setTimeout(() => this.verificarSuscripcion(), 200);
+  this.checkDescriptionHeight();
+}
+
+
+marcarEntrada() {
+  this.streamService.entrarView(this.streamId).subscribe((res: any) => {
+    console.log("Entró viewer:", res);
+  });
+}
+
+  ngOnDestroy() {
+  if (this.heartbeatInterval) {
+      clearInterval(this.heartbeatInterval);
+    }
+
+    if (this.streamEventsSub) {
+      this.streamEventsSub.unsubscribe();
+    }
+
+      if (this.streamId) {
+      this.streamService.salirView(this.streamId)
+        .subscribe(res => console.log('Salió viewer:', res));
+    }
+
+    this.streamService.salirView(this.stream.id).subscribe();
   }
-
-
 
 
   ngOnChanges() {
@@ -114,27 +179,102 @@ export class VerStreamComponent implements OnInit,  AfterViewInit, AfterViewChec
       }, 200);
     }
 
-
-  }
-
-  checkDescriptionHeight() {
-    if (this.descripcionElement && this.stream?.descripcion) {
-      const descripcion = this.descripcionElement.nativeElement;
-      const maxHeight = 150; 
-      const scrollHeight = descripcion.scrollHeight;
-      this.showToggleLink = scrollHeight > maxHeight + 20;
-      if (!this.showToggleLink) {
-        this.isExpanded = true;
-      }
-    } else {
-      console.log('checkDescriptionHeight: Element or description not ready', {
-        hasElement: !!this.descripcionElement,
-        hasDescription: !!this.stream?.descripcion
-      });
-      this.showToggleLink = false;
+    if (this.viewerSub) {
+      this.viewerSub.unsubscribe();
     }
-    this.cdr.detectChanges();
   }
+
+    generateAnonId(): string {
+    let anonId = localStorage.getItem('anon_viewer_id');
+    if (!anonId) {
+      anonId = crypto.randomUUID();
+      localStorage.setItem('anon_viewer_id', anonId);
+    }
+    return anonId;
+  }
+
+  setViewerId() {
+  const userId = this.usuario?.id;
+    if (userId) {
+      this.viewerId = userId;
+    } else {
+      this.viewerId = this.generateAnonId();
+    }
+  }
+    
+startHeartbeat() {
+  this.heartbeatInterval = setInterval(() => {
+    this.streamService.heartbeat(this.streamId, this.viewerId)
+      .subscribe({
+        next: (res) => {
+          console.log(res)
+          this.viewersCount 
+
+        },
+        error: err => console.error('Heartbeat error:', err)
+      });
+  }, 8000);
+}
+
+  private scheduleDescriptionHeightCheck(): void {
+    if (!this.descripcionElement) {
+      console.warn('descripcionElement no disponible aún');
+      return;
+    }
+
+    setTimeout(() => {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          this.checkDescriptionHeight();
+        });
+      });
+    }, 100);
+  }
+
+
+
+
+toggleExpand(event: Event): void {
+  event.preventDefault();
+  event.stopPropagation();
+
+  const element = this.descripcionElement.nativeElement;
+
+  if (!this.isExpanded) {
+    const fullHeight = element.scrollHeight;
+    
+    element.style.height = `${fullHeight}px`;
+  } else {
+    element.style.height = `${element.scrollHeight}px`;
+    void element.offsetHeight; 
+    element.style.height = '150px';
+  }
+
+  this.isExpanded = !this.isExpanded;
+  this.cdr.detectChanges();
+}
+
+checkDescriptionHeight(): void {
+  if (!this.descripcionElement?.nativeElement || !this.stream?.descripcion) {
+    this.showToggleLink = false;
+    this.isExpanded = false;
+    return;
+  }
+
+  const element = this.descripcionElement.nativeElement;
+  
+  const originalHeight = element.style.height;
+  element.style.height = 'auto';
+  const scrollHeight = element.scrollHeight;
+  element.style.height = originalHeight || '150px';
+
+  this.showToggleLink = scrollHeight > 180; 
+  this.isExpanded = !this.showToggleLink;
+
+  console.log('[DESCRIPCIÓN] scrollHeight:', scrollHeight, 'showToggleLink:', this.showToggleLink);
+
+  this.cdr.detectChanges();
+}
 
   checkContentOverflow() {
     if (this.descripcionElement) {
@@ -142,8 +282,18 @@ export class VerStreamComponent implements OnInit,  AfterViewInit, AfterViewChec
       this.isContentOverflowing = element.scrollHeight > element.clientHeight;
     }
   }
-  
- 
+
+   private mostrarSidebar(): void {
+    this.usuarioGlobal.setSidebarVisible(false);
+    this.sidebarSubscription = this.usuarioGlobal.sidebarCollapsed$.subscribe(visible => {
+      this.sidebarVisible = visible;
+      this.cdr.detectChanges();
+    });
+  }
+
+  toggleSidebar(): void {
+    this.usuarioGlobal.toggleSidebar();
+  }
 
   
   ngAfterViewInit(): void {
@@ -161,8 +311,14 @@ export class VerStreamComponent implements OnInit,  AfterViewInit, AfterViewChec
     this.checkContentOverflow();
   }
 
+
+
+  
+  viewers:any
+
+
   obtenerUsuario(): void {
-    this.authService.usuario$.subscribe(res => {
+    this.usuarioGlobal.usuario$.subscribe(res => {
       this.usuario = res;
   
       if (this.usuario) {
@@ -176,15 +332,6 @@ export class VerStreamComponent implements OnInit,  AfterViewInit, AfterViewChec
   }
 
  
-
-  toggleExpand(event: Event) {
-    event.preventDefault();
-    this.isExpanded = !this.isExpanded;
-    this.cdr.detectChanges();
-  }
-
-
-
 
   obtenerUsuarioConCanal(): void {
     if (this.userId !== undefined) {
@@ -247,8 +394,12 @@ export class VerStreamComponent implements OnInit,  AfterViewInit, AfterViewChec
     this.mostrarStream(); 
   }
 
-  handleCinemaMode(isCinema: boolean): void {
-    this.isCinemaMode = isCinema;  
+
+   handleCinemaMode(isCinemaMode: boolean) {
+    console.log('Iniciando handleCinemaMode, isCinemaMode:', isCinemaMode);
+    this.isCinemaMode = isCinemaMode;
+    this.cinemaModeService.setCinemaMode(isCinemaMode);
+    console.log('CinemaMode guardado en servicio:', isCinemaMode);
   }
 
   
@@ -286,25 +437,21 @@ export class VerStreamComponent implements OnInit,  AfterViewInit, AfterViewChec
         console.log(res)
         this.stream = res.transmision || {};
         this.errorMessage = ''; 
+        this.canalId = this.stream.canal_id;
 
-    
-        if (this.stream?.error?.code === 403) {
-          this.isBlocked = true;
-          this.errorMessage = 'Este video ha sido bloqueado y no se puede acceder.';
-          console.error(this.errorMessage);
-          return; 
-        }
-  
-        if (this.playlistId) {
-          console.log(this.playlistId)
-        }
+
+
+
+          setTimeout(() => {
+            this.scheduleDescriptionHeightCheck(); 
+          }, 150);
 
         this.isBlocked = false;
         this.streamUrl = res.url_hls;
         this.procesarFechaDeCreacion();
         this.actualizarTituloDePagina();
         this.obtenerDatosDelCanal();
-        this.listarNumeroDeSuscriptores();
+        this.listarNumeroDeSuscriptores(this.canalId);
       },
       (error) => {
         this.isBlocked = false; 
@@ -368,41 +515,44 @@ export class VerStreamComponent implements OnInit,  AfterViewInit, AfterViewChec
   
   suscribirse(): void {
     if (!this.usuario || !this.usuario.id) {
-      window.location.href = `${this.serverIp}3002/#/`;
+      window.location.href = `${this.serverIp}3002/#/`; 
       return;
     }
-    
     this.suscripcionService.suscribirse(this.userId, this.canalId).subscribe(
       response => {
-        
         this.mensaje = 'Suscripción exitosa';
-        this.suscrito = 'suscrito'; 
+        this.suscrito = 'suscrito';
+
+      this.notificacionesActivas = true;
+
+        this.cdr.detectChanges();
       },
       error => this.handleError(error)
     );
   }
 
-  listarNumeroDeSuscriptores() {
-    this.suscripcionService.listarNumeroDeSuscriptores(this.canalId).subscribe(res => {
+  listarNumeroDeSuscriptores(canalId: number) {
+    this.suscripcionService.listarNumeroDeSuscriptores(canalId).subscribe(res => {
       this.numeroDeSuscriptores = res;
     });
   }
-  
 
   anularSuscripcion(): void {
     const dialogRef = this.dialog.open(ConfirmacionDesuscribirModalComponent);
     dialogRef.afterClosed().subscribe(result => {
-        if (result) {
-            this.suscripcionService.anularSuscripcion(this.userId, this.canalId).subscribe(
-                () => {
-                    this.mensaje = 'Suscripción anulada';
-                    this.suscrito = 'desuscrito'; 
-                },
-                error => this.handleError(error)
-            );
-        }
+      if (result) {
+        this.suscripcionService.anularSuscripcion(this.userId, this.canalId).subscribe(
+          () => {
+            this.mensaje = 'Suscripción anulada';
+            this.suscrito = 'desuscrito';
+            this.notificacionesActivas = false; 
+            this.cdr.detectChanges();
+          },
+          error => this.handleError(error)
+        );
+      }
     });
-}
+  }
 
 
 toggleNotificaciones(): void {
@@ -416,24 +566,21 @@ toggleNotificaciones(): void {
   });
 }
 
-  toggleSuscripcion(): void {
-
-
+ toggleSuscripcion(): void {
     if (this.suscrito) {
-      this.anularSuscripcion(); 
+      this.anularSuscripcion();
     } else {
-      this.suscribirse(); 
+      this.suscribirse();
     }
   }
 
-  
-    
   verificarSuscripcion(): void {
     if (!this.userId || !this.canalId) {
       return;
     }
     this.suscripcionService.verificarSuscripcion(this.userId, this.canalId).subscribe(
       response => {
+        console.log(response)
         switch (response.estado) {
           case 'propietario':
             this.suscrito = 'propietario';
@@ -460,10 +607,6 @@ toggleNotificaciones(): void {
       }
     );
   }
-
-
-
-
 
   private handleError(error: any): void {
     if (error.status === 409) {

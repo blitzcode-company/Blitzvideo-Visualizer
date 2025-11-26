@@ -715,6 +715,7 @@ private detachPreviewListeners() {
     }, 50); 
   }
 }
+
   setupVideoJSEvents(): void {
   this.player.on('loadstart', () => {
     this.videoReady = false;

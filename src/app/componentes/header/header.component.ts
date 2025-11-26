@@ -11,6 +11,7 @@ import { NotificacionesService } from '../../servicios/notificaciones.service';
 import { Notificacion } from '../../clases/notificacion';
 import { UsuarioGlobalService } from '../../servicios/usuario-global.service';
 import { Subscription } from 'rxjs';
+import { ThemeService } from '../../servicios/theme.service';
 
 @Component({
   selector: 'app-header',
@@ -26,6 +27,7 @@ export class HeaderComponent {
     private api:AuthService,
     private eRef: ElementRef,
     private usuarioGlobal:UsuarioGlobalService,
+    public themeService:ThemeService,
     private canalService: CanalService,
     private notificacionesService: NotificacionesService,
 ){}    
@@ -80,6 +82,9 @@ export class HeaderComponent {
 }
 
 
+cambiarTema(tema: 'light' | 'dark' | 'auto') {
+  this.themeService.setTema(tema);
+}
 
   obtenerUsuario() {
     this.usuarioGlobal.usuario$.subscribe(user => {

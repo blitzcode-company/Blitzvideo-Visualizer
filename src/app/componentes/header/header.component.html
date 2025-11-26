@@ -99,10 +99,22 @@
                   </div>
 
                   <div class="panel-body">
-                    <div class="empty-state" *ngIf="notificaciones.length === 0">
-                      <mat-icon>notifications_off</mat-icon>
-                      <p>No tienes notificaciones</p>
+                  <div class="empty-state" *ngIf="notificaciones.length === 0">
+                    <div class="empty-icon-wrapper">
+                      <mat-icon class="empty-bell" svgIcon="bell-off" aria-hidden="true"></mat-icon>
+
                     </div>
+                    
+                    <h6 class="empty-title">Todo está en calma por aquí</h6>
+                    <p class="empty-text">
+                      Cuando alguien comente, responda o suba algo nuevo,<br>
+                      aparecerá aquí al instante.
+                    </p>
+                    
+                    <div class="empty-decoration">
+                      <span></span><span></span><span></span>
+                    </div>
+                  </div>
 
                     <div *ngFor="let n of notificaciones; trackBy: trackByNotif"
                           class="noti-item"

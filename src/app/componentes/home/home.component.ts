@@ -10,6 +10,7 @@ import { Notificacion } from '../../clases/notificacion';
 import { StreamService } from '../../servicios/stream.service';
 import { Subscription } from 'rxjs';
 import { UsuarioGlobalService } from '../../servicios/usuario-global.service';
+import { ViewChildren, QueryList, ElementRef } from '@angular/core';
 
 @Component({
   selector: 'app-home',
@@ -17,6 +18,9 @@ import { UsuarioGlobalService } from '../../servicios/usuario-global.service';
   styleUrls: ['./home.component.css']
 })
 export class HomeComponent implements OnDestroy {
+
+  @ViewChildren('previewVideo') previewVideos!: QueryList<ElementRef<HTMLVideoElement>>;
+
   videos: any[] = [];
   isLoading: boolean = false;
   mostrandoVideosGenerales: boolean = false;
@@ -153,18 +157,38 @@ export class HomeComponent implements OnDestroy {
 
 
 playPreview(video: any) {
-  video.mostrarPreview = true;
-  
-  setTimeout(() => {
-    const videoEl = document.querySelectorAll('video').item(this.videos.indexOf(video)) as HTMLVideoElement;
-    if (videoEl) {
-      videoEl.load(); 
-    }
-  }, 50);
-}
+  if (video.previewBlobUrl) {
+    video.mostrarPreview = true;
+    video.isPlayingPreview = true;
+    return;
+  }
 
+  video.mostrarPreview = true;
+  video.isLoadingPreview = true;
+
+  fetch(video.link, {
+    method: 'GET',
+    headers: { Range: 'bytes=0-2097152' } 
+  })
+  .then(res => res.blob())
+  .then(blob => {
+    video.previewBlobUrl = URL.createObjectURL(blob);
+    video.isLoadingPreview = false;
+  })
+  .catch(() => {
+    video.previewBlobUrl = video.link;
+  });
+}
 stopPreview(video: any) {
   video.mostrarPreview = false;
+  video.isPlayingPreview = false;
+
+  const index = this.videos.indexOf(video);
+  const videoEl = this.previewVideos.toArray()[index]?.nativeElement;
+  if (videoEl) {
+    videoEl.pause();
+    videoEl.currentTime = 0; 
+  }
 }
 
 forceMute(event: any) {
@@ -222,6 +246,7 @@ getPreviewStartTime(duracion: number): number {
   cargarStreams(): void {
     this.streamService.listarStreams().subscribe({
       next: (res) => {
+        console.log(res)
         this.streams = res.map((stream: any) => ({
           ...stream,
         }));

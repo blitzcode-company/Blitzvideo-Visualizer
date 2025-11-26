@@ -1,4 +1,10 @@
-class u {
+import {
+  __spreadProps,
+  __spreadValues
+} from "./chunk-PZQZAEDH.js";
+
+// node_modules/laravel-echo/dist/echo.js
+var u = class {
   constructor() {
     this.notificationCreatedEvent = ".Illuminate\\Notifications\\Events\\BroadcastNotificationCreated";
   }
@@ -26,8 +32,8 @@ class u {
   stopListeningForWhisper(e, t) {
     return this.stopListening(".client-" + e, t);
   }
-}
-class d {
+};
+var d = class {
   /**
    * Create a new class instance.
    */
@@ -46,17 +52,17 @@ class d {
   setNamespace(e) {
     this.namespace = e;
   }
-}
+};
 function w(n) {
   try {
     new n();
   } catch (e) {
     if (e instanceof Error && e.message.includes("is not a constructor"))
-      return !1;
+      return false;
   }
-  return !0;
+  return true;
 }
-class l extends u {
+var l = class extends u {
   /**
    * Create a new class instance.
    */
@@ -132,8 +138,8 @@ class l extends u {
   on(e, t) {
     return this.subscription.bind(e, t), this;
   }
-}
-class f extends l {
+};
+var f = class extends l {
   /**
    * Send a whisper event to other clients in the channel.
    */
@@ -143,8 +149,8 @@ class f extends l {
       t
     ), this;
   }
-}
-class g extends l {
+};
+var g = class extends l {
   /**
    * Send a whisper event to other clients in the channel.
    */
@@ -154,8 +160,8 @@ class g extends l {
       t
     ), this;
   }
-}
-class y extends f {
+};
+var y = class extends f {
   /**
    * Register a callback to be called anytime the member list changes.
    */
@@ -189,8 +195,8 @@ class y extends f {
       e(t.info);
     }), this;
   }
-}
-class b extends u {
+};
+var b = class extends u {
   /**
    * Create a new class instance.
    */
@@ -265,8 +271,8 @@ class b extends u {
       (s) => s !== t
     )), (!t || this.listeners[e].length === 0) && (this.events[e] && (this.socket.removeListener(e, this.events[e]), delete this.events[e]), delete this.listeners[e]);
   }
-}
-class v extends b {
+};
+var v = class extends b {
   /**
    * Send a whisper event to other clients in the channel.
    */
@@ -277,8 +283,8 @@ class v extends b {
       data: t
     }), this;
   }
-}
-class m extends v {
+};
+var m = class extends v {
   /**
    * Register a callback to be called anytime the member list changes.
    */
@@ -315,8 +321,8 @@ class m extends v {
       (t) => e(t.user_info)
     ), this;
   }
-}
-class h extends u {
+};
+var h = class extends u {
   /**
    * Subscribe to a channel.
    */
@@ -363,24 +369,24 @@ class h extends u {
   on(e, t) {
     return this;
   }
-}
-class k extends h {
+};
+var k = class extends h {
   /**
    * Send a whisper event to other clients in the channel.
    */
   whisper(e, t) {
     return this;
   }
-}
-class C extends h {
+};
+var C = class extends h {
   /**
    * Send a whisper event to other clients in the channel.
    */
   whisper(e, t) {
     return this;
   }
-}
-class _ extends k {
+};
+var _ = class extends k {
   /**
    * Register a callback to be called anytime the member list changes.
    */
@@ -405,8 +411,8 @@ class _ extends k {
   leaving(e) {
     return this;
   }
-}
-const c = class c {
+};
+var c = class c2 {
   /**
    * Create a new class instance.
    */
@@ -417,11 +423,9 @@ const c = class c {
    * Merge the custom options with the defaults.
    */
   setOptions(e) {
-    this.options = {
-      ...c._defaultOptions,
-      ...e,
+    this.options = __spreadProps(__spreadValues(__spreadValues({}, c2._defaultOptions), e), {
       broadcaster: e.broadcaster
-    };
+    });
     let t = this.csrfToken();
     t && (this.options.auth.headers["X-CSRF-TOKEN"] = t, this.options.userAuthentication.headers["X-CSRF-TOKEN"] = t), t = this.options.bearerToken, t && (this.options.auth.headers.Authorization = "Bearer " + t, this.options.userAuthentication.headers.Authorization = "Bearer " + t);
   }
@@ -448,8 +452,8 @@ c._defaultOptions = {
   key: null,
   namespace: "App.Events"
 };
-let i = c;
-class o extends i {
+var i = c;
+var o = class extends i {
   constructor() {
     super(...arguments), this.channels = {};
   }
@@ -554,8 +558,8 @@ class o extends i {
   disconnect() {
     this.pusher.disconnect();
   }
-}
-class I extends i {
+};
+var I = class extends i {
   constructor() {
     super(...arguments), this.channels = {};
   }
@@ -647,8 +651,8 @@ class I extends i {
   disconnect() {
     this.socket.disconnect();
   }
-}
-class p extends i {
+};
+var p = class extends i {
   constructor() {
     super(...arguments), this.channels = {};
   }
@@ -708,8 +712,8 @@ class p extends i {
    */
   disconnect() {
   }
-}
-class E {
+};
+var E = class {
   /**
    * Create a new class instance.
    */
@@ -727,18 +731,16 @@ class E {
    */
   connect() {
     if (this.options.broadcaster === "reverb")
-      this.connector = new o({
-        ...this.options,
+      this.connector = new o(__spreadProps(__spreadValues({}, this.options), {
         cluster: ""
-      });
+      }));
     else if (this.options.broadcaster === "pusher")
       this.connector = new o(this.options);
     else if (this.options.broadcaster === "ably")
-      this.connector = new o({
-        ...this.options,
+      this.connector = new o(__spreadProps(__spreadValues({}, this.options), {
         cluster: "",
         broadcaster: "pusher"
-      });
+      }));
     else if (this.options.broadcaster === "socket.io")
       this.connector = new I(this.options);
     else if (this.options.broadcaster === "null")
@@ -860,11 +862,11 @@ class E {
       }
     );
   }
-}
+};
 export {
   u as Channel,
   i as Connector,
   d as EventFormatter,
   E as default
 };
-//# sourceMappingURL=echo.js.map
+//# sourceMappingURL=laravel-echo.js.map

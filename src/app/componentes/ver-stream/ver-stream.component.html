@@ -1,94 +1,151 @@
-<app-header></app-header>
-<div *ngIf="isBlocked || errorMessage" class="error-message">
-  <mat-card>
-    <mat-card-title>{{ isBlocked ? 'Video Bloqueado' : 'Error' }}</mat-card-title>
-    <mat-card-content>{{ isBlocked ? 'Este video ha sido bloqueado y no se puede acceder.' : errorMessage }}</mat-card-content>
-  </mat-card>
+<app-header (toggleSidebar)="toggleSidebar()"></app-header>
+
+<div class="sidebar-container" *ngIf="sidebarVisible" [class.open]="sidebarVisible">
+  <app-sidebar></app-sidebar>
 </div>
 
-<div *ngIf="!stream">
-  <p>Cargando stream...</p>
-</div>
-<div class="container-fluid">
-  <div class="video-container" *ngIf="!isBlocked && !errorMessage && stream">
-    <div class="tituloyvideo">
-      <h1>{{ stream.titulo }}</h1>
+<div class="overlay" [class.active]="sidebarVisible" (click)="toggleSidebar()"></div>
+
+<div class="containerHome">
+
+    <div *ngIf="isBlocked || errorMessage" class="error-message">
+      <mat-card>
+        <mat-card-title>{{ isBlocked ? 'Stream Bloqueado' : 'Error' }}</mat-card-title>
+        <mat-card-content>{{ isBlocked ? 'Este stream ha sido bloqueado y no se puede acceder.' : errorMessage }}</mat-card-content>
+      </mat-card>
     </div>
-  
-    <div class="reproductor" [ngClass]="{ 'cinema-mode': isCinemaMode }">
-      <div *ngIf="reproduciendoPublicidad" class="publicidad-overlay">
-        <img class="fotopublicidad" [src]="publicidad?.canal.user.foto">
-        <h1>{{ nombrePublicidad }} </h1>
-        <p>Publicidad: {{ publicidadDuracionRestante }} segundos restantes</p>
-        <button *ngIf="mostrarBotonSaltar" (click)="saltarPublicidad()">Saltar publicidad</button>
+
+    <div *ngIf="!stream">
+      <p>Cargando stream...</p>
+    </div>
+
+
+  <div class="container-fluid" [class.collapsed]="sidebarCollapsed" [ngClass]="{'cinema-mode': isCinemaMode}">
+    <div class="video-container" *ngIf="!isBlocked && !errorMessage && stream">
+      <div class="tituloyvideo">
+        <h1>{{ stream.titulo }}</h1> <a [routerLink]="['/overlay/chat']" [queryParams]="{ streamId: stream.id }">prueba de overlay</a>
+
       </div>
     
-      <app-reproductor-stream
-      [activoStream]="stream?.activo ?? 0"
-      [streamUrl]="streamUrl"
-        [isCinemaMode]="isCinemaMode"
-        (toggleCinemaMode)="handleCinemaMode($event)"
-      ></app-reproductor-stream>
-    </div>
-
-    <div class="info-container">
-      <a *ngIf="stream.canal" [routerLink]="['/canal', stream.canal.id]">
-        <div class="info-canal">
-          <img *ngIf="!stream.canal.user.foto" class="fotodeperfil" src="assets/images/user.svg" alt="Logo del canal del usuario" srcset="">
-          <img *ngIf="stream.canal.user.foto" class="fotodeperfil" [src]="stream.canal.user.foto" alt="Logo del canal del usuario" srcset="">
-        </div>
-      </a>
-
-      <div class="nombreysubs">
-        <a *ngIf="stream.canal" class="nombrecanal" [routerLink]="['/canal', stream.canal.id]">
-          {{ stream.canal.nombre }}</a>
-        <p class="suscriptores" *ngIf="numeroDeSuscriptores">
-          {{ numeroDeSuscriptores.numero_suscripciones }} suscriptores
-        </p>
-      </div>
- 
-      <button *ngIf="suscrito !== 'propietario'" class="boton" 
-        [ngClass]="{'suscrito': suscrito === 'suscrito'}" 
-        (click)="suscrito === 'suscrito' ? anularSuscripcion() : suscribirse()">
-        {{ suscrito === 'suscrito' ? 'Suscrito' : 'Suscribirse' }}
-      </button>
-      <ng-container *ngIf="suscrito === 'suscrito'">
-        <button mat-icon-button 
-          [matTooltip]="notificacionesActivas ? 'Desactivar notificaciones' : 'Activar notificaciones'" 
-          (click)="toggleNotificaciones()" 
-          [disabled]="cargando"
-          aria-label="Notificaciones">
-          <mat-icon color="primary">
-            {{ notificacionesActivas ? 'notifications' : 'notifications_off' }}
-          </mat-icon>
-        </button>
-      </ng-container>
-
-      <div class="puntuaryguardar">
-        <div class="options">
-          <i class="fa-solid fa-ellipsis-vertical botonTresPuntos" (click)="toggleDropdown()" aria-hidden="true"></i>
-          <div *ngIf="dropdownVisible" class="dropdown-menu">
-            <a (click)="openReportModal()">Reportar Stream</a>
+      <div class="video-page-wrapper" [ngClass]="{ 'cinema-mode': isCinemaMode }">
+        <div class="reproductor-wrapper">
+        <app-reproductor-stream
+          [activoStream]="stream?.activo ?? 0"
+          [streamUrl]="streamUrl"
+          [isCinemaMode]="isCinemaMode"
+          (toggleCinemaMode)="handleCinemaMode($event)"
+        ></app-reproductor-stream>
+          <div *ngIf="reproduciendoPublicidad" class="publicidad-overlay">
+            <img class="fotopublicidad" [src]="publicidad?.canal.user.foto" alt="Foto canal publicidad">
+            <div class="text-content">
+              <h1>{{ nombrePublicidad }}</h1>
+              <p>Publicidad: {{ publicidadDuracionRestante }} segundos restantes</p>
+            </div>
+            <button *ngIf="mostrarBotonSaltar" (click)="saltarPublicidad()">Saltar</button>
           </div>
         </div>
       </div>
-    </div>
- 
-    <div #descripcion class="descripcion" [ngClass]="{'expanded': isExpanded}">
-      <p class="fechadescripcion">Fecha de subida: {{ stream.created_at }}</p>
-      <p>{{ stream.descripcion }}</p>
-      <div class="toggle-container">
-        <a *ngIf="!isExpanded" class="toggle-link" (click)="toggleExpand($event)">Ver más</a>
-        <a *ngIf="isExpanded" class="toggle-link" (click)="toggleExpand($event)">Ver menos</a>
+
+      <div class="video-info-alineado">
+        <div class="info-y-acciones-header">
+          <div class="info-container">
+              <a *ngIf="stream.canal" [routerLink]="['/canal', stream.canal.id]">
+                <div class="info-canal">
+                  <img *ngIf="!stream.canal.user.foto" class="fotodeperfil" src="assets/images/user.svg" alt="Logo del canal del usuario" srcset="">
+                  <img *ngIf="stream.canal.user.foto" class="fotodeperfil" [src]="stream.canal.user.foto" alt="Logo del canal del usuario" srcset="">
+                </div>
+              </a>
+
+              <div class="nombreysubs">
+                <a *ngIf="stream.canal" class="nombrecanal" [routerLink]="['/canal', stream.canal.id]">
+                  {{ stream.canal.nombre }}</a>
+                <p class="suscriptores" *ngIf="numeroDeSuscriptores">
+                  {{ numeroDeSuscriptores.numero_suscripciones }} suscriptores
+                </p>
+              </div>
+              <div *ngIf="suscrito !== 'propietario'" class="acciones-suscripcion">
+                <button 
+                  class="boton" 
+                  [ngClass]="{'suscrito': suscrito === 'suscrito'}" 
+                  (click)="suscrito === 'suscrito' ? anularSuscripcion() : suscribirse()">
+                  {{ suscrito === 'suscrito' ? 'Suscrito' : 'Suscribirse' }}
+                </button>
+
+                <ng-container *ngIf="suscrito === 'suscrito'">
+                  <button mat-icon-button 
+                          [matTooltip]="notificacionesActivas ? 'Desactivar notificaciones' : 'Activar notificaciones'" 
+                          (click)="toggleNotificaciones()" 
+                          [disabled]="cargando">
+                    <mat-icon color="primary">
+                      {{ notificacionesActivas ? 'notifications' : 'notifications_off' }}
+                    </mat-icon>
+                  </button>
+                </ng-container>
+              </div>
+          </div>
+          <div class="acciones-derechas">
+            <div class="puntuaryguardar">
+              
+            </div>
+            <div class="options">
+              <i class="fa-solid fa-ellipsis-vertical botonTresPuntos" (click)="toggleDropdown()" aria-hidden="true"></i>
+                <div *ngIf="dropdownVisible" [class.show]="dropdownVisible" class="dropdown-menu">
+                  <a (click)="openReportModal()"><mat-icon>flag</mat-icon>
+                    Reportar Stream</a>
+                </div>
+            </div>
+            <div class="viewers-counter" *ngIf="stream?.activo === 1">
+              <mat-icon class="viewers-icon">visibility</mat-icon>
+              <span class="viewers-text">{{ viewersCount | number }}</span>
+            </div>
+          </div>
+        </div>
+        <div #descripcion class="descripcion" *ngIf="!isCinemaMode" [ngClass]="{'expanded': isExpanded}">
+          <p class="fechadescripcion">Fecha de subida: {{ stream.created_at }}</p>
+          <p [innerHTML]="stream.descripcion | safeHtml"></p>
+            <div class="toggle-container" *ngIf="showToggleLink">
+              <a class="toggle-link" 
+                (click)="toggleExpand($event)"
+                [innerText]="isExpanded ? 'Ver menos' : 'Ver más'">
+              </a>
+            </div>
+        </div>
       </div>
+    </div>
+    <div class="columnaLateral" *ngIf="!isCinemaMode">
+        <app-chat-de-stream
+        [streamId]="streamId"
+        [userId]="userId"
+        
+        
+        ></app-chat-de-stream>
+    </div>
+  <div class="video-footer" *ngIf="isCinemaMode">
+    <div class="cinema-footer-grid">
+      <div class="cinema-footer-left">
+          <div #descripcion class="descripcion" [ngClass]="{ 'expanded': isExpanded }">
+            <p class="fechadescripcion">Fecha de subida: {{ stream.created_at }}</p>
+            <p [innerHTML]="stream.descripcion | safeHtml"></p>
+            
+            <div class="toggle-container" *ngIf="showToggleLink">
+              <a class="toggle-link" (click)="toggleExpand($event)">
+                {{ isExpanded ? 'Ver menos' : 'Ver más' }}
+              </a>
+            </div>
+          </div>
+
+        
+      </div>
+
+      <div class="cinema-footer-right">
+        <div class="columnaLateral" *ngIf="isCinemaMode">
+          <app-chat-de-stream
+          [streamId]="streamId"
+          [userId]="userId"
+          ></app-chat-de-stream>
+        </div>
     </div>
   </div>
 
-  <div class="columnaLateral">
-   <app-chat-de-stream
-   [streamId]="streamId"
-   [userId]="userId"
-   
-   
-   ></app-chat-de-stream>
+      
 </div>

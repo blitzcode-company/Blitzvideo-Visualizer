@@ -46,6 +46,9 @@
                 "./node_modules/xgplayer/dist/index.min.js"
 
               ],
+              "allowedCommonJsDependencies": [
+                "pusher-js"
+              ],
               "server": "src/main.server.ts",
               "prerender": true,
               "ssr": {

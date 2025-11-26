@@ -642,10 +642,10 @@ checkDescriptionHeight(): void {
         this.actualizarTituloDePagina();
         this.calcularTotalVotos();
 
-        this.cdr.detectChanges(); // Primero aseguramos que el DOM se actualice
+        this.cdr.detectChanges(); 
 
           setTimeout(() => {
-            this.scheduleDescriptionHeightCheck(); // Usar función segura
+            this.scheduleDescriptionHeightCheck(); 
           }, 150);
         
         setTimeout(() => {
@@ -782,9 +782,8 @@ obtenerVideosDePlaylist(): void {
 
         const playlist = res.data.playlist;
 
-        // APLICAMOS EL FORMATEO DE DURACIÓN A CADA VIDEO
         this.videosDePlaylist = playlist.videos.map((v: any) => ({
-          ...new Videos(v), // si tu clase Videos ya tiene lógica, la mantenemos
+          ...new Videos(v), 
           duracionFormateadaPlaylist: this.convertirDuracion(v.duracion)
         }));
 
@@ -1039,7 +1038,7 @@ obtenerVideosDePlaylist(): void {
           () => {
             this.mensaje = 'Suscripción anulada';
             this.suscrito = 'desuscrito';
-            this.notificacionesActivas = false; // ← seguro
+            this.notificacionesActivas = false; 
             this.cdr.detectChanges();
           },
           error => this.handleError(error)

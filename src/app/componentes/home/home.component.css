@@ -1,9 +1,19 @@
+:host-context(.dark-theme) .containerHome{
+  background-color:  rgb(15 15 15);;
+}
+
+
+.containerHome {
+  min-height: 100vh;
+  width: 100%;
+  position: relative;
+  z-index: 1;
+}
+
 a {
   text-decoration: none;
   color: black;
 }
-
-
 
 
 .content-wrapper {
@@ -41,6 +51,14 @@ a {
   color: #333;
 }
 
+:host-context(.dark-theme) .stream-grid h2,
+:host-context(.dark-theme) .video-grid h2 {
+
+  color: rgb(255, 255, 255)
+
+}
+
+
 .stream-grid p,
 .video-grid p {
   grid-column: 1 / -1;
@@ -58,6 +76,12 @@ a {
   display: block;
 }
 
+:host-context(.dark-theme) .stream-card,
+:host-context(.dark-theme) .video-card {
+  background-color: rgb(15 15 15);
+  color: rgb(255, 255, 255)
+
+}
 
 
 .preview-video {
@@ -168,6 +192,14 @@ a {
   overflow: hidden;
 }
 
+
+:host-context(.dark-theme) .titulo-video, 
+:host-context(.dark-theme)  a {
+
+  color: rgb(255, 255, 255)
+
+}
+
 .meta {
   font-size: 0.875rem;
   color: #606060;
@@ -181,6 +213,7 @@ a {
   font-size: 0.9rem;
   color: #0f0f0f;
 }
+
 
 .canal-link {
   display: flex;
