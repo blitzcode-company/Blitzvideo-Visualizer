@@ -23,7 +23,7 @@
   <div class="container-fluid" [class.collapsed]="sidebarCollapsed" [ngClass]="{'cinema-mode': isCinemaMode}">
     <div class="video-container" *ngIf="!isBlocked && !errorMessage && stream">
       <div class="tituloyvideo">
-        <h1>{{ stream.titulo }}</h1> <a [routerLink]="['/overlay/chat']" [queryParams]="{ streamId: stream.id }">prueba de overlay</a>
+        <h1>{{ stream.video.titulo }}</h1>
 
       </div>
     
@@ -101,8 +101,8 @@
           </div>
         </div>
         <div #descripcion class="descripcion" *ngIf="!isCinemaMode" [ngClass]="{'expanded': isExpanded}">
-          <p class="fechadescripcion">Fecha de subida: {{ stream.created_at }}</p>
-          <p [innerHTML]="stream.descripcion | safeHtml"></p>
+          <p class="fechadescripcion">Fecha de subida: {{ stream.video.created_at }}</p>
+          <p [innerHTML]="stream.video.descripcion | safeHtml"></p>
             <div class="toggle-container" *ngIf="showToggleLink">
               <a class="toggle-link" 
                 (click)="toggleExpand($event)"
@@ -124,8 +124,8 @@
     <div class="cinema-footer-grid">
       <div class="cinema-footer-left">
           <div #descripcion class="descripcion" [ngClass]="{ 'expanded': isExpanded }">
-            <p class="fechadescripcion">Fecha de subida: {{ stream.created_at }}</p>
-            <p [innerHTML]="stream.descripcion | safeHtml"></p>
+            <p class="fechadescripcion">Fecha de subida: {{ stream.video.created_at }}</p>
+            <p [innerHTML]="stream.video.descripcion | safeHtml"></p>
             
             <div class="toggle-container" *ngIf="showToggleLink">
               <a class="toggle-link" (click)="toggleExpand($event)">

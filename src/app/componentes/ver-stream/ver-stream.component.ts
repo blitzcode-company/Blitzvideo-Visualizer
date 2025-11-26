@@ -109,7 +109,8 @@ export class VerStreamComponent implements OnInit, OnDestroy,  AfterViewInit, Af
 
 ngOnInit(): void {
   this.route.params.subscribe(params => {
-    this.streamId = params['id'];
+     this.streamId = +params['id']; 
+    console.log("STREAM ID:" + this.streamId)
     this.mostrarStream();
 
     this.obtenerUsuario(); 
@@ -123,6 +124,9 @@ ngOnInit(): void {
     const storedCinemaMode = localStorage.getItem('cinemaMode');
     this.isCinemaMode = storedCinemaMode ? JSON.parse(storedCinemaMode) : false;
 
+   
+  });
+  
     setTimeout(() => {
       this.setViewerId();         
       this.startHeartbeat();       
@@ -139,7 +143,6 @@ ngOnInit(): void {
           });
 
     }, 200); 
-  });
 
   this.mostrarSidebar();
   setTimeout(() => this.verificarSuscripcion(), 200);
@@ -172,7 +175,7 @@ marcarEntrada() {
 
 
   ngOnChanges() {
-    if (this.stream?.descripcion) {
+    if (this.stream?.video.descripcion) {
       setTimeout(() => {
         this.checkDescriptionHeight();
         this.cdr.detectChanges();
@@ -255,7 +258,7 @@ toggleExpand(event: Event): void {
 }
 
 checkDescriptionHeight(): void {
-  if (!this.descripcionElement?.nativeElement || !this.stream?.descripcion) {
+  if (!this.descripcionElement?.nativeElement || !this.stream?.video.descripcion) {
     this.showToggleLink = false;
     this.isExpanded = false;
     return;
@@ -435,9 +438,10 @@ checkDescriptionHeight(): void {
     this.streamService.obtenerInformacionStreams(this.streamId).subscribe(
       (res) => {
         console.log(res)
-        this.stream = res.transmision || {};
+        this.stream = res
         this.errorMessage = ''; 
-        this.canalId = this.stream.canal_id;
+        this.canalId = this.stream.canal.id;
+        console.log("Canal ID:", this.canalId);
 
 
 
@@ -462,23 +466,23 @@ checkDescriptionHeight(): void {
   }
   
   private procesarFechaDeCreacion(): void {
-    if (this.stream?.created_at) {
-      const fecha = new Date(this.stream.created_at);
+    if (this.stream?.video.created_at) {
+      const fecha = new Date(this.stream.video.created_at);
       if (!isNaN(fecha.getTime())) {
-        this.stream.created_at = this.convertirFechaALineaDeTexto(fecha);
+        this.stream.video.created_at = this.convertirFechaALineaDeTexto(fecha);
       }
     }
   }
   
   private actualizarTituloDePagina(): void {
-    if (this.stream?.titulo) {
-      this.titleService.setTitle(this.stream.titulo + ' - BlitzVideo');
+    if (this.stream?.video.titulo) {
+      this.titleService.setTitle(this.stream.video.titulo + ' - BlitzVideo');
     }
   }
   
   private obtenerDatosDelCanal(): void {
     this.streamId = this.stream.id;
-    this.canalId = this.stream.canal_id;
+    this.canalId = this.stream.video.canal_id;
   
     this.puedeEditarVideo = this.canalId === this.idDelCanalDelUsuario;
   }
