@@ -1,0 +1,156 @@
+<app-header (toggleSidebar)="toggleSidebar()"></app-header>
+
+<div class="containerHome" [class.collapsed]="sidebarCollapsed$ | async">
+  <div class="sidebar-container" [class.bottom-mobile]="isMobile">
+    <app-sidebar 
+      [collapsed]="!!(sidebarCollapsed$ | async)"
+      [class.bottom-mobile]="isMobile"
+      [isMobile]="isMobile">
+    </app-sidebar>
+  </div>
+
+  <div class="main-content" (click)="closeMenu()">
+
+      <div *ngIf="loading" class="loading">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Cargando playlist...</p>
+      </div>
+
+      <div *ngIf="error403" class="private-playlist blocked">
+        <div class="private-icon">
+          <i class="fas fa-lock"></i>
+        </div>
+        <h2>Esta lista de reproducción es privada</h2>
+        <p>Solo el propietario puede ver el contenido de esta lista.</p>
+      </div>
+      
+      <div *ngIf="playlistNotFound" class="not-found-playlist">
+      <div class="not-found-icon">
+        <i class="fas fa-search"></i>
+      </div>
+      <h2>No se encontró la playlist</h2>
+      <p>La lista de reproducción que buscas no existe o fue eliminada.</p>
+      <a routerLink="/" class="back-home-btn">
+        Volver a la página principal
+      </a>
+    </div>
+    <div class="playlist-container" *ngIf="playlist">
+      <ng-container *ngIf="playlist.acceso == 1 || esMiPlaylist">
+
+        <div class="private-notice" *ngIf="playlist.acceso == 0">
+          <i class="fas fa-lock"></i>
+          Esta es una lista de reproducción privada · Solo tú puedes verla
+        </div>
+
+        <div class="playlist-header">
+          <div class="playlist-info">
+            <h1 class="playlist-title">{{ playlist.nombre }}</h1>
+            <div class="playlist-meta">
+              <span class="count">{{ videos.length }} video{{ videos.length !== 1 ? 's' : '' }}</span>
+              <span class="visibility">
+                {{ playlist.acceso == 1 ? 'Pública' : 'Privada' }}
+              </span>
+              <span class="updated" *ngIf="playlist.updated_at">
+                • Actualizada {{ formatDate(playlist.updated_at) }}
+              </span>
+            </div>
+          </div>
+
+          <div class="playlist-controls">
+            <button class="play-all-btn" 
+                    (click)="verVideo(videos[0]?.id, playlist.id)" 
+                    [disabled]="videos.length === 0">
+              <i class="fas fa-play"></i> Reproducir todo
+            </button>
+
+            <ng-container *ngIf="!esMiPlaylist">
+              <button 
+                class="save-btn" 
+                *ngIf="!yaGuardada"
+                (click)="guardarPlaylist()" 
+                [disabled]="guardando">
+                <i class="fas" [ngClass]="guardando ? 'fa-spinner fa-spin' : 'fa-bookmark'"></i>
+                {{ guardando ? 'Guardando...' : 'Guardar' }}
+              </button>
+
+              <button class="saved-btn" *ngIf="yaGuardada" (click)="quitarDeGuardadas()">
+                <i class="fas fa-check"></i> Guardada
+              </button>
+            </ng-container>
+          </div>
+        </div>
+
+        <div class="video-list" 
+             cdkDropList 
+             [cdkDropListDisabled]="!esMiPlaylist"
+             (cdkDropListDropped)="drop($event)">
+
+          <div *ngIf="videos.length === 0" class="empty-playlist">
+            <div class="empty-icon">
+              <i class="fas fa-video-slash"></i>
+            </div>
+            <h3>Esta playlist está vacía</h3>
+            <p *ngIf="esMiPlaylist">
+              Agrega videos para comenzar a organizar tu contenido.
+            </p>
+            <p *ngIf="!esMiPlaylist">
+              El creador aún no ha agregado videos.
+            </p>
+          </div>
+
+          <div class="video-item" 
+               *ngFor="let video of videos; let i = index"
+               cdkDrag
+               [cdkDragDisabled]="!esMiPlaylist"
+               [cdkDragData]="video"
+               (mouseenter)="showActions(i)"
+               (mouseleave)="hideActions()"
+               [class.playing]="i === 0">
+
+            <div class="drag-handle" cdkDragHandle *ngIf="esMiPlaylist">
+              <i class="fas fa-grip-lines"></i>
+            </div>
+
+            <div class="video-index">{{ i + 1 }}</div>
+
+            <a (click)="verVideo(video.id, playlist.id)" class="thumbnail-link">
+              <div class="thumbnail-wrapper">
+                <img [src]="video.miniatura" 
+                     (error)="onImageError($event)" 
+                     class="thumbnail"
+                     [alt]="video.titulo">
+                <div class="duration">{{ formatDuration(video.duracion) }}</div>
+              </div>
+            </a>
+
+            <div class="video-details">
+              <a (click)="verVideo(video.id, playlist.id)" class="video-title-link">
+                <h3 class="video-title">{{ video.titulo }}</h3>
+              </a>
+              <p class="video-meta">
+                {{ video.visitas_count || 0 }} vista{{ (video.visitas_count || 0) !== 1 ? 's' : '' }} • 
+                {{ formatDate(video.created_at) }}
+              </p>
+            </div>
+
+            <div class="video-actions" 
+                 [class.visible]="hoveredIndex === i" 
+                 (click)="$event.stopPropagation()">
+              <button class="menu-button" 
+                      (click)="toggleMenu(i, $event)" 
+                      *ngIf="esMiPlaylist">
+                <i class="fas fa-ellipsis-v"></i>
+              </button>
+
+              <div class="menu-dropdown" [class.show]="menuOpenIndex === i">
+                <button (click)="quitarVideo(playlist.id, video.id)">
+                  <i class="fas fa-trash-alt"></i> Quitar de la lista
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+</div>

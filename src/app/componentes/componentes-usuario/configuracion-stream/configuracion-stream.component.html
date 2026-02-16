@@ -1,0 +1,59 @@
+<app-header></app-header>
+
+<div class="configuracion"  [class.collapsed]="sidebarCollapsed$ | async">
+    <div class="sidebar">
+        <a  href="/ajustes/perfil"> <mat-icon>account_box</mat-icon>
+          <span>Perfil</span></a>
+        <a href="/ajustes/pagos"><mat-icon>payment</mat-icon>
+          <span>Pagos</span></a>
+        <a class="selected"  href="/ajustes/streams"> <mat-icon>view_stream</mat-icon>
+          <span>Streams</span></a>
+      </div>
+
+    <div class="containerConfig container-fluid">
+        <div class="header">
+            <h2>Configuración de Stream</h2>
+            <hr />
+        </div>
+
+        <div class="streams-container" *ngIf="tieneCanal; else noCanalTemplate">
+            <div class="form-group">
+                <label for="rtmpServer">Servidor RTMP</label>
+                <div class="input-group">
+                  <input type="text" id="rtmpServer" class="form-control" 
+                         [value]="mostrarRtmpServer ? streamData.server : '********'" readonly />
+                  <button type="button" class="toggle-button" (click)="toggleMostrarRtmpServer()">
+                    <i class="fas" [ngClass]="mostrarRtmpServer ? 'fa-eye-slash' : 'fa-eye'"></i>
+                  </button>
+                  <button type="button" class="copy-button" (click)="copiarAlPortapapeles(streamData.server, 'server')">
+                    <i class="fas" [ngClass]="copiadoServer ? 'fa-check' : 'fa-copy'"></i>
+                  </button>
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label for="streamKey">Stream Key</label>
+                <div class="input-group">
+                  <input type="text" id="streamKey" class="form-control" 
+                         [value]="mostrarStreamKey ? streamData.stream_key : '********'" readonly />
+                  <button type="button" class="toggle-button" (click)="toggleMostrarStreamKey()">
+                    <i class="fas" [ngClass]="mostrarStreamKey ? 'fa-eye-slash' : 'fa-eye'"></i>
+                  </button>
+                  <button type="button" class="copy-button" (click)="copiarAlPortapapeles(streamData.stream_key, 'streamKey')">
+                    <i class="fas" [ngClass]="copiadoStreamKey ? 'fa-check' : 'fa-copy'"></i>
+                  </button>
+                </div>
+              </div>
+            <div class="alert-container" *ngIf="alertMessageStream">
+                <div class="alert alert-info">{{ alertMessageStream }}</div>
+            </div>
+            <button *ngIf="alertMessageStream && alertMessageStream.includes('Error')" class="btn-submit" (click)="cargarStreamData()">Reintentar</button>
+        </div>
+
+        <ng-template #noCanalTemplate>
+            <div class="alert alert-warning">
+                No tienes un canal creado. <a [href]="serverIp + '3001' + '/#/crearCanal'">Haz click aquí para crear uno</a>.
+            </div>
+        </ng-template>
+    </div>
+</div>

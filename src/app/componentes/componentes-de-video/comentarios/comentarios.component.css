@@ -1,0 +1,331 @@
+
+:host {
+  display: block;
+  width: 100%;
+  min-width: 0; 
+  box-sizing: border-box;
+}
+.comentarios-contador {
+  margin-bottom: 20px;
+}
+
+
+.btn .btn-primary {
+
+background-color: #32b1f9;
+  
+}
+
+
+.fotoInput {
+  width: 70px; 
+  height: 70px;
+  border-radius: 50%; 
+  object-fit: cover;
+  flex-shrink: 0; 
+}
+.mensaje-bloqueado {
+  color: #d32f2f; 
+  font-weight: bold;
+  margin-top: 10px;
+  padding: 10px;
+  background-color: #fce4e4;
+  border-radius: 4px;
+}
+
+.comentarios-container {
+  width: 100%;
+  min-width: 0; 
+  margin-top: 10px;
+
+
+
+}
+
+:host-context(.dark-theme) .comentariosycontador{
+background-color: #0f0f0f;
+}
+
+
+
+.comentarista {
+  display: flex;
+  flex-direction: column;
+}
+
+.inputyenvio {
+  display: flex;
+  align-items: center;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  width: 100%; 
+}
+
+.inputyenvio img.fotoInput {
+  margin-right: 15px; 
+}
+
+.inputyenvio input[type="text"] {
+  width: 100%; 
+  flex-grow: 1;
+  
+  height: 50px;
+  padding-left: 10px;
+  border: none; 
+  background-color: transparent;
+  border-bottom: 1px solid #ccc; 
+  transition: all 0.3s ease; 
+}
+
+.input-container {
+  position: relative; 
+  flex-grow: 1; 
+  min-width: 0;
+}
+.inputyenvio input[type="text"]:focus {
+  background-color: #fff; 
+  padding-bottom: 12px; 
+  border-bottom: 2px solid #0282e5;
+  outline: none; 
+}
+
+
+.inputyenvio .botonEnviar {
+  margin-top: 0;
+  margin-left: 20px;
+  border: none;
+  padding: 8px 16px;
+  font-weight: 600;
+  background-color: #32b1f9;
+  color: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.inputyenvio .botonEnviar:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.enviarComentario {
+  margin-left: 0;
+  background-color: #0282e5;
+  color: white;
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+}
+
+.botonResponder {
+  background-color: #0282e5;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+.comentario {
+  margin-bottom: 30px;
+}
+
+.respuesta {
+  margin-bottom: 10px;
+  margin-top: 10px;
+}
+
+.fotocomentador {
+  width: 50px;
+  border-radius: 100px;
+  object-fit: cover;
+
+}
+
+.fotoRespuesta {
+  width: 45px;
+  border-radius: 100px;
+}
+
+.comentario-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.comentarios-header {
+  margin-left: 10px;
+
+}
+.comentario-info {
+  margin-left: 10px;
+}
+
+.comentario-footer {
+  margin-top: 10px;
+}
+
+.responderComentario {
+  display: flex;
+  flex-direction: column;
+  margin-top: 10px;
+}
+
+.responderComentario input[type="text"] {
+  width: 100%; 
+  min-width: 0;
+  box-sizing: border-box; 
+  height: 40px;
+  background-color: #f1f1f1;
+  border: 1px solid #ccc;
+  padding-left: 10px;
+  margin-bottom: 10px;
+}
+
+.responderComentario button {
+ 
+  padding: 10px;
+  cursor: pointer;
+}
+
+.respuestas {
+  margin-top: 10px;
+}
+
+.sin-comentarios {
+  text-align: center;
+  padding: 60px 20px;
+  color: #606060;
+  font-family: 'Roboto', sans-serif;
+}
+
+.icono-comentario-vacio {
+  margin-bottom: 16px;
+  opacity: 0.6;
+}
+
+.icono-comentario-vacio svg {
+  width: 64px;
+  height: 64px;
+  color: #32b1f9;
+  opacity: 0.7;
+}
+
+.texto-vacio {
+  font-size: 18px;
+  font-weight: 500;
+  margin: 0 0 8px 0;
+  color: #333;
+}
+
+.subtexto-vacio {
+  font-size: 14px;
+  margin: 0;
+  color: #666;
+}
+
+.cargando-comentarios {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+  font-size: 14px;
+}
+.comentario-resaltado {
+  animation: resaltarComentario 3s ease-in-out;
+  background-color: rgba(50, 177, 249, 0.15) !important;
+  border-left: 4px solid #32b1f9 !important;
+  padding-left: 12px !important;
+  transition: all 0.3s ease;
+}
+
+@keyframes resaltarComentario {
+  0%   { background-color: rgba(50, 177, 249, 0.3); }
+  70%  { background-color: rgba(50, 177, 249, 0.15); }
+  100% { background-color: transparent; }
+}
+
+
+ :host-context(.dark-theme) .comentarios-contador {
+    color: #fbe0e7 !important;
+  }
+
+:host-context(.dark-theme)  .inputyenvio input[type="text"] {
+    background-color: transparent !important;
+    border-bottom: 1px solid #444 !important;
+    color: #fbe0e7 !important;
+  }
+
+ :host-context(.dark-theme) .inputyenvio input[type="text"]::placeholder {
+    color: #888 !important;
+  }
+
+
+  :host-context(.dark-theme) .botonEnviar:disabled {
+    background-color: #555 !important;
+  }
+
+ :host-context(.dark-theme) .responderComentario input[type="text"] {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid #444 !important;
+    color: #fbe0e7 !important;
+  }
+
+:host-context(.dark-theme)  .responderComentario input[type="text"]:focus {
+    border-color: #ff69b4 !important;
+    box-shadow: 0 0 0 2px rgba(255, 105, 180, 0.2) !important;
+  }
+
+:host-context(.dark-theme)  .sin-comentarios {
+    color: #aaaaaa !important;
+  }
+
+ :host-context(.dark-theme) .texto-vacio {
+    color: #e0e0e0 !important;
+  }
+
+:host-context(.dark-theme)  .subtexto-vacio {
+    color: #aaaaaa !important;
+  }
+
+ :host-context(.dark-theme) .icono-comentario-vacio svg {
+    opacity: 0.6;
+  }
+
+:host-context(.dark-theme)  .cargando-comentarios {
+    color: #aaaaaa !important;
+  }
+
+ :host-context(.dark-theme) .comentario-resaltado {
+    background-color: rgba(255, 105, 180, 0.15) !important;
+    border-left: 5px solid #ff69b4 !important;
+  }
+
+  @keyframes resaltarComentario {
+    0%   { background-color: rgba(255, 105, 180, 0.3); }
+    50%  { background-color: rgba(255, 105, 180, 0.2); }
+    100% { background-color: rgba(255, 105, 180, 0.15); }
+  }
+
+:host-context(.dark-theme)  .fotoInput {
+    border: 2px solid #333 !important;
+  }
+
+:host-context(.dark-theme)  .fotocomentador {
+    border: 2px solid #333 !important;
+  }
+
+:host-context(.dark-theme)  .fotoRespuesta {
+    border: 2px solid #333 !important;
+  }
+
+:host-context(.dark-theme) .mensaje-bloqueado {
+    background-color: rgba(211, 47, 47, 0.2) !important;
+    color: #ff8a80 !important;
+    border: 1px solid #d32f2f !important;
+  }
+
+
+:host-context(.dark-theme) .inputyenvio {
+
+  transition: all 0.2s ease;
+}
+

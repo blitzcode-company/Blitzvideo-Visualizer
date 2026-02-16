@@ -22,12 +22,10 @@ export class ModocineService {
 
   getCinemaModeValue(): boolean {
     const value = this.cinemaModeSubject.getValue();
-    console.log('Consultado valor actual de cinemaMode:', value);
     return value;
   }
 
   setCinemaMode(enabled: boolean): void {
-    console.log('Guardando cinemaMode:', enabled);
     localStorage.setItem(this.storageKey, JSON.stringify(enabled));
     this.cinemaModeSubject.next(enabled);
   }

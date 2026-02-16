@@ -1,0 +1,62 @@
+<app-header (toggleSidebar)="toggleSidebar()"></app-header>
+<div class="containerHome" [class.collapsed]="sidebarCollapsed$ | async">
+  <div class="sidebar-container"  [class.bottom-mobile]="isMobile" >
+    <app-sidebar 
+    [collapsed]="!!(sidebarCollapsed$ | async)"
+    [class.bottom-mobile]="isMobile"
+    [isMobile]="isMobile"
+        ></app-sidebar>
+  </div>
+
+
+<div class="content-wrapper">
+  <div class="search-results">
+    <div class="results-header">
+      <h2>{{ videos.length }} resultados para "{{ nombre }}"</h2>
+    </div>
+
+    <div class="container">
+      <div *ngIf="videos.length === 0" class="no-results">
+        <mat-icon style="font-size: 64px; color: #ccc;">search_off</mat-icon>
+        <h3>No se encontraron resultados</h3>
+        <p>Intenta con otras palabras como "{{ nombre }}"</p>
+      </div>
+
+      <div *ngIf="videos.length > 0" class="results-grid">
+        <a *ngFor="let video of videos" 
+          [routerLink]="['/video', video.id]" 
+          class="video-card">
+          
+          <div class="thumbnail-container">
+            <img class="thumbnail" 
+                [src]="video.miniatura" 
+                (error)="onImageError($event)" 
+                alt="{{ video.titulo }}">
+            <span class="duration">{{ video.duracionFormateada }}</span>
+            <div class="play-overlay">
+              <mat-icon>play_circle_filled</mat-icon>
+            </div>
+          </div>
+
+          <div class="video-info">
+            <h3 class="title">{{ video.titulo }}</h3>
+            <div class="channel-info">
+              <img class="channel-avatar" 
+                  [src]="video.canal.user?.foto || '/assets/images/user.svg'" 
+                  alt="Canal">
+              <div>
+                <p class="channel-name">{{ video.canal.nombre }}</p>
+                <p class="views-date">
+                  {{ video.visitas_count }} vistas • {{ video.created_at }}
+                </p>
+              </div>
+            </div>
+          <p class="descripcion" [innerHTML]="video.descripcion"></p>
+
+          </div>
+        </a>
+      </div>
+    </div>
+    </div>
+  </div>
+</div> 

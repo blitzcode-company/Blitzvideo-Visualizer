@@ -19,7 +19,6 @@ export class LoadingBarComponent {
       if (event instanceof NavigationEnd) {
         this.startLoading();
 
-        // Simula fin de carga rápido (puedes quitar esto si usas el interceptor HTTP)
         setTimeout(() => this.complete(), 400);
       }
     });

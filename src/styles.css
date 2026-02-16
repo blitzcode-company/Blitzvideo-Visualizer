@@ -9,9 +9,42 @@
     src: url("assets/fonts/Roboto-Bold.ttf") format("truetype");
 }
 
+:root,
+.light-theme {
+    --bg-primary: #ffffff;
+    --bg-secondary: #f9f9f9;
+    --bg-tertiary: #f5f5f5;
+    --text-primary: #000000;
+    --text-secondary: #606060;
+    --text-tertiary: #333333;
+    --border-color: #dee2e6;
+    --shadow-color: rgba(0, 0, 0, 0.1);
+    --hover-bg: #f0f0f0;
+    --active-bg: #e7f1ff;
+    --input-bg: #ffffff;
+    --input-border: #ced4da;
+}
+
+.dark-theme {
+    --bg-primary: #0f0f0f;
+    --bg-secondary: #1a1a1a;
+    --bg-tertiary: #242424;
+    --text-primary: #ffffff;
+    --text-secondary: #aaaaaa;
+    --text-tertiary: #cccccc;
+    --border-color: #3a3a3a;
+    --shadow-color: rgba(0, 0, 0, 0.3);
+    --hover-bg: #2a2a2a;
+    --active-bg: #1e3a5f;
+    --input-bg: #1a1a1a;
+    --input-border: #3a3a3a;
+}
+
 body {
     font-family: Roboto;
-
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 
@@ -26,5 +59,11 @@ body {
   }
   
   .sidebar-container:not(.sidebar-hidden) ~ .containerHome {
-    margin-left: 240px; /* mismo ancho que el sidebar */
+    margin-left: 240px; 
   }
+
+  :host-context(.dark-theme) .containerHome.collapsed .sidebar-container{
+    border-right:none;
+
+  }
+

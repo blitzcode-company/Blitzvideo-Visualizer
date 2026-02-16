@@ -1,0 +1,148 @@
+<app-header (toggleSidebar)="toggleSidebar()"></app-header>
+<div class="containerHome" [class.collapsed]="sidebarCollapsed$ | async">
+  <div class="sidebar-container"  [class.bottom-mobile]="isMobile">
+    <app-sidebar 
+    [collapsed]="!!(sidebarCollapsed$ | async)"
+    [class.bottom-mobile]="isMobile"
+    [isMobile]="isMobile"
+    
+    ></app-sidebar>
+  </div>
+
+  <div class="main-content">
+    <div
+      class="banner-container"
+      [ngStyle]="{
+        '--profile-banner': 'url(' + (canal?.portada ? canal.portada : 'assets/images/cover-default.png') + ')'
+      }"
+    ></div>
+
+    <header>
+      <div class="profile">
+        <img
+          [src]="usuarioCanal?.foto ? usuarioCanal.foto : 'assets/images/user.svg'"
+          alt="Foto de perfil"
+          class="profile-pic"
+        />
+        <div class="profile-info">
+          <h1>{{ canalNombre }}</h1>
+          <p class="subscriber-count">{{ numeroDeSuscriptores.numero_suscripciones || 0 }} suscriptores</p>
+          <div class="suscribirse">
+            <button
+              *ngIf="suscrito !== 'propietario'"
+              class="boton"
+              [ngClass]="{ suscrito: suscrito === 'suscrito' }"
+              (click)="toggleSuscripcion()"
+            >
+              {{ suscrito === 'suscrito' ? 'Suscrito' : 'Suscribirse' }}
+            </button>
+
+            <button
+              *ngIf="suscrito === 'suscrito'"
+              mat-icon-button
+              [matTooltip]="notificacionesActivas ? 'Desactivar notificaciones' : 'Activar notificaciones'"
+              (click)="toggleNotificaciones()"
+              [disabled]="cargando"
+              aria-label="Notificaciones"
+            >
+              <mat-icon color="primary">{{ notificacionesActivas ? 'notifications' : 'notifications_off' }}</mat-icon>
+            </button>
+
+            <span
+              *ngIf="usuario?.id !== canal?.user_id"
+              (click)="openReportModal()"
+              class="botonreportar"
+              title="Reportar"
+              matTooltip="Reportar cuenta"
+            >
+              <i class="fa-solid fa-flag" 
+              ></i>
+            </span>
+          </div>
+          
+        </div>
+      </div>
+    </header>
+
+    <nav >
+     <ul>
+        <li><a [routerLink]="['/canal', canalId]">Inicio</a></li>
+        <li ><a [routerLink]="['/canal', canalId, 'videos']">Videos</a></li>
+        <li><a [routerLink]="['/canal', canalId, 'sobre']" >Sobre este canal</a></li>
+        <li><a [routerLink]="['/canal', canalId, 'playlists']" >Listas de reproducción</a></li>
+      </ul>
+    </nav>
+  <main class="playlists-main">
+  <div class="no-content-message" *ngIf="(!playlists?.creadas?.length && !playlists?.guardadas?.length) && !cargando">
+    <i class="fas fa-list-ul no-content-icon"></i>
+    <h2>Este canal no tiene listas de reproducción</h2>
+  </div>
+
+  <div class="loading-playlists" *ngIf="cargando">
+    <mat-spinner diameter="50"></mat-spinner>
+  </div>
+
+  <section class="playlists-section" *ngIf="playlists?.creadas?.length">
+    <h2 class="section-title">
+      <mat-icon>queue_music</mat-icon>
+      Listas creadas ({{ playlists.creadas.length }})
+    </h2>
+
+    <div class="playlists-grid">
+      <div class="playlist-card" *ngFor="let playlist of playlists.creadas" 
+           [routerLink]="['/playlists', playlist.id]">
+        
+        <div class="thumbnail-wrapper">
+          <img [src]="playlist.miniatura || 'assets/images/playlist-default.png'" 
+               alt="Miniatura de {{ playlist.nombre }}"
+               class="playlist-thumbnail">
+          <div class="videos-count">
+            <mat-icon>playlist_play</mat-icon>
+            <span>{{ playlist.total_videos }}</span>
+          </div>
+        </div>
+
+        <div class="playlist-info">
+          <h3 class="playlist-title">{{ playlist.nombre }}</h3>
+          <p class="playlist-meta">
+            {{ playlist.total_videos }} video{{ playlist.total_videos !== 1 ? 's' : '' }}
+            • Creada el {{ playlist.created_at | date:'dd MMM yyyy' }}
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="playlists-section" *ngIf="playlists?.guardadas?.length">
+    <h2 class="section-title">
+      <mat-icon>bookmark_added</mat-icon>
+      Listas guardadas ({{ playlists.guardadas.length }})
+    </h2>
+
+    <div class="playlists-grid">
+      <div class="playlist-card" *ngFor="let playlist of playlists.guardadas" 
+           [routerLink]="['/playlists', playlist.id]">
+        
+        <div class="thumbnail-wrapper">
+          <img [src]="playlist.miniatura || 'assets/images/playlist-default.png'" 
+               alt="Miniatura de {{ playlist.nombre }}"
+               class="playlist-thumbnail">
+          <div class="videos-count">
+            <mat-icon>playlist_play</mat-icon>
+            <span>{{ playlist.total_videos }}</span>
+          </div>
+        </div>
+
+        <div class="playlist-info">
+          <h3 class="playlist-title">{{ playlist.nombre }}</h3>
+          <p class="playlist-meta">
+            Por <strong>{{ playlist.autor_nombre }}</strong>
+            • {{ playlist.total_videos }} video{{ playlist.total_videos !== 1 ? 's' : '' }}
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+  </div>
+</div>

@@ -1,0 +1,116 @@
+<app-header (toggleSidebar)="toggleSidebar()"></app-header>
+
+<div class="containerHome" [class.collapsed]="sidebarCollapsed$ | async">
+  <div class="sidebar-container" [class.bottom-mobile]="isMobile">
+    <app-sidebar 
+      [collapsed]="!!(sidebarCollapsed$ | async)"
+      [class.bottom-mobile]="isMobile"
+      [isMobile]="isMobile">
+    </app-sidebar>
+  </div>
+
+  <div class="main-content">
+    <div class="banner-container"
+         [ngStyle]="{'--profile-banner': 'url(' + (canal?.portada ? canal.portada : 'assets/images/cover-default.png') + ')'}">
+      <div class="banner-gradient"></div>
+    </div>
+
+     <header>
+      <div class="profile">
+        <img
+          [src]="usuarioCanal?.foto ? usuarioCanal.foto : 'assets/images/user.svg'"
+          alt="Foto de perfil"
+          class="profile-pic"
+        />
+        <div class="profile-info">
+          <h1>{{ canalNombre }}</h1>
+          <p class="subscriber-count">{{ numeroDeSuscriptores.numero_suscripciones || 0 }} suscriptores</p>
+          <div class="suscribirse">
+            <button
+              *ngIf="suscrito !== 'propietario'"
+              class="boton"
+              [ngClass]="{ suscrito: suscrito === 'suscrito' }"
+              (click)="toggleSuscripcion()"
+            >
+              {{ suscrito === 'suscrito' ? 'Suscrito' : 'Suscribirse' }}
+            </button>
+
+            <button
+              *ngIf="suscrito === 'suscrito'"
+              mat-icon-button
+              [matTooltip]="notificacionesActivas ? 'Desactivar notificaciones' : 'Activar notificaciones'"
+              (click)="toggleNotificaciones()"
+              [disabled]="cargando"
+              aria-label="Notificaciones"
+            >
+              <mat-icon color="primary">{{ notificacionesActivas ? 'notifications' : 'notifications_off' }}</mat-icon>
+            </button>
+
+            <span
+              *ngIf="usuario?.id !== canal?.user_id"
+              (click)="openReportModal()"
+              class="botonreportar"
+              title="Reportar"
+              matTooltip="Reportar cuenta"
+            >
+              <i class="fa-solid fa-flag" 
+              ></i>
+            </span>
+          </div>
+          
+        </div>
+      </div>
+    </header>
+        <nav *ngIf="tieneContenido">
+      <ul>
+        <li><a [routerLink]="['/canal', canalId]">Inicio</a></li>
+        <li><a [routerLink]="['/canal', canalId, 'videos']">Videos</a></li>
+        <li><a [routerLink]="['/canal', canalId, 'sobre']" >Sobre este canal</a></li>
+        <li><a [routerLink]="['/canal', canalId, 'playlists']" >Listas de reproducción</a></li>
+      </ul>
+    </nav>
+
+    <main class="sobre-main-content">
+      <div class="sobre-container">
+
+        <section class="seccion descripcion" *ngIf="canal?.descripcion">
+          <h2>Descripción</h2>
+          <div class="descripcion-content" [innerHTML]="canal.descripcion | safeHtml"></div>
+        </section>
+
+        <section class="seccion detalles">
+          <h2>Detalles</h2>
+          <div class="detalle-item">
+            <strong>Se unió</strong>
+            <span>{{ canal?.created_at | tiempo }}</span>
+          </div>
+          <div class="detalle-item">
+            <strong>Total de vistas</strong>
+            <span>{{ stats.visitas_totales | number }} vistas</span>
+          </div>
+          <div class="detalle-item">
+            <strong>Vídeos</strong>
+            <span>{{ stats.total_videos }} vídeos</span>
+          </div>
+          <div class="detalle-item" *ngIf="canal?.pais">
+            <strong>Ubicación</strong>
+            <span>{{ canal.pais }}</span>
+          </div>
+        </section>
+
+        <section class="seccion stats" >
+          <h2>Estadísticas del canal</h2>
+          <div class="stats-grid">
+            <div class="stat-card">
+              <mat-icon>trending_up</mat-icon>
+              <div>
+                <p>Crecimiento últimos 30 días</p>
+                <strong>+{{ stats.crecimiento_30dias | number }} suscriptores</strong>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+</div>

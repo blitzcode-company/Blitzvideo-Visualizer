@@ -90,6 +90,17 @@ export class VideosService {
   }
 
 
+    listarVideosMasVistos():Observable<any> {
+    const httpOptions = {
+      headers: new HttpHeaders({
+          'Content-Type' : 'application/json',
+      })
+    }
+    const url = `${this.apiUrl}api/v1/videos/masvistos`;
+    return this.httpClient.get<Videos>(url, httpOptions);
+  }
+
+
   listarVideosRelacionados(idVideo: any) {
     const url = `${this.apiUrl}api/v1/videos/${idVideo}/relacionados`;
 

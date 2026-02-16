@@ -21,6 +21,11 @@ export class CanalService {
     return this.httpClient.get(url);
   }
 
+    informacionSobreElCanal(canalId: any): Observable<any> {
+    const url = `${this.apiUrl}api/v1/canal/${canalId}/sobre`;
+
+    return this.httpClient.get(url);
+  }
   crearCanal(userId: any, canal:any): Observable<any> {
     const url = `${this.apiUrl}api/v1/canal/${userId}`;
     const httpOptions = {

@@ -1,0 +1,68 @@
+.modal-header {
+  padding: 20px 24px 0;
+}
+
+h2 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+}
+
+.warning-icon {
+  color: #ff9800;
+  font-size: 28px;
+  width: 28px;
+  height: 28px;
+}
+
+.modal-content {
+  padding: 20px 24px;
+}
+
+.modal-content p {
+  margin: 0 0 12px 0;
+  font-size: 15px;
+  line-height: 1.5;
+  color: #555;
+}
+
+.warning-text {
+  font-size: 14px;
+  color: #d32f2f;
+  background-color: #ffebee;
+  padding: 12px;
+  border-radius: 6px;
+  border-left: 4px solid #d32f2f;
+}
+
+.modal-actions {
+  padding: 12px 24px 20px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.btn-cancelar {
+  min-width: 100px;
+}
+
+.btn-confirmar {
+  min-width: 140px;
+}
+
+:host-context(.dark-theme) h2 {
+  color: #000000;
+}
+
+:host-context(.dark-theme) .modal-content p {
+  color: #252525;
+}
+
+:host-context(.dark-theme) .warning-text {
+  background-color: rgba(211, 47, 47, 0.1);
+  color: #ef5350;
+}

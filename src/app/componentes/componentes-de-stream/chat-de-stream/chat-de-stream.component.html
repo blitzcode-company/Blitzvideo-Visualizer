@@ -1,0 +1,65 @@
+<!-- Botón de toggle cuando está colapsado - FUERA del wrapper -->
+<button *ngIf="chatCollapsed" class="chat-toggle-btn collapsed" (click)="toggleChat()">
+  <mat-icon>forum</mat-icon>
+  <span class="toggle-text">Chat</span>
+  <span *ngIf="unreadCount > 0" class="unread-badge">{{ unreadCount }}</span>
+</button>
+
+<div class="live-chat-wrapper" [class.collapsed]="chatCollapsed" [ngClass]="{'cinema-mode': isCinemaMode}">
+
+  <div class="chat-container">
+    <div class="chat-header">
+      <div class="chat-header-left">
+        <h3>Chat en vivo</h3>
+        <span class="live-indicator">
+          <span class="live-pulse"></span>
+          <span class="live-text">EN VIVO</span>
+        </span>
+      </div>
+      <button class="chat-collapse-btn" (click)="toggleChat()" [matTooltip]="chatCollapsed ? 'Mostrar chat' : 'Ocultar chat'">
+        <mat-icon>{{ chatCollapsed ? 'chevron_left' : 'chevron_right' }}</mat-icon>
+      </button>
+    </div>
+    <div #chatMessages class="chat-messages">
+      <div *ngFor="let message of messages; trackBy: trackByMessageId"
+           class="chat-message"
+           [class.my-message]="usuario?.name && message.user === usuario.name"
+           [@messageIn]>
+
+      
+
+        <div class="chat-content">
+          <div class="chat-meta">
+              <img class="chat-user-photo"
+             [src]="message.user_photo || 'assets/images/user.svg'"
+             [alt]="message.user"
+             loading="lazy">
+            <span class="chat-username"
+                  >
+              {{ message.user }}:
+            </span>
+           
+          </div>
+
+          <div class="chat-text">
+            {{ message.text }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chat-input">
+      <form (ngSubmit)="enviarMensaje()" class="chat-input-form">
+        <input [(ngModel)]="mensaje"
+               name="mensaje"
+               placeholder="Enviar mensaje al chat..."
+               autocomplete="off"
+               (keydown.enter)="enviarMensaje()">
+
+        <button type="submit" [disabled]="!mensaje.trim()">
+          <mat-icon>send</mat-icon>
+        </button>
+      </form>
+    </div>
+  </div>
+</div>

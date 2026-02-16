@@ -4,56 +4,57 @@ import { BrowserModule, provideClientHydration } from '@angular/platform-browser
 import { ChunkPipe } from './pipes/chunk.pipe'; 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { HomeComponent } from './componentes/home/home.component';
-import { HeaderComponent } from './componentes/header/header.component';
+import { HomeComponent } from './componentes/home/home/home.component';
+import { HeaderComponent } from './componentes/componentes-layout/header/header.component';
 import { CookieService } from 'ngx-cookie-service';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms'; 
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
-import { VerVideoComponent } from './componentes/ver-video/ver-video.component';
-import { EditarUsuarioComponent } from './componentes/editar-usuario/editar-usuario.component';
+import { VerVideoComponent } from './componentes/componentes-de-video/ver-video/ver-video.component';
+import { EditarUsuarioComponent } from './componentes/componentes-usuario/editar-usuario/editar-usuario.component';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
-import { ComentariosComponent } from './componentes/comentarios/comentarios.component';
+import { ComentariosComponent } from './componentes/componentes-de-video/comentarios/comentarios.component';
 import { UsuarioRequeridoComponent } from './Modales/usuario-requerido/usuario-requerido.component';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
-import { ResultadoDeBusquedaComponent } from './componentes/resultado-de-busqueda/resultado-de-busqueda.component'; 
+import { ResultadoDeBusquedaComponent } from './componentes/home/resultado-de-busqueda/resultado-de-busqueda.component';
 import { ComentariosService } from './servicios/comentarios.service';
-import { ContenidoDeComentariosComponent } from './componentes/contenido-de-comentarios/contenido-de-comentarios.component';
-import { VerCanalComponent } from './componentes/ver-canal/ver-canal.component';
-import { VideosDelCanalComponent } from './componentes/videos-del-canal/videos-del-canal.component';
+import { ContenidoDeComentariosComponent } from './componentes/componentes-de-video/contenido-de-comentarios/contenido-de-comentarios.component';
+import { VerCanalComponent } from './componentes/componentes-de-canal/ver-canal/ver-canal.component';
+import { VideosDelCanalComponent } from './componentes/componentes-de-canal/videos-del-canal/videos-del-canal.component';
 import {VgCoreModule} from '@videogular/ngx-videogular/core';
 import {VgControlsModule} from '@videogular/ngx-videogular/controls';
 import {VgOverlayPlayModule} from '@videogular/ngx-videogular/overlay-play';
 import {VgBufferingModule} from '@videogular/ngx-videogular/buffering';
-import { ReproductorVideoComponent } from './componentes/reproductor-video/reproductor-video.component'
+import { ReproductorVideoComponent } from './componentes/componentes-de-video/reproductor-video/reproductor-video.component';
 import { RouterModule } from '@angular/router';
-import { NoEncontradoComponent } from './componentes/no-encontrado/no-encontrado.component';
-import { ListaDeReproduccionComponent } from './componentes/lista-de-reproduccion/lista-de-reproduccion.component';
+import { NoEncontradoComponent } from './componentes/home/no-encontrado/no-encontrado.component';
+import { ListaDeReproduccionComponent } from './componentes/componentes-de-playlist/lista-de-reproduccion/lista-de-reproduccion.component';
 import { MatFormFieldModule } from '@angular/material/form-field'; 
 import { MatInputModule } from '@angular/material/input'; 
 import { MatSelectModule } from '@angular/material/select';
 import { MatOption } from '@angular/material/select';
-import { ContenidoListaDeReproduccionComponent } from './componentes/contenido-lista-de-reproduccion/contenido-lista-de-reproduccion.component';
-import { ConfirmacionDesuscribirModalComponent } from './componentes/confirmacion-desuscribir-modal/confirmacion-desuscribir-modal.component';
-import { AgregarListaComponent } from './componentes/agregar-lista/agregar-lista.component';
-import { CrearListaComponent } from './componentes/crear-lista/crear-lista.component';
+import { ContenidoListaDeReproduccionComponent } from './componentes/componentes-de-playlist/contenido-lista-de-reproduccion/contenido-lista-de-reproduccion.component';
+import { ConfirmacionDesuscribirModalComponent } from './componentes/modales/confirmacion-desuscribir-modal/confirmacion-desuscribir-modal.component';
+import { AgregarListaComponent } from './componentes/componentes-de-playlist/agregar-lista/agregar-lista.component';
+import { CrearListaComponent } from './componentes/componentes-de-playlist/crear-lista/crear-lista.component';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
-import { ModalEditarlistaComponent } from './componentes/modal-editarlista/modal-editarlista.component';
-import { PagosComponent } from './componentes/pagos/pagos.component';
-import { ConfiguracionDePerfilComponent } from './componentes/configuracion-de-perfil/configuracion-de-perfil.component';
-import { GraciasModalComponent } from './componentes/gracias-modal/gracias-modal.component';
-import { SuscripcionPaypalComponent } from './componentes/suscripcion-paypal/suscripcion-paypal.component';
-import { SeleccionPagoComponent } from './componentes/seleccion-pago/seleccion-pago.component';
-import { ModalReporteVideoComponent } from './componentes/modal-reporte-video/modal-reporte-video.component';
+import { ModalEditarlistaComponent } from './componentes/componentes-de-playlist/modal-editarlista/modal-editarlista.component';
+import { PagosComponent } from './componentes/componentes-de-pago/pagos/pagos.component';
+import { ConfiguracionDePerfilComponent } from './componentes/componentes-usuario/configuracion-de-perfil/configuracion-de-perfil.component';
+import { GraciasModalComponent } from './componentes/modales/gracias-modal/gracias-modal.component';
+import { ConfirmarBajaModalComponent } from './componentes/modales/confirmar-baja-modal/confirmar-baja-modal.component';
+import { SuscripcionPaypalComponent } from './componentes/componentes-de-pago/suscripcion-paypal/suscripcion-paypal.component';
+import { SeleccionPagoComponent } from './componentes/componentes-usuario/seleccion-pago/seleccion-pago.component';
+import { ModalReporteVideoComponent } from './componentes/modales/modal-reporte-video/modal-reporte-video.component';
 import { ReportesService } from './servicios/reportes.service';
-import { ModalReporteComentarioComponent } from './componentes/modal-reporte-comentario/modal-reporte-comentario.component';
-import { ModalReportarUsuarioComponent } from './componentes/modal-reportar-usuario/modal-reportar-usuario.component';
+import { ModalReporteComentarioComponent } from './componentes/modales/modal-reporte-comentario/modal-reporte-comentario.component';
+import { ModalReportarUsuarioComponent } from './componentes/modales/modal-reportar-usuario/modal-reportar-usuario.component';
 import { MatCardModule } from '@angular/material/card';
-import { VerStreamComponent } from './componentes/ver-stream/ver-stream.component';
-import { ReproductorStreamComponent } from './componentes/reproductor-stream/reproductor-stream.component';
-import { ConfiguracionStreamComponent } from './componentes/configuracion-stream/configuracion-stream.component';
-import { SidebarComponent } from './componentes/sidebar/sidebar.component';
+import { VerStreamComponent } from './componentes/componentes-de-stream/ver-stream/ver-stream.component';
+import { ReproductorStreamComponent } from './componentes/componentes-de-stream/reproductor-stream/reproductor-stream.component';
+import { ConfiguracionStreamComponent } from './componentes/componentes-usuario/configuracion-stream/configuracion-stream.component';
+import { SidebarComponent } from './componentes/componentes-layout/sidebar/sidebar.component';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -63,11 +64,11 @@ import Pusher from 'pusher-js';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatListModule } from '@angular/material/list';
 import { TiempoPipe } from './pipes/tiempo.pipe';
-import { ChatDeStreamComponent } from './componentes/chat-de-stream/chat-de-stream.component';
-import { HistorialComponent } from './componentes/historial/historial.component';
-import { TendenciasComponent } from './componentes/tendencias/tendencias.component';
-import { NuevosComponent } from './componentes/nuevos/nuevos.component';
-import { VideosDeEtiquetaComponent } from './componentes/videos-de-etiqueta/videos-de-etiqueta.component';
+import { ChatDeStreamComponent } from './componentes/componentes-de-stream/chat-de-stream/chat-de-stream.component';
+import { HistorialComponent } from './componentes/componentes-usuario/historial/historial.component';
+import { TendenciasComponent } from './componentes/home/tendencias/tendencias.component';
+import { NuevosComponent } from './componentes/home/nuevos/nuevos.component';
+import { VideosDeEtiquetaComponent } from './componentes/home/videos-de-etiqueta/videos-de-etiqueta.component';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatCheckbox, MatCheckboxChange } from '@angular/material/checkbox';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -78,7 +79,9 @@ import { LoadingBarComponent } from './componentes/shared/loading-bar/loading-ba
 import { LoadingBarService } from './servicios/loading-bar.service';
 import { LoadingInterceptor } from './servicios/core/interceptors/loading.service';
 import { provideHttpClient } from '@angular/common/http';
-
+import { InfoCanalComponent } from './componentes/componentes-de-canal/info-canal/info-canal.component';
+import { PlaylistDelCanalComponent } from './componentes/componentes-de-canal/playlist-del-canal/playlist-del-canal.component';
+import { MasVistosComponent } from './componentes/home/mas-vistos/mas-vistos.component';
 @NgModule({
   declarations: [
     AppComponent,
@@ -104,6 +107,7 @@ import { provideHttpClient } from '@angular/common/http';
     PagosComponent,
     ConfiguracionDePerfilComponent,
     GraciasModalComponent,
+    ConfirmarBajaModalComponent,
     SuscripcionPaypalComponent,
     SeleccionPagoComponent,
     ModalReporteVideoComponent,
@@ -121,6 +125,9 @@ import { provideHttpClient } from '@angular/common/http';
     VideosDeEtiquetaComponent,
     SafeHtmlPipe,
     LoadingBarComponent,
+    InfoCanalComponent,
+    PlaylistDelCanalComponent,
+    MasVistosComponent,
     
     
   ],

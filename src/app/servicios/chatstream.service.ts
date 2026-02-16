@@ -3,8 +3,9 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import { CookieService } from 'ngx-cookie-service';
 import { Observable, Subject, BehaviorSubject, filter, shareReplay } from 'rxjs';
-import Pusher from 'pusher-js';
+import { initEcho } from '../../echo';
 import Echo from 'laravel-echo';
+
 
 type PusherChannelWithListen = any; 
 
@@ -39,40 +40,13 @@ export class ChatstreamService {
     private cookie: CookieService,
     private ngZone: NgZone
   ) {
-    this.initEcho();
-  }
-
-  private initEcho() {
-    Pusher.logToConsole = environment.production === false;
-
-    const pusherClient = new Pusher('blitzvideo-key', {
-      wsHost: '172.18.0.17',
-      wsPort: 6001,
-      wssPort: 6001,
-      forceTLS: false,
-      enabledTransports: ['ws'],
-      cluster: 'mt1',
-      disableStats: true,
-      authEndpoint: 'http://172.18.0.2:8000/broadcasting/auth',
-      auth: {
-        headers: {
-          Authorization: 'Bearer ' + this.cookie.get('accessToken'),
-        }
-      }
-    });
-
-    this.echo = new Echo({
-      broadcaster: 'pusher',
-      client: pusherClient
-    });
-
-    pusherClient.connection.bind('connected', () => {
-      console.log('%c[ECHO] Conectado al WebSocket', 'color: green; font-weight: bold');
-    });
-
-    pusherClient.connection.bind('disconnected', () => {
-      console.log('%c[ECHO] Desconectado del WebSocket', 'color: red; font-weight: bold');
-    });
+    console.log('[CHAT SERVICE] Inicializando servicio...');
+    this.echo = initEcho(this.cookie);
+    console.log('[CHAT SERVICE] Echo inicializado:', this.echo);
+    
+    // Exponer Echo globalmente como en Creadores
+    (window as any).Echo = this.echo;
+    console.log('[CHAT SERVICE] Echo expuesto en window.Echo');
   }
 
   cargarMensaje(streamId: number): Observable<any> {
@@ -92,6 +66,7 @@ export class ChatstreamService {
 
   startListening(streamId: number): Observable<ChatMessage> {
     if (this.listeningStreamId === streamId && this.channel) {
+      console.log(`[CHAT SERVICE] Ya estamos escuchando el stream ${streamId}, reutilizando observable`);
       return this.messageStream$.asObservable();
     }
 
@@ -101,26 +76,48 @@ export class ChatstreamService {
     this.messagesSubject.next([]);
 
     return new Observable<ChatMessage>(observer => {
-      const channelName = `stream.${streamId}`;
-      this.channel = this.echo.private(channelName);
-      this.channelPublic = this.echo.channel(channelName);
+      const privateChannelName = `stream.${streamId}`; // Sin prefijo 'private-'
+      const publicChannelName = `stream.${streamId}`;
+      
+      console.log(`[CHAT SERVICE] Conectando a canales:`);
+      console.log(`[CHAT SERVICE] - Canal privado (usando .private()): ${privateChannelName}`);
+      console.log(`[CHAT SERVICE] - Canal público (usando .channel()): ${publicChannelName}`);
+      
+      // Canal privado para mensajes de chat - Echo añade el prefijo 'private-' automáticamente
+      console.log('[CHAT SERVICE] Intentando conectar al canal privado...');
+      this.channel = this.echo.private(privateChannelName);
+      console.log('[CHAT SERVICE] Canal privado conectado:', this.channel);
+      console.log('[CHAT SERVICE] Nombre real del canal:', this.channel.name);
+      console.log('[CHAT SERVICE] Tipo de canal:', this.channel?.constructor?.name);
+      
+      // Verificar si el canal tiene el método notification (es canal privado)
+      console.log('[CHAT SERVICE] ¿Es canal privado?', typeof this.channel?.notification === 'function');
+      
+      // Canal público para eventos de viewers
+      console.log('[CHAT SERVICE] Intentando conectar al canal público...');
+      this.channelPublic = this.echo.channel(publicChannelName);
+      console.log('[CHAT SERVICE] Canal público conectado:', this.channelPublic);
 
+      console.log(`[CHAT SERVICE] Canales conectados, configurando listeners...`);
 
       this.channelPublic.listen('.stream-event', (event: any) => {
-        console.log(event)
-        if (event.type === 'viewer_count') {
+        console.log('[CHAT SERVICE] Evento .stream-event recibido desde canal PÚBLICO:', event);
+        
+        // Emitir todos los eventos, no solo viewer_count
+        this.streamEventsSubject.next(event);
 
-          this.streamEventsSubject.next(event);
-
-          this.ngZone.run(() => {
-            console.log("[VIEWERS EVENT]", event);
-          });
-        }
+        this.ngZone.run(() => {
+          console.log("[VIEWERS EVENT EN NGZONE]", event);
+        });
       });
 
+      // Verificar qué eventos están disponibles en el canal
+      console.log('[CHAT SERVICE] Canal privado:', this.channel);
+      
       this.channel.listen('.chat-message', (event: any) => {
+        console.log('[CHAT SERVICE] ✉️ Evento .chat-message recibido desde canal PRIVADO:', event);
+        
         this.ngZone.run(() => {
-          console.log('Evento recibido:', event);
           const msg: ChatMessage = {
             id: event.id ?? Date.now(),
             user: event.user_name ?? event.user?.name ?? 'Anónimo',
@@ -129,6 +126,8 @@ export class ChatstreamService {
             created_at: event.created_at ?? new Date().toISOString()
           };
 
+          console.log('[CHAT SERVICE] Mensaje procesado:', msg);
+
           const current = this.messagesSubject.getValue();
           this.messagesSubject.next([...current, msg]);
 
@@ -136,6 +135,13 @@ export class ChatstreamService {
           this.messageStream$.next(msg); 
         });
       });
+      
+      // También escuchar el evento sin el punto
+      this.channel.listen('chat-message', (event: any) => {
+        console.log('[CHAT SERVICE] ✉️ Evento chat-message (sin punto) recibido:', event);
+      });
+
+      console.log('[CHAT SERVICE] Listeners configurados correctamente');
 
       return () => {
         this.leaveChannel();
@@ -151,10 +157,21 @@ export class ChatstreamService {
         this.channel.stopListening('.chat-message');
         this.echo.leave(`private-stream.${this.listeningStreamId}`);
       } catch (e) {
-        console.warn('Error al dejar el canal:', e);
+        console.warn('Error al dejar el canal privado:', e);
       }
     }
+    
+    if (this.channelPublic && this.listeningStreamId) {
+      try {
+        this.channelPublic.stopListening('.stream-event');
+        this.echo.leave(`stream.${this.listeningStreamId}`);
+      } catch (e) {
+        console.warn('Error al dejar el canal público:', e);
+      }
+    }
+    
     this.channel = null;
+    this.channelPublic = null;
     this.listeningStreamId = null;
   }
 

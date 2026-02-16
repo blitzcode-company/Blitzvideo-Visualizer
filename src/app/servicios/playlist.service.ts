@@ -35,6 +35,18 @@ export class PlaylistService {
     );
   }
 
+ obtenerListasDeReproduccionDelCanal(canalId: number, userId?: number) {
+  const url = `${this.apiUrl}api/v1/playlists/canal/${canalId}/playlists`;
+
+  const params: any = {};
+
+  if (userId) {
+    params.user_id = userId.toString();
+  }
+
+  return this.http.get(url, { params });
+}
+
   obtenerSiguienteVideo(playlistId: number, videoId: number) {
     const url = `${this.apiUrl}api/v1/playlists/${playlistId}/siguiente/${videoId}`;
     console.log('URL GENERADA:', url); 
@@ -85,24 +97,19 @@ estaGuardada(playlistId: number, userId: number) {
 
   
 
- obtenerPlaylistConVideos(playlistId: number, videoId: number, fromPlaylist: boolean): Observable<any> {
-    const url = `${this.apiUrl}api/v1/playlists/${playlistId}/videos`;
-    const params = new HttpParams()
-      .set('video_id', videoId.toString())
-      .set('fromPlaylist', fromPlaylist.toString());
+obtenerPlaylistConVideos(playlistId: number, videoId: number, fromPlaylist: boolean, userId: number | null = null): Observable<any> {
+  const url = `${this.apiUrl}api/v1/playlists/${playlistId}/videos`;
+  let params = new HttpParams()
+    .set('video_id', videoId.toString())
+    .set('fromPlaylist', fromPlaylist.toString())
+    if (userId && userId > 0) {
+      params = params.set('user_id', userId.toString());
+    }
+    
 
-    return this.http.get<any>(url, { params }).pipe(
-      map(response => ({
-        ...response,
-        data: {
-          playlist: new Playlist({
-            ...response.data.playlist,
-            videos: response.data.videos,
-          }),
-        }
-      }))
-    );
-  }
+
+  return this.http.get<any>(url, { params });
+}
   
   crearLista(nombre: string, acceso: boolean, userId: number): Observable<any> {
     const url = `${this.apiUrl}api/v1/playlists`;

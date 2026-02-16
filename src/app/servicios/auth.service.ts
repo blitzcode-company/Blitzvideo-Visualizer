@@ -51,7 +51,25 @@ export class AuthService {
       })
     );
   }
+  
+cambiarPassword(data: {
+    user_id: number;
+    current_password: string;
+    new_password: string;
+    new_password_confirmation: string;
+  }):
+  Observable<any> {
+    const url = `${this.apiUrl}api/v1/usuario/password?user_id=${data.user_id}`;
 
+ 
+    const httpOptions = {
+        headers: new HttpHeaders({
+            'Content-Type' : 'application/json',
+            'Authorization' : 'Bearer ' + this.cookie.get('accessToken')
+        })
+      } 
+  return this.http.post(url, data, httpOptions);
+}
   
 
   obtenerCanalDelUsuario(id:number) {

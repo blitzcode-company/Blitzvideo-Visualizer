@@ -1,4 +1,8 @@
-import { Injectable, signal, effect } from '@angular/core';
+import { Injectable, signal, effect, Inject} from '@angular/core';
+import { PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { CookieService } from 'ngx-cookie-service';
+
 
 @Injectable({
   providedIn: 'root'
@@ -6,17 +10,26 @@ import { Injectable, signal, effect } from '@angular/core';
 export class ThemeService {
 
   temaActual = signal<'light' | 'dark' | 'auto'>('auto');
-
   private readonly STORAGE_KEY = 'tema';
+  private isBrowser = false;
 
-  constructor() {
+
+  constructor( @Inject(PLATFORM_ID) private platformId: Object, 
+                private cookieService: CookieService) {
+
+
+    this.isBrowser = isPlatformBrowser(this.platformId);
+
+    if (!this.isBrowser) return;
+
     this.cargarTemaGuardado();
+
 
     if (window.matchMedia) {
       const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
       mediaQuery.addEventListener('change', this.onSystemThemeChange.bind(this));
     }
-
+    
     effect(() => {
       this.aplicarTema();
     });
@@ -37,6 +50,7 @@ export class ThemeService {
   setTema(tema: 'light' | 'dark' | 'auto') {
     this.temaActual.set(tema);
     localStorage.setItem(this.STORAGE_KEY, tema);
+    this.cookieService.set(this.STORAGE_KEY, tema);
   }
 
   getTema() {
@@ -63,7 +77,6 @@ export class ThemeService {
     root.setAttribute('data-theme', isDark ? 'dark' : 'light');
   }
 
-  // Bonus: método para toggle rápido (útil en botones simples)
   toggle() {
     const nuevo = this.temaActual() === 'dark' ? 'light' : 'dark';
     this.setTema(nuevo);

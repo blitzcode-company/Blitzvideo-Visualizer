@@ -1,4 +1,4 @@
-interface Window {
-    Pusher: any;
-    Echo: any; 
-  }
+declare interface Window {
+Pusher: any;
+    Echo: Echo;
+    }

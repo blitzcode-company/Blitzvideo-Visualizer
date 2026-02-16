@@ -27,15 +27,22 @@ export class UsuarioGlobalService {
     private authService: AuthService,
     private suscripcionesService: SuscripcionesService
   ) {
+    const savedState = localStorage.getItem('sidebarCollapsed');
+    if (savedState !== null) {
+      this.sidebarCollapsedSubject.next(JSON.parse(savedState));
+    }
     this.inicializarUsuario();
   }
 
   toggleSidebar() {
-    this.sidebarCollapsedSubject.next(!this.sidebarCollapsedSubject.value);
+    const newState = !this.sidebarCollapsedSubject.value;
+    this.sidebarCollapsedSubject.next(newState);
+    localStorage.setItem('sidebarCollapsed', JSON.stringify(newState));
   }
 
   setSidebarVisible(visible: boolean) {
     this.sidebarCollapsedSubject.next(visible);
+    localStorage.setItem('sidebarCollapsed', JSON.stringify(visible));
   }
   
 
