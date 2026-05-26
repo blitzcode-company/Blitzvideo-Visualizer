@@ -44,7 +44,6 @@ export class ChatstreamService {
     this.echo = initEcho(this.cookie);
     console.log('[CHAT SERVICE] Echo inicializado:', this.echo);
     
-    // Exponer Echo globalmente como en Creadores
     (window as any).Echo = this.echo;
     console.log('[CHAT SERVICE] Echo expuesto en window.Echo');
   }
@@ -76,24 +75,21 @@ export class ChatstreamService {
     this.messagesSubject.next([]);
 
     return new Observable<ChatMessage>(observer => {
-      const privateChannelName = `stream.${streamId}`; // Sin prefijo 'private-'
+      const privateChannelName = `stream.${streamId}`; 
       const publicChannelName = `stream.${streamId}`;
       
       console.log(`[CHAT SERVICE] Conectando a canales:`);
       console.log(`[CHAT SERVICE] - Canal privado (usando .private()): ${privateChannelName}`);
       console.log(`[CHAT SERVICE] - Canal público (usando .channel()): ${publicChannelName}`);
       
-      // Canal privado para mensajes de chat - Echo añade el prefijo 'private-' automáticamente
       console.log('[CHAT SERVICE] Intentando conectar al canal privado...');
       this.channel = this.echo.private(privateChannelName);
       console.log('[CHAT SERVICE] Canal privado conectado:', this.channel);
       console.log('[CHAT SERVICE] Nombre real del canal:', this.channel.name);
       console.log('[CHAT SERVICE] Tipo de canal:', this.channel?.constructor?.name);
       
-      // Verificar si el canal tiene el método notification (es canal privado)
       console.log('[CHAT SERVICE] ¿Es canal privado?', typeof this.channel?.notification === 'function');
       
-      // Canal público para eventos de viewers
       console.log('[CHAT SERVICE] Intentando conectar al canal público...');
       this.channelPublic = this.echo.channel(publicChannelName);
       console.log('[CHAT SERVICE] Canal público conectado:', this.channelPublic);
@@ -103,7 +99,6 @@ export class ChatstreamService {
       this.channelPublic.listen('.stream-event', (event: any) => {
         console.log('[CHAT SERVICE] Evento .stream-event recibido desde canal PÚBLICO:', event);
         
-        // Emitir todos los eventos, no solo viewer_count
         this.streamEventsSubject.next(event);
 
         this.ngZone.run(() => {
@@ -111,7 +106,6 @@ export class ChatstreamService {
         });
       });
 
-      // Verificar qué eventos están disponibles en el canal
       console.log('[CHAT SERVICE] Canal privado:', this.channel);
       
       this.channel.listen('.chat-message', (event: any) => {
@@ -136,7 +130,6 @@ export class ChatstreamService {
         });
       });
       
-      // También escuchar el evento sin el punto
       this.channel.listen('chat-message', (event: any) => {
         console.log('[CHAT SERVICE] ✉️ Evento chat-message (sin punto) recibido:', event);
       });

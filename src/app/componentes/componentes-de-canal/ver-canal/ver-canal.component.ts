@@ -47,6 +47,7 @@ export class VerCanalComponent implements OnInit {
   sidebarVisible: boolean = true;
   tieneContenido: boolean = true;
 defaultAvatar = '/assets/images/user.svg';
+canalNotFound: boolean = false;
 
 
   constructor(
@@ -187,7 +188,6 @@ defaultAvatar = '/assets/images/user.svg';
       }
     );
 }
-canalNotFound: boolean = false;
   obtenerCanal(canalId: number) {
     this.cargando = true;
   
@@ -212,7 +212,7 @@ canalNotFound: boolean = false;
                 duracionFormateada: this.convertirDuracion(videoData.duracion)
               }));
   
-              this.videos = this.videosGeneral.slice(0, 3);
+              this.videos = this.videosGeneral.slice(0, 4);
   
               this.ultimoVideo = this.videosGeneral.reduce((prev: any, current: any) =>
                 (prev.id > current.id) ? prev : current

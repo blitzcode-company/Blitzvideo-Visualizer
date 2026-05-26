@@ -75,4 +75,22 @@ export class StreamService {
     return this.httpClient.get<any>(url, httpOptions);
 }
 
+  obtenerStreamActivo(userId: number): Observable<any> {
+    const params = new HttpParams().set('user_id', userId.toString());
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + this.cookie.get('accessToken')
+      }),
+      params: params
+    };
+    const url = `${this.apiUrl}api/v1/streams/activo/usuario`;
+    return this.httpClient.get<any>(url, httpOptions).pipe(
+      catchError(error => {
+        console.error('Error al obtener stream activo:', error);
+        return of({ stream: null });
+      })
+    );
+  }
+
 }

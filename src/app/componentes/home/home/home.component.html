@@ -96,6 +96,12 @@
       </video>
 
       <p class="duracionVideo">{{ video.duracionFormateada }}</p>
+      <div class="progress-container" *ngIf="video.progreso_porcentaje !== null">
+      <div class="progress-filled" 
+           [style.width.%]="video.progreso_porcentaje">
+      </div>
+    </div>
+
     </div>
 
     <div class="video-info">

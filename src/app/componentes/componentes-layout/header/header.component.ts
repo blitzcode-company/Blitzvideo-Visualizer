@@ -6,6 +6,7 @@ import { CookieService } from 'ngx-cookie-service';
 import { AuthService } from '../../../servicios/auth.service';
 import { Canal } from '../../../clases/canal';
 import { CanalService } from '../../../servicios/canal.service';
+import { StreamService } from '../../../servicios/stream.service';
 import { environment } from '../../../../environments/environment';
 import { NotificacionesService } from '../../../servicios/notificaciones.service';
 import { Notificacion } from '../../../clases/notificacion';
@@ -30,6 +31,7 @@ export class HeaderComponent {
     public themeService:ThemeService,
     private canalService: CanalService,
     private notificacionesService: NotificacionesService,
+    private streamService: StreamService,
 ){}    
 
   serverIp = environment.serverIp;
@@ -58,6 +60,7 @@ export class HeaderComponent {
   isTemaDropdownOpen = false; 
   mostrandoTemas = false;
   mostrandoTemasUsuario = false;
+  streamActivo: any = null;
 
   currentTheme: 'light' | 'dark' | 'auto' = 'auto';
   @Output() toggleSidebar = new EventEmitter<void>();
@@ -70,28 +73,38 @@ export class HeaderComponent {
   ngOnInit() {
     this.obtenerUsuario();
     this.cargarHistorialBusquedas();
-  effect(() => {
-    this.currentTheme = this.themeService.temaActual();
-  });
-
+    effect(() => {
+      this.currentTheme = this.themeService.temaActual();
+    });
   }
 
+  private cargarStreamActivo() {
+    if (this.usuario?.id) {
+      this.streamService.obtenerStreamActivo(this.usuario.id).subscribe({
+        next: (response) => {
+          this.streamActivo = response.stream;
+        },
+        error: (err) => {
+          console.error('Error al cargar stream activo:', err);
+          this.streamActivo = null;
+        }
+      });
+    }
+  }
 
-
-  
   private cargarNotificacionesOrdenadas(userId: number) {
-  this.notificacionesService.listarNotificaciones(userId).subscribe(res => {
-    const lista = res.notificaciones || [];
-    
-    this.notificaciones = lista
-      .slice() 
-      .sort((a: any, b: any) => 
-        new Date(b.fecha_creacion).getTime() - new Date(a.fecha_creacion).getTime()
-      );
-  });
-}
-
-
+    this.notificacionesService.listarNotificaciones(userId).subscribe(res => {
+      const lista = res.notificaciones || [];
+      
+      this.notificaciones = lista
+        .slice() 
+        .sort((a: any, b: any) => 
+          new Date(b.fecha_creacion).getTime() - new Date(a.fecha_creacion).getTime()
+        );
+      
+      this.contadorNotificaciones = this.notificaciones.filter(n => n.leido === 0).length;
+    });
+  }
   cambiarTema(tema: 'light' | 'dark' | 'auto') {
     this.themeService.setTema(tema);
     this.isTemaDropdownOpen = false;
@@ -114,6 +127,7 @@ export class HeaderComponent {
   
       this.obtenerCanal(this.userId);
       this.obtenerNotificacionesDelMes(this.userId);
+      this.cargarStreamActivo();
   
       this.logoUrl = this.usuario.premium ? 'assets/images/logopremium.png' : 'assets/images/logo.png';
     });
@@ -214,33 +228,6 @@ obtenerNotificacionesDelMes(userId: number): void {
   });
 }
   
-irANotificacion(notif: any) {
-  this.marcarComoVista(notif.id);
-
-  if (notif.id_video && notif.referencia_id) {
-    localStorage.setItem('highlightCommentId', notif.referencia_id.toString());
-    
-   this.router.navigate(['/video', notif.id_video]).then(() => {
-     this.router.navigate(['/video', notif.id_video], { queryParams: { comment: notif.referencia_id } });
-    });
-  }
-}
-
-marcarComoVista(notificacionId: number): void {
-  const notif = this.notificaciones.find(n => n.id === notificacionId);
-  if (!notif || notif.leido === 1) return;
-
-  this.notificacionesService.marcarNotificacionComoVista(notificacionId, this.usuario.id).subscribe({
-    next: () => {
-      notif.leido = 1;
-      this.contadorNotificaciones = Math.max(0, this.contadorNotificaciones - 1); 
-    },
-    error: (err) => {
-      console.error('Error al marcar como vista:', err);
-    }
-  });
-}
-
 
   buscarVideos() {
     if (this.nombre?.trim()) {
@@ -321,16 +308,10 @@ onImgError(event: any) {
   event.target.src = 'assets/images/cover-default.png'; 
 }
 
-  trackByNotif(index: number, notif: any): any {
-    return notif.id;
-  }
-
 toggleNotiDropdown() {
   this.isNotiDropdownOpen = !this.isNotiDropdownOpen;
   this.isUserDropdownOpen = false;
   this.isCrearDropdownOpen = false;
-
-  
 }
 
 toggleTemaDropdown() {
@@ -369,34 +350,18 @@ toggleCrearDropdown() {
 
   irLive() {
     this.toggleCrearDropdown();
-    window.open(this.serverIp + '3001/#/crearStream', '_blank');
+    
+    if (this.streamActivo && this.streamActivo.id) {
+      window.open(this.serverIp + '3001/#/monitorear-stream/' + this.streamActivo.id, '_blank');
+    } else {
+      window.open(this.serverIp + '3001/#/crearStream', '_blank');
+    }
   }
 
   irSubirVideo() {
     this.toggleCrearDropdown();
     window.open(this.serverIp + '3001/#/subirVideo', '_blank');
   }
-
-
-
-obtenerIconoNotificaciones(): string {
-  if (this.contadorNotificaciones === 0) return 'notifications_none';
-  if (this.isNotiDropdownOpen) return 'notifications_active';
-  return 'notifications';
-}
-
-
-getNombreUsuario(n: Notificacion): string {
-  switch (n.referencia_tipo) {
-    case 'new_video':
-      return n.nombre_subidor || 'Alguien';
-    case 'new_comment':
-    case 'new_reply':
-      return n.nombre_comentador || 'Alguien';
-    default:
-      return n.nombre_comentador || n.nombre_subidor || 'Alguien';
-  }
-}
 
 @HostListener('document:click', ['$event'])
 onDocumentClick(event: Event) {

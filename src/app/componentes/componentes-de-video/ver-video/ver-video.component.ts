@@ -26,6 +26,7 @@ import { Usuario } from '../../../clases/usuario';
 import { NavigationEnd } from '@angular/router';
 import { combineLatest } from 'rxjs';
 import { AutoplayService } from '../../../servicios/autoplay.service';
+import { ChatstreamService } from '../../../servicios/chatstream.service';
 
 
 @Component({
@@ -84,8 +85,10 @@ export class VerVideoComponent implements OnInit, OnDestroy, AfterViewInit, Afte
   public videoPublicidadUrl: string | null = null;
   sidebarVisible: boolean = false;
   hoverValor: number | null = null;
-defaultAvatar = 'assets/images/user.svg';
-
+  defaultAvatar = 'assets/images/user.svg';
+  startedAt: string | null = null;
+  mensajesDelChat: any[] = [];
+  mensajesVisibles: any[] = [];
   videosRecomendadosColumnaLateral: any[] = [];   
   videosRecomendadosPantallaFinal: any[] = [];   
   mostrarColumnaLateral: boolean = false;     
@@ -146,6 +149,7 @@ defaultAvatar = 'assets/images/user.svg';
     private titleService: Title,
     private router: Router,
     private overlay: Overlay,
+    private chatService: ChatstreamService,
     private usuarioGlobal: UsuarioGlobalService,
     private puntuarService: PuntuacionesService,
     private playlistService: PlaylistService,
@@ -288,7 +292,6 @@ const idComentario = localStorage.getItem('scrollToCommentId');
 detectMobile() {
   this.isMobile = window.innerWidth <= 1024;
   
-  // Desactivar modo cinema en responsive
   if (this.isMobile && this.isCinemaMode) {
     this.isCinemaMode = false;
     this.cinemaModeService.setCinemaMode(false);
@@ -403,6 +406,9 @@ onTouchEnd() {
   @ViewChild('videoPageWrapper') videoPageWrapper!: ElementRef;
 
   ngAfterViewInit() {
+
+        this.scrollToBottom();
+
     this.overlayComment = document.querySelector('.comments-overlay') as HTMLElement;
     if (window.innerWidth > 1024) return;
 
@@ -434,6 +440,12 @@ onTouchEnd() {
       }
     });
 
+  const videoEl = this.obtenerElementoVideo();
+  if (videoEl) {
+    videoEl.addEventListener('canplay', () => {
+      console.log('[VIDEO] canplay disparado → forzando currentTime si hay progreso');
+    });
+  }
   }
 
 
@@ -462,7 +474,9 @@ onTouchEnd() {
     this.pendingTimeouts = [];
 
     this.visitaContada = false;
-    
+    if (this.progresoInterval) {
+    clearInterval(this.progresoInterval);
+  }
     this.limpiarEstadoPlaylist();
   }
 
@@ -596,21 +610,31 @@ onTouchEnd() {
 
   obtenerUsuario(): void {
     this.usuarioSubscription = this.usuarioGlobal.usuario$.subscribe(res => {
+      console.log('[obtenerUsuario] Usuario recibido:', res);
       this.usuario = res;
       console.log(res)
-      if (this.usuario && this.usuario.id) {
-        this.userId = this.usuario.id;
+
+if (this.usuario && this.usuario.id && this.usuario.id > 1) {  // >1 para evitar invitado
+      this.userId = this.usuario.id;
+      console.log('[obtenerUsuario] Usuario REAL confirmado:', this.userId);
+
+      // Solo si el video ya está cargado y no se visitó aún
+      if (this.videoId && this.video && !this.visitaYaContadaParaEsteVideo) {
+        console.log('[obtenerUsuario] Video listo → progreso + visita REAL');
+        this.cargarProgresoAnterior();
+        this.iniciarHeartbeatProgreso();
+        this.visitar(this.userId);  // siempre con ID real
+      }
+
         this.obtenerEstadoDeNotificaciones();
         this.obtenerPuntuacionActual();
         this.verificarSuscripcion();
-        if (!this.visitaYaContadaParaEsteVideo) {
-          this.visitar(this.userId);
-        }
+
       } else {
-        if (!this.visitaYaContadaParaEsteVideo) {
-          this.visitar(); 
-        }
+        console.log('[obtenerUsuario] Usuario NO logueado, es invitado');
+     
       }
+     
     });
     this.authService.mostrarUserLogueado().subscribe();
   }
@@ -679,7 +703,6 @@ checkDescriptionHeight(): void {
         console.log('[Recomendados] Cargados:', videosConDuracion.length);
         console.log('🎯 Videos disponibles para autoplay:', this.videosRecomendadosPantallaFinal.length);
         
-        // Notificar al reproductor que hay videos disponibles
         this.siguienteVideoDisponible = videosConDuracion.length > 0;
         this.cdr.detectChanges();
       },
@@ -764,6 +787,9 @@ checkDescriptionHeight(): void {
     event.target.src = 'assets/images/video-default.png';
   }
 
+  onImageErrorUser(event: any) {
+    event.target.src = 'assets/images/user.svg';
+  }
 
 
   publicidadCargando: boolean = false; 
@@ -825,7 +851,7 @@ checkDescriptionHeight(): void {
       (res) => {
         this.video = res;
         this.canalId = this.video.canal_id;
-        
+     
         if (this.video?.error?.code === 403) {
           this.isBlocked = true;
           this.errorMessage = 'Este video ha sido bloqueado y no se puede acceder.';
@@ -859,6 +885,9 @@ checkDescriptionHeight(): void {
           this.cdr.detectChanges();
           this.publicidadCargando = false;
         }, 800)
+        if (this.progresoInterval) clearInterval(this.progresoInterval);
+        this.iniciarHeartbeatProgreso();
+        this.cargarProgresoAnterior();   
       },
       error => {
         this.isBlocked = false;
@@ -867,6 +896,7 @@ checkDescriptionHeight(): void {
       }
     );
   }
+
 
   handleCinemaMode(isCinemaMode: boolean) {
     console.log('Iniciando handleCinemaMode, isCinemaMode:', isCinemaMode);
@@ -934,6 +964,96 @@ checkDescriptionHeight(): void {
       this.video.puntuacion_5;
   }
 
+private progresoInterval: any = null;
+
+
+private obtenerElementoVideo(): HTMLVideoElement | null {
+  return this.reproductor?.videoElement || null;
+}
+
+private cargarProgresoAnterior(): void {
+  console.log('[PROGRESO] Intentando cargar progreso - userId:', this.userId, 'videoId:', this.videoId);
+
+  if (!this.userId || !this.videoId) {
+    console.log('[PROGRESO] Faltan datos → saliendo');
+    return;
+  }
+
+  this.videoService.obtenerProgresoAnterior(this.userId, this.videoId)
+    .subscribe({
+      next: (res) => {
+        console.log('[PROGRESO] Respuesta backend:', res);
+
+        if (res.progreso <= 0) {
+          console.log('[PROGRESO] No hay progreso guardado (0)');
+          return;
+        }
+
+        const videoEl = this.obtenerElementoVideo();
+        if (!videoEl) {
+          console.warn('[PROGRESO] No se encontró <video> → saliendo');
+          return;
+        }
+
+        const onLoadedMetadata = () => {
+          console.log('[PROGRESO] loadedmetadata OK - readyState:', videoEl.readyState);
+          videoEl.currentTime = res.progreso;
+          console.log(`[PROGRESO] ¡Seteado! Tiempo: ${res.progreso}s`);
+
+          this.cdr.detectChanges();
+          videoEl.removeEventListener('loadedmetadata', onLoadedMetadata);
+        };
+
+        if (videoEl.readyState >= 1) { 
+          onLoadedMetadata();
+        } else {
+          videoEl.addEventListener('loadedmetadata', onLoadedMetadata);
+          console.log('[PROGRESO] Esperando loadedmetadata...');
+        }
+      },
+      error: (err) => console.error('[PROGRESO] Error:', err)
+    });
+}
+
+private iniciarHeartbeatProgreso(): void {
+  if (this.progresoInterval) clearInterval(this.progresoInterval);
+
+  this.progresoInterval = setInterval(() => {
+    const videoEl = this.obtenerElementoVideo();
+
+    console.log('[HEARTBEAT TICK] Elemento video encontrado:', !!videoEl);
+
+    if (!videoEl) {
+      console.warn('[HEARTBEAT] No se encontró <video>');
+      return;
+    }
+
+    console.log('[HEARTBEAT TICK] Estado video → paused:', videoEl.paused, 'ended:', videoEl.ended, 'readyState:', videoEl.readyState);
+
+    if (videoEl.paused || videoEl.ended || videoEl.readyState < 2) {
+      console.log('[HEARTBEAT] Video no listo/reproduciendo → skip');
+      return;
+    }
+
+    const current = Math.floor(videoEl.currentTime);
+    const duration = Math.floor(videoEl.duration || 0);
+
+    console.log('[HEARTBEAT TICK] Valor REAL capturado → currentTime:', current, 'duration:', duration);
+
+    if (current <= 0) {
+      console.log('[HEARTBEAT] currentTime es 0 → skip envío');
+      return;
+    }
+
+    this.videoService.enviarProgreso(this.userId, this.videoId, current, duration)
+      .subscribe({
+        next: () => console.log('[HEARTBEAT] Envío OK para', current, 'segundos'),
+        error: err => console.error('[HEARTBEAT] Error en envío:', err)
+      });
+  }, 5000);
+}
+
+streamIdDelVideo: number | null = null;
 
   mostrarVideo(): void {
     this.visitaContada = false;
@@ -944,7 +1064,13 @@ checkDescriptionHeight(): void {
 
     this.videoService.obtenerInformacionVideo(this.videoId).subscribe({
      next: (res) => {
-        this.video = new Videos(res);
+      this.video = new Videos(res);
+      this.startedAt = res.stream?.started_at ?? null;
+      this.streamIdDelVideo = res.stream?.id ?? null;
+
+     if (this.startedAt && this.streamIdDelVideo) {
+      this.cargarMensajesDelChat();
+    }
         console.log(res)
         this.cdr.detectChanges();
         this.errorMessage = '';
@@ -956,6 +1082,7 @@ checkDescriptionHeight(): void {
           this.mostrarColumnaLateral = true;
           return;
         }
+        this.cargarProgresoAnterior();
         
         if (this.playlistId) {
           this.obtenerVideosDePlaylist();
@@ -978,6 +1105,15 @@ checkDescriptionHeight(): void {
             this.scheduleDescriptionHeightCheck(); 
           }, 150);
         
+          this.scheduleTimeout(() => {
+          if (this.userId && this.userId > 1 && !this.visitaYaContadaParaEsteVideo) {
+            console.log('[mostrarVideo] Usuario real listo → visita con ID:', this.userId);
+            this.visitar(this.userId);
+          } else if (!this.userId && !this.visitaYaContadaParaEsteVideo) {
+            console.log('[mostrarVideo] No hay usuario real → visita como invitado');
+            this.visitar(); 
+          }
+        }, 800);
         this.scheduleTimeout(() => {
           this.mostrarColumnaLateral = true;
           this.obtenerVideosRelacionados(this.videoId);
@@ -1012,8 +1148,46 @@ checkDescriptionHeight(): void {
   });
   }
 
-
+onTiempoActualizado(segundos: number): void {
+  this.mensajesVisibles = this.mensajesDelChat.filter(msg => msg.offset <= segundos);
   
+  if (Math.floor(segundos) % 5 === 0) {
+    console.log('tiempo:', segundos);
+    console.log('startedAt:', this.startedAt);
+    console.log('mensajesDelChat:', this.mensajesDelChat.length);
+    console.log('mensajesVisibles:', this.mensajesVisibles.length);
+  }
+}
+
+private cargarMensajesDelChat(): void {
+  if (!this.streamIdDelVideo || !this.startedAt) return;
+
+  const startedAtUTC = this.startedAt.replace(' ', 'T') + 'Z';
+
+  this.chatService.cargarMensaje(this.streamIdDelVideo).subscribe({
+    next: (res: any) => {
+      this.mensajesDelChat = res.map((msg: any) => ({
+        id: msg.id,
+        user: msg.user?.name || 'Anónimo',
+        user_photo: msg.user?.foto || null,
+        text: msg.mensaje || '',
+        created_at: msg.created_at,
+        offset: (new Date(msg.created_at).getTime() - new Date(startedAtUTC).getTime()) / 1000
+      }));
+      console.log('primer mensaje offset:', this.mensajesDelChat[0]?.offset);
+    }
+  });
+}
+
+  @ViewChild('chatContainer') chatContainer!: ElementRef;
+
+
+  scrollToBottom(): void {
+    if (this.chatContainer) {
+      const element = this.chatContainer.nativeElement;
+      element.scrollTop = element.scrollHeight;
+    }
+  }
   private manejarBloqueo(): void {
     this.isBlocked = true;
     this.isNotFound = false;
@@ -1421,34 +1595,55 @@ crearActualizarPuntuacion(): void {
   );
 }
 
-visitar(userId?: number, progresoSegundos: number = 0, completado: boolean = false): void {
+  visitar(userId?: number, progresoSegundos: number = 0, completado: boolean = false): void {
   if (this.visitaYaContadaParaEsteVideo) {
     console.log('Visita ya contada para este video en esta sesión, ignorando...');
     return;
   }
 
-  if (this.visitaContada) {
-    return;
-  }
+    let userIdFinal = userId ?? this.userId;
 
+      // Si el ID final es inválido (null, undefined, 0 o <=1), forzar invitado
+      if (!userIdFinal || userIdFinal <= 1) {
+        userIdFinal = 1;  // invitado explícito
+        console.warn('[VISITAR] ID inválido o no disponible → forzando invitado (1)');
+      }
+
+    console.log('[VISITAR] DEBUG INFO:', {
+        userIdPassed: userId,
+        thisUserId: this.userId,
+        userIdFinal: userIdFinal,
+        esInvitado: userIdFinal === 1,
+        videoId: this.videoId
+      });
+    
   this.visitaYaContadaParaEsteVideo = true;
   this.visitaContada = true;
 
-  const esInvitado = !userId;
+  const esInvitado = userIdFinal === 1;
+  
   const contadorClave = esInvitado
     ? 'contadorVideosInvitado'
-    : `contadorVideos_${userId}`;
+    : `contadorVideos_${userIdFinal}`;
 
   let contadorTotal = this.cargarContador(contadorClave) || 0;
 
+  console.log('[VISITAR] Calling service with:', {
+    esInvitado,
+    videoId: this.videoId,
+    userIdFinal,
+    endpoint: esInvitado ? 'contarVisitaInvitado' : 'contarVisita'
+  });
+
   const visitaObservable = esInvitado
     ? this.videoService.contarVisitaInvitado(this.videoId, progresoSegundos, completado)
-    : this.videoService.contarVisita(this.videoId, userId!, progresoSegundos, completado);
+    : this.videoService.contarVisita(this.videoId, userIdFinal, progresoSegundos, completado);
 
   visitaObservable.pipe(take(1)).subscribe({
     next: (res) => {
       contadorTotal++;
       this.guardarContador(contadorClave, contadorTotal);
+      console.log('[VISITAR] Visita registrada exitosamente para user:', userIdFinal);
 
       if (contadorTotal >= 3 && (esInvitado || this.usuario?.premium !== 1)) {
         this.guardarContador(contadorClave, 0); 
@@ -1457,7 +1652,7 @@ visitar(userId?: number, progresoSegundos: number = 0, completado: boolean = fal
     },
     error: (err) => console.error('[Visitar] Error:', err)
   });
-}
+}  
 
   guardarContador(clave: string, valor: number): void {
     localStorage.setItem(clave, valor.toString());
@@ -1602,6 +1797,9 @@ visitar(userId?: number, progresoSegundos: number = 0, completado: boolean = fal
     );
   }
 
+
+  
+
   private handleError(error: any): void {
     if (error.status === 409) {
       this.mensaje = 'Ya estás suscrito a este canal.';
@@ -1610,3 +1808,4 @@ visitar(userId?: number, progresoSegundos: number = 0, completado: boolean = fal
     }
   }
 }
+

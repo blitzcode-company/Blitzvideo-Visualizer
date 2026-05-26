@@ -36,6 +36,7 @@
         <app-reproductor-stream
           [activoStream]="stream?.activo ?? 0"
           [streamUrl]="streamUrl"
+          [estadoStream]="estadoStream"
           [isCinemaMode]="isCinemaMode"
           (toggleCinemaMode)="handleCinemaMode($event)"
         ></app-reproductor-stream>
@@ -65,6 +66,7 @@
         <app-reproductor-stream
           [activoStream]="stream?.activo ?? 0"
           [streamUrl]="streamUrl"
+          [estadoStream]="estadoStream"
           [isCinemaMode]="isCinemaMode"
           (toggleCinemaMode)="handleCinemaMode($event)"
         ></app-reproductor-stream>
@@ -114,7 +116,7 @@
                   {{ numeroDeSuscriptores.numero_suscripciones }} suscriptores
                 </p>
               </div>
-              <div class="subscribe-section" *ngIf="suscrito !== 'propietario'">
+              <div class="subscribe-section" *ngIf="!puedeEditarStream && suscrito !== 'propietario'">
               <button
                 mat-stroked-button
                 class="subscribe-btn"
@@ -130,18 +132,33 @@
               <button
                 *ngIf="suscrito === 'suscrito'"
                 mat-icon-button
-                class="bell-btn"
+                class="bell-btn channel-notifications"
                 [class.active]="notificacionesActivas"
                 (click)="toggleNotificaciones()"
                 [disabled]="cargando"
-                [matTooltip]="notificacionesActivas ? 'Notificaciones activas' : 'Notificaciones desactivadas'"
+                [matTooltip]="notificacionesActivas ? 'Desactivar notificaciones de este canal' : 'Activar notificaciones de este canal'"
+                aria-label="Alternar notificaciones del canal"
               >
                 <mat-icon>
                   {{ notificacionesActivas ? 'notifications' : 'notifications_off' }}
                 </mat-icon>
               </button>
           </div>
+
+                    <div class="editarvideo" *ngIf="puedeEditarStream">
+            <a 
+              class="boton-editar-video"
+              [href]="serverIp + '3001' + '/#/monitorear-stream/' + stream.id"
+              target="_blank"
+              rel="noopener"
+            
+            >
+          <i class="fa-solid fa-monitor-waveform"></i>
+                <span>Monitorear stream</span>
+            </a>
+         </div>
           </div>
+
           <div class="acciones-derechas">
             <div class="puntuaryguardar">
               
@@ -172,7 +189,6 @@
       </div>
     </div>
 
-    <!-- Desktop chat -->
     <div class="columnaLateral" *ngIf="!isMobile && !isCinemaMode">
         <app-chat-de-stream
         [streamId]="streamId"

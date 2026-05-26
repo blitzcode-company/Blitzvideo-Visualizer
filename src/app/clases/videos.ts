@@ -31,6 +31,7 @@ export class Videos {
   promedio_puntuaciones: number;
   canal: Canal;
   duracionFormateada?: string; 
+  estado?: string;
 
   etiquetas: Etiqueta[];
   error?: {

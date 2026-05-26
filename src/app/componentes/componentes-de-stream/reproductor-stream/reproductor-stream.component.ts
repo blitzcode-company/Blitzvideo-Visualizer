@@ -1,4 +1,4 @@
-import { Component, Input, EventEmitter, Output, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef, SimpleChanges, ChangeDetectorRef, HostListener } from '@angular/core';
+import { Component, Input, EventEmitter, Output, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef, SimpleChanges, OnChanges, ChangeDetectorRef, HostListener } from '@angular/core';
 import { Subscription } from 'rxjs';
 import videojs from 'video.js';
 import Hls from 'hls.js';
@@ -9,7 +9,9 @@ import 'video.js/dist/video-js.css';
   templateUrl: './reproductor-stream.component.html',
   styleUrl: './reproductor-stream.component.css'
 })
-export class ReproductorStreamComponent {
+
+export class ReproductorStreamComponent implements OnInit, OnDestroy, AfterViewInit, OnChanges {
+
 
   private previousVolume = 0.7;
   private readonly STORAGE_KEY_VOLUME = 'playerVolume';
@@ -17,8 +19,9 @@ export class ReproductorStreamComponent {
   private videoElement!: HTMLVideoElement;
 
 
-@Input() streamUrl: string | null = null;
+  @Input() streamUrl: string | null = null;
   @Input() activoStream: number = 0;
+  @Input() estadoStream: string = ''; 
   @ViewChild('videoPlayer', { static: false }) videoPlayer: ElementRef<HTMLVideoElement> | undefined;
   @ViewChild('progressBar', { static: true }) progressBar!: ElementRef<HTMLInputElement>;
   @ViewChild('volumeSlider', { static: true }) volumeSlider!: ElementRef<HTMLInputElement>;
@@ -41,97 +44,157 @@ export class ReproductorStreamComponent {
 
   private retryInterval: any;
   private isTryingToLoad = false;
+  private hlsCheckInterval: any = null;
+  private cinemaModeSubscription?: Subscription;
 
   constructor(
     private cdr: ChangeDetectorRef,
 
   ) { }
 
-  ngOnInit(): void { }
+  ngOnInit(): void {
+    this.cargarAjustesDeSonido();
+  }
 
   ngAfterViewInit(): void {
-    if (this.videoPlayer?.nativeElement) {
-      const videoElement = this.videoPlayer.nativeElement;
-      videoElement.load();
-      videoElement.addEventListener('ended', this.onVideoEnd.bind(this));
+  const video = this.videoEl;
+  if (!video) return;
+
+  this.inicializarVideoJS(video);
+  this.configurarEventListeners();
+}
+
+private inicializarVideoJS(video: HTMLVideoElement): void {
+  this.isPlaying = !video.paused;
+  this.player = videojs(video, {
+    controls: false,
+    autoplay: 'muted',
+    preload: 'auto',
+    fluid: false,
+    responsive: true,
+    bigPlayButton: false,
+    liveui: true,
+    controlBar: {
+      volumePanel: { inline: false },
+      pictureInPictureToggle: true,
+    },
+    html5: {
+      vhs: {
+        overrideNative: true,
+        enableLowInitialPlaylist: true,
+        fastQualityChange: true,
+        smoothQualityChange: true,
+        liveSyncDurationCount: 3,
+        liveMaxLatencyDurationCount: 8,
+      },
+      nativeVideoTracks: false,
+      nativeAudioTracks: false,
+      nativeTextTracks: false
     }
+  });
 
-      const video = this.videoEl;
-        if (!video) return;
-    
-        this.isPlaying = !video.paused;
-    
-        this.player = videojs(this.videoPlayer!.nativeElement, {
-            controls: false,
-            
-            autoplay: 'muted',
-            preload: 'auto',
-            fluid: false,
-            responsive: true,
-            bigPlayButton: false,
-            liveui: true,
-            controlBar: {
-          volumePanel: { inline: false },
-          pictureInPictureToggle: true,
-        },
-         html5: {
-          vhs: {
-           overrideNative: true,
-          enableLowInitialPlaylist: true,
-          fastQualityChange: true,
-          smoothQualityChange: true,
-          liveSyncDurationCount: 3,
-          liveMaxLatencyDurationCount: 8,
-          },
-          nativeVideoTracks: false,
-          nativeAudioTracks: false,
-          nativeTextTracks: false
-        }
-          });
-          this.player.on('play', () => console.log('playing'));
-          this.player.on('pause', () => console.log('paused'));
-           this.player.on('loadedmetadata', () => {
-            const w = this.player.videoWidth();
-            const h = this.player.videoHeight();
-            console.log('Stream cargado correctamente');
-             this.mostrarLive();
+  this.player.on('loadedmetadata', () => {
+    const w = this.player.videoWidth();
+    const h = this.player.videoHeight();
+    if (w && h) {
+      this.videoContainer.nativeElement.style.aspectRatio = `${w} / ${h}`;
+    }
+  });
 
-            if (w && h) {
-              const ratio = `${w} / ${h}`;
-              this.videoContainer.nativeElement.style.aspectRatio = ratio;
-            }
-          });
-          this.player.on('enterpictureinpicture', () => this.isPipMode = true);
-          this.player.on('leavepictureinpicture', () => this.isPipMode = false);
-          this.player.ready(() => {
-      this.handleStreamUrlChange(); 
-    });
+  this.player.on('enterpictureinpicture', () => this.isPipMode = true);
+  this.player.on('leavepictureinpicture', () => this.isPipMode = false);
+  this.player.on('play', () => { this.isPlaying = true; this.cdr.markForCheck(); });
+  this.player.on('pause', () => { this.isPlaying = false; this.cdr.markForCheck(); });
+
+  this.player.ready(() => this.handleStreamUrlChange());
+}
+
+private configurarEventListeners(): void {
+  document.addEventListener('fullscreenchange', this.onFullscreenChange.bind(this));
+
+  const slider = this.volumeSlider?.nativeElement;
+  if (slider) {
+    const vol = this.isMuted ? 0 : this.previousVolume * 100;
+    slider.value = vol.toString();
+    this.actualizarSliderVisual(slider, vol);
   }
+}
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['streamUrl'] && this.streamUrl) {
-      this.cambiarFuenteVideo(this.streamUrl);
-    }
-    if (changes['isCinemaMode'] && this.videoContainer?.nativeElement) {
-      console.log('Cambiando isCinemaMode:', this.isCinemaMode);
-      this.applyCinemaMode(this.isCinemaMode);
-      this.cdr.detectChanges();
-    }
-  }
-
-    private cinemaModeSubscription?: Subscription;
+private actualizarSliderVisual(slider: HTMLInputElement, percent: number): void {
+  slider.style.background = `linear-gradient(to right, #fff 0%, #fff ${percent}%, rgba(255,255,255,0.3) ${percent}%, rgba(255,255,255,0.3) 100%)`;
+}
   
+ngOnChanges(changes: SimpleChanges): void {
 
-
+if (changes['estadoStream']) {
+    console.log('ngOnChanges - estadoStream:', this.estadoStream);
+    console.log('ngOnChanges - streamUrl:', this.streamUrl);
+    console.log('ngOnChanges - player listo:', !!this.player);
     
-    ngOnDestroy(): void {
-    this.cinemaModeSubscription?.unsubscribe();
-    document.removeEventListener('fullscreenchange', this.onFullscreenChange.bind(this));
-       this.detenerPolling();
-    if (this.player) {
-      this.player.dispose();
+    if (this.estadoStream === 'DIRECTO' && this.streamUrl) {
+      this.detenerPolling();
+      this.esperarHLSDisponible();
+      if (this.player) {
+        this.handleStreamUrlChange();
+      } else {
+        setTimeout(() => this.handleStreamUrlChange(), 500);
+      }
     }
   }
+
+
+  if (changes['isCinemaMode'] && this.videoContainer?.nativeElement) {
+    this.applyCinemaMode(this.isCinemaMode);
+    this.cdr.detectChanges();
+  }
+}
+
+  private cargarAjustesDeSonido(): void {
+    const savedVolume = localStorage.getItem(this.STORAGE_KEY_VOLUME);
+    const savedMuted = localStorage.getItem(this.STORAGE_KEY_MUTED);
+
+    this.previousVolume = savedVolume ? parseFloat(savedVolume) : 0.7;
+    this.isMuted = savedMuted === 'true';
+
+    if (this.player) {
+      this.player.muted(this.isMuted);
+      this.player.volume(this.isMuted ? 0 : this.previousVolume);
+
+      const slider = this.volumeSlider?.nativeElement;
+      if (slider) {
+        const percent = this.isMuted ? 0 : this.previousVolume * 100;
+        slider.value = percent.toString();
+        this.actualizarSliderVisual(slider, percent);
+      }
+    }
+  }
+
+
+private esperarHLSDisponible(): void {
+  if (this.hlsCheckInterval) clearInterval(this.hlsCheckInterval);
+
+  this.hlsCheckInterval = setInterval(async () => {
+    if (!this.streamUrl) return;
+    try {
+      const res = await fetch(this.streamUrl, { method: 'HEAD' });
+      if (res.ok) {
+        clearInterval(this.hlsCheckInterval);
+        this.hlsCheckInterval = null;
+        if (this.player) this.handleStreamUrlChange();
+      }
+    } catch (e) {}
+  }, 2000);
+}
+    
+ngOnDestroy(): void {
+  this.cinemaModeSubscription?.unsubscribe();
+  document.removeEventListener('fullscreenchange', this.onFullscreenChange.bind(this));
+  this.detenerPolling();
+  if (this.player) {
+    this.player.dispose();
+    this.player = null;
+  }
+}
   
 
    @HostListener('window:keydown', ['$event'])
@@ -195,6 +258,8 @@ export class ReproductorStreamComponent {
 
 
 private handleStreamUrlChange() {
+    console.log('handleStreamUrlChange - player:', !!this.player);
+  console.log('handleStreamUrlChange - streamUrl:', this.streamUrl);
     if (!this.player) return;
 
     if (this.streamUrl) {
@@ -254,13 +319,11 @@ private handleStreamUrlChange() {
   }
 
   private mostrarLive() {
-    this.player?.nativeElement.classList.remove('offline');
-    this.player?.nativeElement.classList.add('live');
+
   }
 
   private mostrarOffline() {
-    this.player?.nativeElement.classList.remove('live');
-    this.player?.nativeElement.classList.add('offline');
+
     this.player?.pause();
   }
 
@@ -489,30 +552,20 @@ minHeight = 250;
 
 changeVolume(volumeSlider: HTMLInputElement): void {
   if (!this.player) return;
-
   const percent = parseInt(volumeSlider.value);
   const volume = percent / 100;
 
   this.player.volume(volume);
-  
-  if (volume === 0) {
-    this.player.muted(true);
-    this.isMuted = true;
-  } else {
-    this.player.muted(false);
-    this.isMuted = false;
-    this.previousVolume = volume;
-  }
-localStorage.setItem(this.STORAGE_KEY_VOLUME, volume.toString());
+  this.isMuted = volume === 0;
+  this.player.muted(this.isMuted);
+
+  if (!this.isMuted) this.previousVolume = volume;
+
+  this.actualizarSliderVisual(volumeSlider, percent);
+
+  localStorage.setItem(this.STORAGE_KEY_VOLUME, volume.toString());
   localStorage.setItem(this.STORAGE_KEY_MUTED, this.isMuted ? 'true' : 'false');
-
-  
-
-  volumeSlider.style.background = `linear-gradient(to right, #075788 0%, #075788 ${percent}%, rgba(255,255,255,0.3) ${percent}%, rgba(255,255,255,0.3) 100%)`;
-  localStorage.setItem('videoVolume', percent.toString());
-  localStorage.setItem('videoMuted', this.isMuted ? '1' : '0');
 }
-
 
   toggleFullscreen(videoContainer: HTMLElement): void {
     if (!document.fullscreenElement) {

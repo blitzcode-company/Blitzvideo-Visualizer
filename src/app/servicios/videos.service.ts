@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable, throwError, of} from 'rxjs';
-import { catchError, delay, retryWhen, take } from 'rxjs/operators';
+import { catchError, delay, retryWhen, take, tap } from 'rxjs/operators';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Videos } from '../clases/videos';
 import { CookieService } from 'ngx-cookie-service';
@@ -127,6 +127,12 @@ export class VideosService {
       completado: completado
     };
     const url = `${this.apiUrl}api/v1/usuario/${userId}/visita/${idVideo}`;
+    console.log('[contarVisita] Calling authenticated endpoint with:', {
+      url: url,
+      userId: userId,
+      idVideo: idVideo,
+      hasToken: !!this.cookie.get('accessToken')
+    });
   
     return this.httpClient.get(url, httpOptions).pipe(
       retryWhen(errors =>
@@ -153,6 +159,10 @@ export class VideosService {
       })
     };
     const url = `${this.apiUrl}api/v1/invitado/visita/${idVideo}`;
+    console.log('[contarVisitaInvitado] Calling guest endpoint with:', {
+      url: url,
+      idVideo: idVideo
+    });
   
     return this.httpClient.get(url, httpOptions).pipe(
       retryWhen(errors =>
@@ -170,6 +180,61 @@ export class VideosService {
     );
   }
 
+enviarProgreso(userId: number, videoId: number, segundosVistos: number, duracion?: number): Observable<any> {
+  const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + this.cookie.get('accessToken') 
+      })
+    };
 
-  
+  const payload = {
+    user_id: userId,
+    video_id: videoId,
+    segundos_vistos: segundosVistos,
+    duracion
+  };
+
+  console.log('[VideosService] Payload exacto antes de enviar:', payload);
+
+  return this.httpClient.post(
+    `${this.apiUrl}api/v1/usuario/visitas/progreso`,  
+    payload,                        
+    httpOptions
+  ).pipe(
+    tap(res => console.log('[VideosService] Respuesta backend:', res)),
+    catchError(err => {
+      console.error('[VideosService] Error HTTP:', err);
+      return throwError(() => err);
+    })
+  );
+}
+
+obtenerProgresoAnterior(userId: number, videoId: number): Observable<{ progreso: number }> {
+  const url = `${this.apiUrl}api/v1/usuario/visitas/progreso/${videoId}`;  // OK, ya tiene /{videoId}
+
+  const httpOptions = {
+    headers: new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + this.cookie.get('accessToken')
+    })
+  };
+
+  console.log('[VideosService] Llamando GET progreso:', {
+    fullUrl: url + `?user_id=${userId}`,
+    videoId,
+    userId
+  });
+
+  return this.httpClient.get<{ progreso: number }>(url, {
+    params: { user_id: userId.toString() },
+    headers: httpOptions.headers
+  }).pipe(
+    tap(res => console.log('[VideosService] Progreso recibido:', res.progreso)),
+    catchError(err => {
+      console.error('[VideosService] Error en GET progreso:', err);
+      return of({ progreso: 0 });
+    })
+  );
+}
 }

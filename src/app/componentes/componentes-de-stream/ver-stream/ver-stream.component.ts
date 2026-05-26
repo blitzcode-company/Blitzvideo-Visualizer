@@ -84,6 +84,8 @@ export class VerStreamComponent implements OnInit, OnDestroy,  AfterViewInit, Af
   viewerId!: string | number;
   viewers:any
   viewersAnimating: boolean = false;
+  estadoStream: string = '';
+
 
   private cinemaModeSubscription!: Subscription;
   
@@ -161,7 +163,21 @@ ngOnInit(): void {
   this.mostrarSidebar();
   setTimeout(() => this.verificarSuscripcion(), 200);
   this.checkDescriptionHeight();
+      this.scheduleTimeout(() => this.verificarSuscripcion(), 100);
+
+  
 }
+  private scheduleTimeout(callback: () => void, delay: number): number {
+    const id = window.setTimeout(callback, delay);
+    this.pendingTimeouts.push(id);
+    return id;
+  }
+
+  private pendingTimeouts: number[] = [];
+
+get puedeEditarStream(): boolean {
+    return !!this.usuarioConCanal?.canales && !!this.stream && this.usuarioConCanal.canales.id === this.stream.canal.id;
+  }
 
 
 marcarEntrada() {
@@ -171,6 +187,8 @@ marcarEntrada() {
 }
 
   ngOnDestroy() {
+  this.echoSuscrito = false; 
+
     if (this.heartbeatInterval) {
       clearInterval(this.heartbeatInterval);
     }
@@ -186,7 +204,6 @@ marcarEntrada() {
 
     this.streamService.salirView(this.stream.id).subscribe();
     
-    // Desconectar del canal de Echo como en Creadores
     if (this.streamId && (window as any).Echo) {
       try {
         (window as any).Echo.leave(`stream.${this.streamId}`);
@@ -199,27 +216,53 @@ marcarEntrada() {
     this.chatService.leaveChannel();
   }
 
-  private iniciarEscuchaViewersEnTiempoReal() {
-    if (!this.streamId) return;
+private echoSuscrito = false;
 
-    // Usar window.Echo directamente como en Creadores
-    if (!(window as any).Echo) {
-      console.warn('Echo no está disponible aún');
-      return;
-    }
+private iniciarEscuchaViewersEnTiempoReal() {
+   if (!this.streamId || this.echoSuscrito) return; 
+  this.echoSuscrito = true;
 
-    (window as any).Echo.channel(`stream.${this.streamId}`)
-      .listen('.stream-event', (e: any) => {
-        console.log('Evento recibido desde Echo:', e);
-        if (e.count !== undefined) {
-          this.viewersCount = e.count;
-          this.animarViewers(e.count);
+  (window as any).Echo.channel(`stream.${this.streamId}`)
+    .listen('.stream-event', (e: any) => {
+      if (e.count !== undefined) {
+        this.viewersCount = e.count;
+        this.animarViewers(e.count);
+        this.cdr.detectChanges();
+      }
+    })
+    .listen('.stream.status.changed', (data: any) => {  
+      console.log('Estado cambió:', data.estado);
+      this.stream.video.estado = data.estado;
+
+      if (data.estado === 'DIRECTO') {
+        this.stream.activo = 1;
+        
+        if (!this.streamUrl) {
+          this.streamService.obtenerInformacionStreams(this.streamId).subscribe({
+            next: (res: any) => {
+              this.streamUrl = res.url_hls;
+              this.estadoStream = 'DIRECTO'; 
+              console.log('Padre - streamUrl:', this.streamUrl); // 👈
+              console.log('Padre - estadoStream:', this.estadoStream); // 👈
+              this.cdr.detectChanges();
+            }
+          });
+        } else {
+          this.estadoStream = 'DIRECTO'; 
+          console.log('Padre - streamUrl ya existe:', this.streamUrl); // 👈
           this.cdr.detectChanges();
         }
-      });
 
-    console.log(`Escuchando viewers en tiempo real para stream ${this.streamId}`);
-  }
+      } else if (data.estado === 'FINALIZADO') {
+        this.stream.activo = 0;
+        this.estadoStream = 'FINALIZADO';
+        this.cdr.detectChanges();
+      }
+
+      this.cdr.detectChanges();
+    });
+}
+
 
   private animarViewers(count: number) {
     this.viewersAnimating = true;
@@ -521,7 +564,6 @@ checkDescriptionHeight(): void {
         this.obtenerDatosDelCanal();
         this.listarNumeroDeSuscriptores(this.canalId);
         
-        // Iniciar escucha de viewers en tiempo real
         this.iniciarEscuchaViewersEnTiempoReal();
       },
       (error) => {

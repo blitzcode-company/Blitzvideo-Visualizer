@@ -75,6 +75,33 @@
       </ul>
     </nav>
   <main>
+    <div class="filtros-videos">
+
+  <button
+    class="filtro-btn"
+    [class.active]="filtroActivo === 'recientes'"
+    (click)="ordenarVideos('recientes')">
+
+    Más recientes
+  </button>
+
+  <button
+    class="filtro-btn"
+    [class.active]="filtroActivo === 'antiguos'"
+    (click)="ordenarVideos('antiguos')">
+
+    Más antiguos
+  </button>
+
+  <button
+    class="filtro-btn"
+    [class.active]="filtroActivo === 'populares'"
+    (click)="ordenarVideos('populares')">
+
+    Más populares
+  </button>
+
+</div>
     <section class="video-grid">
       <div *ngFor="let chunk of videos | chunkPipe: 4" class="video-row">
         <div *ngFor="let video of chunk" class="video-card">

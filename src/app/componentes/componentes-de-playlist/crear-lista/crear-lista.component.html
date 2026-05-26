@@ -1,24 +1,26 @@
-<h2 mat-dialog-title>
+<div class="body-modal">
+<h2 mat-dialog-title class="titulo-modal">
   <mat-icon>add</mat-icon>
   Crear nueva lista de reproducción
 </h2>
 
 <mat-dialog-content>
   <mat-form-field appearance="outline" class="full-width">
-    <mat-label>Nombre de la lista</mat-label>
+    <mat-label class="nombre-lista">Nombre de la lista</mat-label>
     <input 
       matInput 
+      class="input-lista"
       [(ngModel)]="nombreLista" 
-      placeholder="Ej: Mis favoritos, Rock 2025..."
+      placeholder="Ej: Los mejores videos, Rock 2025..."
       required
       maxlength="100"
     >
-    <mat-hint align="end">{{ nombreLista?.length || 0 }}/100</mat-hint>
+    <mat-hint class="hint-lista" align="end">{{ nombreLista?.length || 0 }}/100</mat-hint>
   </mat-form-field>
 
-  <mat-form-field appearance="outline" class="full-width">
-    <mat-label>Acceso</mat-label>
-    <mat-select [(ngModel)]="acceso" required>
+  <mat-form-field appearance="outline" class="outline-linea full-width">
+    <mat-label class="acceso-lista">Acceso</mat-label>
+    <mat-select class="input-lista" [(ngModel)]="acceso" required>
       <mat-option [value]="true">Pública</mat-option>
       <mat-option [value]="false">Privada</mat-option>
     </mat-select>
@@ -26,7 +28,7 @@
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-  <button mat-button (click)="onNoClick()" [disabled]="loading">Cancelar</button>
+  <button mat-button (click)="onNoClick()" class="button-cancelar" [disabled]="loading">Cancelar</button>
   <button 
     mat-raised-button 
     color="primary" 
@@ -37,3 +39,4 @@
     <span *ngIf="!loading">Crear</span>
   </button>
 </mat-dialog-actions>
+</div>

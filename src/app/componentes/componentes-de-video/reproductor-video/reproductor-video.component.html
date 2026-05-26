@@ -63,21 +63,37 @@
         <mat-spinner diameter="50"></mat-spinner>
       </div>
 
-    <div class="autoplay-countdown-overlay" *ngIf="showAutoplayCountdown">
-      <div class="autoplay-countdown-container">
-        <div class="autoplay-countdown-content">
-          <i class="fas fa-play-circle autoplay-icon"></i>
-          <h3 class="autoplay-title">Reproduciendo siguiente video en</h3>
-          <div class="countdown-circle">
-            <span class="countdown-number">{{ autoplayCountdownSeconds }}</span>
-          </div>
-          <button class="cancel-autoplay-btn" (click)="cancelAutoplayCountdown(); $event.stopPropagation()">
-            <i class="fas fa-times"></i>
-            Cancelar
-          </button>
-        </div>
+<div class="autoplay-countdown-overlay" *ngIf="showAutoplayCountdown">
+  <div class="autoplay-countdown-container">
+    <div class="autoplay-header">
+      <h3 class="autoplay-title">Reproduciendo a continuación en</h3>
+      <div class="countdown-circle">
+        <span class="countdown-number">{{ autoplayCountdownSeconds }}</span>
       </div>
     </div>
+
+    <div class="next-video-preview" 
+         (click)="playNextVideoImmediately()" 
+         tabindex="0"
+         [attr.aria-label]="'Reproducir ahora: ' + nextVideoData?.titulo">
+      <div class="thumbnail-wrapper">
+        <img [src]="nextVideoData?.miniatura || 'assets/images/video-default.png'" 
+             alt="Miniatura de {{ nextVideoData?.titulo }}"
+             class="next-thumbnail"
+             (error)="onImageError($event, nextVideoData)">
+      </div>
+      <div class="next-video-info">
+        <p class="next-title">{{ nextVideoData?.titulo || 'Siguiente video' }}</p>
+        <p class="next-channel">{{ nextVideoData?.canal?.nombre || 'Canal desconocido' }}</p>
+      </div>
+    </div>
+
+    <button class="cancel-autoplay-btn" 
+            (click)="cancelAutoplayCountdown(); $event.stopPropagation()">
+      <i class="fas fa-times"></i> Cancelar reproducción automática
+    </button>
+  </div>
+</div>
 
      <div class="skip-button left" (click)="skipBackward($event)" #skipLeft>
 
@@ -165,7 +181,7 @@
   </div>
   <div class="end-screen-overlay" *ngIf="mostrarEndScreen && !reproduciendoPublicidad" [ngClass]="{'mostrar': mostrarEndScreen}">
     <div class="recomendaciones-grid">
-      <div class="thumbnail-container" *ngFor="let recVideo of videosRecomendados | slice:0:12; let i = index"
+      <div class="thumbnail-container" *ngFor="let recVideo of videosRecomendados | slice:0:6; let i = index"
            [style.animation-delay]="i * 0.05 + 's'"
            (click)="seleccionarRecomendacion(recVideo)"
            role="button"

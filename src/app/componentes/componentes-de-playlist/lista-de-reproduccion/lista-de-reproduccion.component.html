@@ -58,22 +58,21 @@
         class="playlist-card"
         (click)="verPlaylist(lista.id)"
       >
-        <div class="thumbnail-mosaic">
-          <img 
-            *ngFor="let img of lista.imagenesMosaico; let i = index"
-            [src]="img"
-            (error)="onImageError($event)"
-            [class]="'thumb-' + i"
-            alt="Miniatura {{ i + 1 }}"
-            loading="lazy"
-          >
-          <div 
-            *ngIf="lista.imagenesMosaico.length === 0" 
-            class="thumb-placeholder"
-          >
-            <mat-icon>video_library</mat-icon>
-          </div>
+       <div class="thumbnail-mosaic">
+        <img 
+          [src]="obtenerMiniaturaDelUltimoVideo(lista.videos)"
+          (error)="onImageError($event)"
+          alt="Miniatura"
+          loading="lazy"
+        >
+
+        <div 
+          *ngIf="!lista.videos || lista.videos.length === 0" 
+          class="thumb-placeholder"
+        >
+          <mat-icon>video_library</mat-icon>
         </div>
+      </div>
 
         <div class="playlist-info">
           <h3 class="title">{{ lista.nombre }}</h3>

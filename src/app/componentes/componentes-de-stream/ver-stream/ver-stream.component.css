@@ -325,8 +325,12 @@
 .viewers-text {
   min-width: 30px;
   text-align: center;
+  color: rgb(0, 0, 0);
   transition: transform 0.3s ease, color 0.3s ease;
 }
+:host-context(.dark-theme) .viewers-text {
+  color: rgb(197 197 197)
+} 
 
 .viewers-text.animating,
 .viewers-count.animating {
@@ -1255,6 +1259,59 @@ text-decoration: none;
 }
 
 
+.editarvideo {
+  margin-top: 12px;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.boton-editar-video {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background-color: #f2f2f2;
+  color: #0f0f0f;
+  font-family: 'Roboto', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  border-radius: 20px;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  cursor: pointer;
+  border: 1px solid #e0e0e0;
+}
+
+.boton-editar-video:hover {
+  background-color: #e5e5e5;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+  transform: translateY(-1px);
+}
+
+.boton-editar-video:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.icono-editar {
+  transition: transform 0.2s ease;
+}
+
+.boton-editar-video:hover .icono-editar {
+  transform: rotate(-10deg) scale(1.1);
+}
+
+@media (max-width: 640px) {
+  .boton-editar-video {
+    padding: 8px 14px;
+    font-size: 13px;
+  }
+  .icono-editar {
+    width: 16px;
+    height: 16px;
+  }
+}
 
 
 .subscribe-btn:not(.subscribed) {

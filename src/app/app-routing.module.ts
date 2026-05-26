@@ -22,7 +22,6 @@ import { VideosDeEtiquetaComponent } from './componentes/home/videos-de-etiqueta
 import { InfoCanalComponent } from './componentes/componentes-de-canal/info-canal/info-canal.component';
 import { PlaylistDelCanalComponent } from './componentes/componentes-de-canal/playlist-del-canal/playlist-del-canal.component';
 import { MasVistosComponent } from './componentes/home/mas-vistos/mas-vistos.component';
-
 const routes: Routes = [
   {path: '', component: HomeComponent},
   {path: 'video/:id', component: VerVideoComponent, },
@@ -43,7 +42,9 @@ const routes: Routes = [
   {path: 'explorar/populares', component: MasVistosComponent},
   {path: 'stream/:id', component: VerStreamComponent},
   {path: 'etiqueta/:id', component: VideosDeEtiquetaComponent},
-  { path: '**', component: NoEncontradoComponent }, 
+
+  { path: '**', component: NoEncontradoComponent },
+
 ];
 
 @NgModule({

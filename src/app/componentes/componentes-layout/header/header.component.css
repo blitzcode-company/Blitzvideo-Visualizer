@@ -1441,3 +1441,13 @@ background: rgba(15, 15, 15, 0.75);
   width: 18px;
   height: 18px;
 }
+
+.mobile-search-btn {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .mobile-search-btn {
+    display: inline-flex;
+  }
+}

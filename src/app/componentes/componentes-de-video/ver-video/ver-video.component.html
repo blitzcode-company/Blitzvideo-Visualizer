@@ -68,6 +68,7 @@
           [videoUrl]="reproduciendoPublicidad ? videoPublicidadUrl : videoUrl"
           [miniaturaUrl]="miniaturaUrl"
           [reproduciendoPublicidad]="reproduciendoPublicidad"
+          (tiempoActualizado)="onTiempoActualizado($event)"
           [isCinemaMode]="isCinemaMode" 
           [siguienteVideoDatos]="siguienteVideoDatos" 
           (autoplayFinish)="siguienteVideo()"
@@ -152,6 +153,20 @@
               <path fill="currentColor" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a.996.996 0 0 0 0-1.41l-2.34-2.34a.996.996 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
             </svg>
             <span>Editar video</span>
+          </a>
+        </div>
+
+                <div class="editarvideo" *ngIf="puedeEditarVideo">
+          <a 
+            class="boton-editar-video"
+            [href]="serverIp + '3001' + '/#/estadisticas-video/' + video.id"
+            target="_blank"
+            rel="noopener"
+           
+          >
+          <mat-icon>bar_chart</mat-icon>
+
+            <span>Estadisticas</span>
           </a>
         </div>
 
@@ -256,6 +271,16 @@
 </div>
   </div>
       <div class="columnaLateral"  *ngIf="!isCinemaMode">
+        <div class="chat-replay" #chatContainer>
+          <div class="chat-replay-header">Reproduccion del chat</div>
+          <div *ngFor="let msg of mensajesVisibles" class="mensaje">
+            <img [src]="msg.user_photo || 'assets/images/user.svg'" (error)="onImageErrorUser($event)">
+            <div>
+              <span class="user">{{ msg.user }}</span>
+              <span class="text">{{ msg.text }}</span>
+            </div>
+          </div>
+        </div>
         <div *ngIf="videosDePlaylist.length > 0" class="playlist-sidebar">
           <div class="playlist-header">
             <h3 class="playlist-title">
@@ -355,6 +380,16 @@
     </div>
 
     <div class="cinema-footer-right">
+      <div class="chat-replay" #chatContainer>
+          <div class="chat-replay-header">Reproduccion del chat</div>
+          <div *ngFor="let msg of mensajesVisibles" class="mensaje">
+            <img [src]="msg.user_photo || 'assets/images/user.svg'" (error)="onImageErrorUser($event)">
+            <div>
+              <span class="user">{{ msg.user }}</span>
+              <span class="text">{{ msg.text }}</span>
+            </div>
+          </div>
+        </div>
       <div *ngIf="videosDePlaylist.length > 0" class="playlist-sidebar">
         <div class="playlist-header">
             <h3 class="playlist-title">

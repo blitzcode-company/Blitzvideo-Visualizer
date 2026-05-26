@@ -50,7 +50,7 @@
     </ng-container>
 
     <ng-container *ngIf="status.isLoggedIn">
-      <p class="text-label">Suscripciones</p>
+      <p class="text-label suscripcionesTexto">Suscripciones</p>
       <div class="canalesSuscritos">
         <ng-container *ngIf="!isLoading; else loadingTemplate2">
           <ng-container *ngIf="canales.length > 0; else noSubscriptions2">

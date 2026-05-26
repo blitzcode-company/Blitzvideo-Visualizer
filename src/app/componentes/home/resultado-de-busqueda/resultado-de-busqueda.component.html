@@ -41,11 +41,16 @@
           <div class="video-info">
             <h3 class="title">{{ video.titulo }}</h3>
             <div class="channel-info">
-              <img class="channel-avatar" 
-                  [src]="video.canal.user?.foto || '/assets/images/user.svg'" 
-                  alt="Canal">
-              <div>
+              <a [routerLink]="['/canal', video.canal.id]" class="channel-link">
+                <img class="channel-avatar" 
+                    [src]="video.canal.user?.foto || '/assets/images/user.svg'" 
+                    alt="Canal">
+              </a>
+                <div>
+
+              <a [routerLink]="['/canal', video.canal.id]" class="channel-link">
                 <p class="channel-name">{{ video.canal.nombre }}</p>
+              </a>
                 <p class="views-date">
                   {{ video.visitas_count }} vistas • {{ video.created_at }}
                 </p>

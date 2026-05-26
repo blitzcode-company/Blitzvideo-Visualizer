@@ -10,11 +10,145 @@
   height: 100%; 
 }
 
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:host {
+  display: block; 
+  width: 100%; 
+  height: 100%; 
+}
+
+/* ============================================
+   SISTEMA DE VARIABLES DINÁMICAS PARA REPRODUCTOR
+   Adaptado del sistema de YouTube
+   ============================================ */
+
+/* Variables globales (pueden ser sobrescritas) */
 :root {
-  --base-size: 1rem; 
-  --control-size: clamp(0.875rem, 2.5vw, 1rem);
-  --thumb-size: clamp(0.75rem, 2vw, 0.875rem);
-  --progress-height: clamp(0.2rem, 0.8vw, 0.25rem);
+    /* Variables base de layout */
+    --player-masthead-height: 0px;        /* Altura del header si existe */
+    --player-top-padding: 0px;            /* Padding superior del contenedor */
+    --player-space-below: 20px;           /* Espacio debajo del reproductor */
+    --player-horizontal-margin: 0px;      /* Márgenes laterales */
+    --player-sidebar-width: 0px;          /* Ancho de sidebar si existe */
+    
+    /* Límites del reproductor */
+    --player-min-height: 240px;
+    --player-max-height: none;
+    --player-min-width: 320px;
+    --player-max-width: 100%;
+    
+    /* Proporciones del video */
+    --player-width-ratio: 16;
+    --player-height-ratio: 9;
+    
+    /* Variables de UI */
+    --player-controls-height: 48px;
+    --player-border-radius: 0px;
+}
+
+/* Variables específicas para el contenedor del reproductor */
+.reproductor-video-container {
+    /* Proporciones base */
+    --player-width-ratio: 16;
+    --player-height-ratio: 9;
+    
+    /* Configuración de layout */
+    --player-masthead-height: 0px;
+    --player-top-padding: 0px;
+    --player-space-below: 20px;
+    --player-horizontal-margin: 0px;
+    --player-sidebar-width: 0px;
+    
+    /* Límites */
+    --player-min-height: 240px;
+    --player-max-height: none;
+    --player-min-width: 320px;
+    --player-max-width: 100%;
+    
+    /* ======================================== */
+    /* VARIABLES CALCULADAS (NO MODIFICAR)      */
+    /* ======================================== */
+    
+    /* Altura total que NO es del reproductor */
+    --player-non-player-height: calc(
+        var(--player-masthead-height) + 
+        var(--player-top-padding) + 
+        var(--player-space-below)
+    );
+    
+    /* Altura máxima dinámica basada en viewport */
+    --player-max-height-dynamic: calc(
+        100vh - 
+        var(--player-masthead-height) - 
+        var(--player-top-padding) - 
+        var(--player-space-below)
+    );
+    
+    /* Ancho máximo dinámico manteniendo proporción */
+    --player-max-width-dynamic: calc(
+        var(--player-max-height-dynamic) * 
+        (var(--player-width-ratio) / var(--player-height-ratio))
+    );
+    
+    /* Ancho mínimo dinámico manteniendo proporción */
+    --player-min-width-dynamic: calc(
+        var(--player-min-height) * 
+        (var(--player-width-ratio) / var(--player-height-ratio))
+    );
+    
+    /* Ancho final del reproductor (clamp automático) */
+    --player-final-width: clamp(
+        var(--player-min-width, 320px),
+        var(--player-max-width-dynamic),
+        var(--player-max-width, 100%)
+    );
+    
+    /* Altura final manteniendo proporción */
+    --player-final-height: calc(
+        var(--player-final-width) * 
+        (var(--player-height-ratio) / var(--player-width-ratio))
+    );
+    
+    /* Ancho disponible para contenido lateral */
+    --player-available-width: calc(
+        100% - 
+        var(--player-sidebar-width) - 
+        (var(--player-horizontal-margin) * 2)
+    );
+    
+    /* Breakpoint para layout responsivo */
+    --player-breakpoint: 1200px;
+}
+
+/* Aplicar las variables al contenedor */
+.reproductor-video-container {
+    /* Tamaños dinámicos */
+    width: var(--player-final-width);
+    max-width: var(--player-max-width);
+    min-width: var(--player-min-width);
+    
+    /* Aspect ratio mantenido */
+    aspect-ratio: var(--player-width-ratio) / var(--player-height-ratio);
+    
+    /* Espaciado */
+    margin-bottom: var(--player-space-below);
+    
+    /* Mantener el resto de tus estilos originales */
+    position: relative;
+    background: #0f0f0f;
+    overflow: hidden;
+    pointer-events: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+    /* Transición suave para cambios de tamaño */
+    transition: width 0.3s ease, height 0.3s ease;
 }
 
 #videoContainer {
@@ -29,7 +163,10 @@
 .video-wrapper {
   position: relative;
   width: 100%;
-      height:  100% !important; 
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .skip-zone {
@@ -238,12 +375,14 @@ aspect-ratio: inherit;
 .reproductor-video-container {
   position: relative;
   width: 100%;
-  height: 45%;
+  aspect-ratio: 16 / 9; 
   background: #0f0f0f;
   overflow: hidden;
-  pointer-events: auto; 
+  pointer-events: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
-
 
 .reproductor-video-container.cinema-mode {
   position: relative;
@@ -501,7 +640,7 @@ input.volume::-webkit-slider-thumb {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  z-index: 8;
+  z-index: 60;
   opacity: 0;
   transition: opacity 0.3s ease;
   pointer-events: none;
@@ -514,14 +653,15 @@ input.volume::-webkit-slider-thumb {
 
 .recomendaciones-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  grid-template-rows: repeat(3, 1fr);
-  gap: 0.625rem; 
+  grid-template-columns: repeat(3, minmax(0, 1fr)); /* 3 columnas fijas */
+  grid-template-rows: repeat(3, auto); /* 3 filas fijas */
+  gap: 0.5rem;
   width: 100%;
   height: 100%;
-  padding: 0.9375rem; 
+  padding: 0.9375rem;
   box-sizing: border-box;
 }
+
 
 .thumbnail-container {
   position: relative;
@@ -533,6 +673,7 @@ input.volume::-webkit-slider-thumb {
   opacity: 0;
   transform: translateY(1.25rem); 
   overflow: hidden;
+  width: 100%;
 }
 
 .thumbnail-container:hover {
@@ -712,7 +853,6 @@ input.volume::-webkit-slider-thumb {
   .reproductor-video-container {
     width: 100% !important;
     height: auto !important;
-    aspect-ratio: 16 / 9;
     max-width: 100%;
   }
 }
@@ -784,128 +924,159 @@ input.volume::-webkit-slider-thumb {
 
 .autoplay-countdown-overlay {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.8);
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(4px);      
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  backdrop-filter: blur(2px);
-  animation: fadeIn 0.3s ease-in-out;
+  animation: fadeIn 0.3s ease;
 }
 
 .autoplay-countdown-container {
-  background: rgba(40, 40, 40, 0.95);
-  border-radius: 12px;
-  padding: 24px;
+  background: rgba(40, 40, 40, 0.92);
+  border-radius: 16px;
+  padding: 32px 40px;
+  max-width: 460px;
+  width: 90%;
   text-align: center;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  min-width: 300px;
-  backdrop-filter: blur(10px);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.6);
+  border: 1px solid rgba(255,255,255,0.08);
+  position: relative;
+  overflow: hidden;
 }
 
-.autoplay-countdown-content {
+.autoplay-header {
   display: flex;
-  flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 16px;
-}
-
-.autoplay-icon {
-  font-size: 48px;
-  color: #0f1f2e;
-  margin-bottom: 8px;
-  animation: pulse 2s infinite;
+  margin-bottom: 24px;
 }
 
 .autoplay-title {
-  color: white;
-  font-size: 18px;
+  color: #fff;
+  font-size: 1.25rem;
   font-weight: 500;
   margin: 0;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 .countdown-circle {
-  width: 80px;
-  height: 80px;
-  border: 4px solid rgba(255, 255, 255, 0.2);
-  border-top: 4px solid #0f1f2e;
+  width: 64px;
+  height: 64px;
+  border: 4px solid rgba(255,255,255,0.25);
+  border-top: 4px solid #065fd4;       
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   animation: rotate 1s linear infinite;
-  position: relative;
 }
 
 .countdown-number {
-  font-size: 32px;
+  font-size: 2rem;
   font-weight: bold;
   color: white;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.next-video-preview {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: rgba(255,255,255,0.05);
+  padding: 12px;
+  border-radius: 12px;
+  margin: 0 auto 24px;
+  max-width: 380px;
+  transition: all 0.2s ease;
+}
+
+
+.thumbnail-wrapper {
+  position: relative;
+  width: 160px;
+  aspect-ratio: 16/9;
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.next-thumbnail {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.play-icon-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.next-video-preview:hover .play-icon-overlay {
+  opacity: 1;
+}
+
+.play-icon-overlay i {
+  font-size: 3rem;
+  color: white;
+  filter: drop-shadow(0 2px 8px rgba(0,0,0,0.6));
+}
+
+.next-video-info {
+  text-align: left;
+  flex: 1;
+}
+
+.next-title {
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0 0 6px;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.next-channel {
+  color: #aaaaaa;
+  font-size: 0.9rem;
+  margin: 0;
 }
 
 .cancel-autoplay-btn {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: white;
-  padding: 12px 20px;
-  border-radius: 8px;
+  background: transparent;
+  border: 1px solid #606060;
+  color: #aaa;
+  padding: 10px 24px;
+  border-radius: 20px;
+  font-size: 1rem;
   cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  transition: all 0.2s ease;
-  backdrop-filter: blur(5px);
+  transition: all 0.2s;
 }
 
 .cancel-autoplay-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.3);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-}
-
-.cancel-autoplay-btn:active {
-  transform: translateY(0);
+  background: rgba(255,255,255,0.1);
+  color: white;
+  border-color: white;
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: scale(0.9);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-@keyframes pulse {
-  0%, 100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  50% {
-    transform: scale(1.1);
-    opacity: 0.8;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @keyframes rotate {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 @media (max-width: 768px) {
@@ -932,7 +1103,6 @@ input.volume::-webkit-slider-thumb {
   }
 }
 
-/* Tema oscuro */
 :host-context(.dark-theme) .autoplay-countdown-container {
   background: rgba(20, 20, 20, 0.95);
   border-color: rgba(255, 255, 255, 0.05);
@@ -946,4 +1116,175 @@ input.volume::-webkit-slider-thumb {
 :host-context(.dark-theme) .cancel-autoplay-btn:hover {
   background: rgba(255, 255, 255, 0.1);
   border-color: rgba(255, 255, 255, 0.2);
+}
+
+@media (max-width: 30rem) { 
+  .recomendaciones-grid {
+    gap: 0.25rem;
+    padding: 0.5rem;
+  }
+  
+  .info-titulo {
+    font-size: 0.6rem;
+  }
+}
+
+@media (min-width: 1200px) {
+    .reproductor-video-container {
+        --player-max-width: min(100%, 1280px);
+        --player-space-below: 24px;
+        --player-min-height: 360px;
+    }
+}
+
+@media (min-width: 769px) and (max-width: 1199px) {
+    .reproductor-video-container {
+        --player-max-width: min(100%, 1024px);
+        --player-space-below: 20px;
+        --player-min-height: 300px;
+        --player-min-width: 280px;
+    }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+    .reproductor-video-container {
+        --player-max-width: 100%;
+        --player-space-below: 16px;
+        --player-min-height: 240px;
+        --player-min-width: 260px;
+    }
+}
+
+@media (min-width: 361px) and (max-width: 480px) {
+    .reproductor-video-container {
+        --player-max-width: 100%;
+        --player-space-below: 12px;
+        --player-min-height: 200px;
+        --player-min-width: 240px;
+    }
+}
+
+@media (max-width: 360px) {
+    .reproductor-video-container {
+        --player-max-width: 100%;
+        --player-space-below: 8px;
+        --player-min-height: 160px;
+        --player-min-width: 220px;
+    }
+}
+
+@media (max-width: 768px) and (orientation: landscape) {
+    .reproductor-video-container {
+        --player-min-height: 160px;
+        --player-max-height: 70vh;
+        --player-space-below: 8px;
+    }
+}
+@media (min-width: 1920px) {
+    .reproductor-video-container {
+        --player-max-width: min(100%, 1600px);
+        --player-min-height: 480px;
+    }
+}
+
+.ambient-canvas {
+    --ambient-blur: 95px;
+    --ambient-saturate: 160%;
+    --ambient-brightness: 1.2;
+    --ambient-opacity-playing: 0.75;
+    --ambient-opacity-paused: 0.55;
+    --ambient-opacity-default: 0.45;
+    
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 50%;
+    height: 150%;
+    transform: translate(-50%, -50%) scale(1.5);
+    filter: blur(var(--ambient-blur)) saturate(var(--ambient-saturate)) brightness(var(--ambient-brightness));
+    opacity: var(--ambient-opacity-default);
+    pointer-events: none;
+    z-index: 1;
+    transition: opacity 0.8s ease;
+    mix-blend-mode: screen;
+}
+
+.reproductor-video-container.playing .ambient-canvas {
+    opacity: var(--ambient-opacity-playing);
+}
+
+.reproductor-video-container.paused .ambient-canvas {
+    opacity: var(--ambient-opacity-paused);
+}
+
+.reproductor-video-container.cinema-mode.playing .ambient-canvas {
+    --ambient-blur: 105px;
+    --ambient-saturate: 170%;
+    --ambient-brightness: 1.25;
+    --ambient-opacity-playing: 0.82;
+}
+
+.reproductor-video-container.size-small {
+    --player-max-width: 640px;
+    --player-min-width: 480px;
+}
+
+.reproductor-video-container.size-medium {
+    --player-max-width: 854px;
+    --player-min-width: 640px;
+}
+
+.reproductor-video-container.size-large {
+    --player-max-width: 1280px;
+    --player-min-width: 854px;
+}
+
+.reproductor-video-container.compact {
+    --player-sidebar-width: 300px;
+    --player-max-width: calc(100% - var(--player-sidebar-width));
+}
+
+.reproductor-video-container.floating {
+    position: fixed !important;
+    bottom: 20px;
+    right: 20px;
+    width: 320px !important;
+    height: 180px !important;
+    z-index: 9999;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    border-radius: 8px;
+    cursor: move;
+    animation: floatIn 0.3s ease;
+}
+
+@keyframes floatIn {
+    from {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+
+.reproductor-video-container[data-aspect="4:3"] {
+    --player-width-ratio: 4;
+    --player-height-ratio: 3;
+}
+
+.reproductor-video-container[data-aspect="21:9"] {
+    --player-width-ratio: 21;
+    --player-height-ratio: 9;
+}
+
+.reproductor-video-container[data-aspect="1:1"] {
+    --player-width-ratio: 1;
+    --player-height-ratio: 1;
+}
+
+.reproductor-video-container[data-aspect="2.35:1"] {
+    --player-width-ratio: 2.35;
+    --player-height-ratio: 1;
 }

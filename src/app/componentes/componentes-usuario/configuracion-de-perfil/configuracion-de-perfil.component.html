@@ -29,20 +29,25 @@
         </div>
 
         <div class="form-group">
+          <br>
           <label for="fechaNac">Fecha de nacimiento</label>
           <input type="date" id="fecha_de_nacimiento" class="form-control" [(ngModel)]="usuario.fecha_de_nacimiento" name="fecha_de_nacimiento" required />
+          <br>
+
         </div>
 
         <div class="photo-upload">
-          <img class="user-photo" *ngIf="fotoPreview" [src]="fotoPreview" alt="Vista previa de foto" />
-          <img class="user-photo" *ngIf="!fotoPreview && usuario.foto" [src]="usuario.foto" alt="Foto de perfil" />
-          <br>
+          <label for="userPhoto" class="photo-upload-box" (click)="openFileInput()">
 
-          <label for="userPhoto" class="upload-button">
+            <img class="user-photo" *ngIf="fotoPreview" [src]="fotoPreview" alt="Vista previa de foto" />
+            <img class="user-photo" *ngIf="!fotoPreview && usuario.foto" [src]="usuario.foto" alt="Foto de perfil" />
             
-            <i class="fas fa-upload"></i> Subir nueva foto
+            <div class="photo-placeholder" *ngIf="!fotoPreview && !usuario.foto">
+              <mat-icon class="placeholder-icon">add_a_photo</mat-icon>
+              <span class="placeholder-text">Agregar foto</span>
+            </div>
           </label>
-          <input type="file" id="userPhoto" class="file-input" (change)="onFileSelected($event)" />
+          <input type="file" #fileInput id="userPhoto" class="file-input" (change)="onFileSelected($event)" accept="image/*" />
         </div>
         <br>
 
@@ -64,19 +69,27 @@
         <div class="form-group">
           <label for="canalNombre">Nombre del canal</label>
           <input type="text" id="canalNombre" class="form-control" [(ngModel)]="canal.nombre" name="nombre" placeholder="Nombre del canal" required />
+          <br>
         </div>
 
         <div class="form-group">
           <label for="canalDescripcion">Descripción del canal</label>
           <textarea id="canalDescripcion" class="form-control" [(ngModel)]="canal.descripcion" name="descripcion" placeholder="Descripción del canal" required></textarea>
+          <br>
         </div>
 
         <div class="form-group photo-upload">
-          <img class="channel-cover" *ngIf="canal.portadaPreview" [src]="canal.portadaPreview" alt="Portada del canal" />
-          <label for="portadaImage" class="upload-button">
-            <i class="fas fa-upload"></i> Subir portada
+
+          <label for="portadaImage" class="cover-upload-box" (click)="openFileInputPortada()">
+
+            <img class="channel-cover" *ngIf="canal.portadaPreview" [src]="canal.portadaPreview" alt="Portada del canal" />
+            
+            <div class="cover-placeholder" *ngIf="!canal.portadaPreview">
+              <mat-icon class="placeholder-icon">add_photo_alternate</mat-icon>
+              <span class="placeholder-text">Agregar portada</span>
+            </div>
           </label>
-          <input type="file" id="portadaImage" class="file-input" (change)="onFileSelectedPortada($event)" />
+          <input type="file" #fileInputPortada id="portadaImage" class="file-input" (change)="onFileSelectedPortada($event)" accept="image/*" />
         </div>
         <br />
         <button type="submit" class="btn-submit">Guardar Cambios</button>
@@ -87,8 +100,14 @@
     </div>
 
     <ng-template #noCanalTemplate>
-      <div class="alert alert-warning" *ngIf="!tieneCanal">
-        No tienes un canal creado. <a [href]="serverIp + '3001' + '/#/crearCanal'">Haz click aquí para crear uno</a>.
+      <div class="alert alert-info" *ngIf="!tieneCanal">
+        <div class="alert-content">
+          <mat-icon class="alert-icon">info</mat-icon>
+          <div class="alert-text">
+            <strong>No tienes un canal creado.</strong>
+            <a [href]="serverIp + '3001' + '/#/crearCanal'" class="alert-link">Crear canal</a>
+          </div>
+        </div>
       </div>
     </ng-template>
 
@@ -113,6 +132,7 @@
             placeholder="Ingresa tu contraseña actual"
             required 
           />
+          <br>
         </div>
 
         <div class="form-group">
@@ -127,9 +147,11 @@
             minlength="8"
             required 
           />
+          <br>
         </div>
 
         <div class="form-group">
+    
           <label for="confirmPassword">Confirmar nueva contraseña</label>
           <input 
             type="password" 
@@ -141,6 +163,7 @@
             minlength="8"
             required 
           />
+          <br>
         </div>
 
         <button type="submit" class="btn-submit" [disabled]="!formPassword.valid">Cambiar contraseña</button>

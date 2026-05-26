@@ -3,7 +3,7 @@
   display: flex;
   flex-direction: column;
   width: 250px; 
-  height: calc(110vh - 60px); 
+  height: calc(100vh - 60px); 
   border-right: 1px solid var(--border-color, #dee2e6);
   box-shadow: 0 2px 4px var(--shadow-color, rgba(0, 0, 0, 0.1));
   position: fixed;
@@ -251,11 +251,15 @@ p {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 6px 10px;
+  height: 48px;
+  padding: 0 12px;
   border-radius: 6px;
+  white-space: nowrap;
+    text-overflow: ellipsis;
+    line-height: 2rem !important;
+    font-weight: 400 !important;
   transition: background-color 0.3s;
   color: #444;
-  font-size: 0.95rem;
   text-decoration: none;
   animation: slideInUp 0.3s ease forwards;
   opacity: 0;
@@ -270,8 +274,8 @@ p {
 
 .fotoUserSuscriptores {
   border-radius: 50%;
-  width: 32px;
-  height: 32px;
+  width: 24px;
+  height: 24px;
   object-fit: cover;
   border: 1.5px solid #ccc;
   flex-shrink: 0;
@@ -406,6 +410,12 @@ p {
   display: inline-block;
   opacity: 1;
   transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.suscripcionesTexto {
+  font-size: 1.1em;
+  font-weight: 600;
+  margin-bottom: 3px;
 }
 
 :host-context(.dark-theme) 
@@ -548,6 +558,19 @@ p {
   margin-top: 4px !important;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
 }
+
+:host-context(.dark-theme) .btn-expandir {
+  background: linear-gradient(135deg, #212121, #1b1b1b) !important;
+  color: #e0e0e0 !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3) !important;
+}
+
+:host-context(.dark-theme) .btn-colapsar {
+  background: linear-gradient(135deg, #212121, #1b1b1b) !important;
+  color: #e0e0e0 !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3) !important;
+}
+
 
 .btn-expandir:hover, .btn-colapsar:hover {
   background: #e3f2fd !important;

@@ -37,7 +37,8 @@ export class VideosDelCanalComponent {
   idCanal: any = null;
   canales: any[] = [];
   isMobile = window.innerWidth <= 767;
-
+  videosOriginales: any[] = [];
+  filtroActivo = 'recientes';
 
   sidebarCollapsed = false;
   sidebarCollapsed$ = this.usuarioGlobal.sidebarCollapsed$;
@@ -132,10 +133,14 @@ export class VideosDelCanalComponent {
       (res: any) => {
         console.log('Datos del canal y videos:', res);
         if (res.length > 0) {
-          this.videos = res.map((videoData: any) => ({
-            ...videoData,
-            duracionFormateada: this.convertirDuracion(videoData.duracion)
-          }));
+         this.videos = res.map((videoData: any) => ({
+        ...videoData,
+        duracionFormateada: this.convertirDuracion(videoData.duracion)
+      }));
+
+      this.videosOriginales = [...this.videos];
+
+      this.ordenarVideos('recientes');
          this.tieneContenido = true
         } else {
           this.videos = [];
@@ -155,6 +160,42 @@ export class VideosDelCanalComponent {
       }
     );
   }
+
+ordenarVideos(tipo: string): void {
+
+  this.filtroActivo = tipo;
+
+  switch (tipo) {
+
+    case 'recientes':
+
+      this.videos = [...this.videosOriginales].sort(
+        (a, b) =>
+          new Date(b.created_at).getTime() -
+          new Date(a.created_at).getTime()
+      );
+
+      break;
+
+    case 'antiguos':
+
+      this.videos = [...this.videosOriginales].sort(
+        (a, b) =>
+          new Date(a.created_at).getTime() -
+          new Date(b.created_at).getTime()
+      );
+
+      break;
+
+    case 'populares':
+
+      this.videos = [...this.videosOriginales].sort(
+        (a, b) => (b.visitas_count || 0) - (a.visitas_count || 0)
+      );
+
+      break;
+  }
+}
 
   openReportModal() {
     const dialogRef = this.dialog.open(ModalReportarUsuarioComponent, {

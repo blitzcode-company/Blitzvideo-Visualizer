@@ -342,12 +342,12 @@ button.btn-danger:hover {
   background: linear-gradient(135deg, #fff, #f1f1f1);
 }
 :host-context(.dark-theme) .configuracion {
-  background-color: #121212;
+  background-color: #0f0f0f;
   min-height:100vh;
 }
 
 :host-context(.dark-theme) .container-fluid {
-  background-color: #121212;
+  background-color: #0f0f0f;
 }
 
 :host-context(.dark-theme) .plandelusuario {

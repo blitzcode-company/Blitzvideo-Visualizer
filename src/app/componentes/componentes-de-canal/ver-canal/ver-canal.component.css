@@ -241,10 +241,13 @@ nav ul li a.router-link-active::after {
   background-color: #32b1f9;
   color: white;
 }
+
 main {
-  padding: 20px;
-  max-width: 1200px;
+  padding: 24px 32px;
+  width: 100%;
+  max-width: 1700px;
   margin: 0 auto;
+  box-sizing: border-box;
 }
 
 .ultimo-video {
@@ -259,9 +262,9 @@ main {
 .ultimo-video-card {
   display: flex;
   flex-direction: column;
+  max-width: 850px;
   cursor: pointer;
   overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
@@ -289,10 +292,9 @@ main {
 
 .video-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 24px;
 }
-
 .video-row {
   display: contents;
 }
@@ -303,7 +305,10 @@ main {
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-
+.videos-title {
+  margin-bottom: 20px;
+  font-size: 22px;
+}
 
 .miniatura-container {
   position: relative;

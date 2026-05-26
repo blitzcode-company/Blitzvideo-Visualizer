@@ -229,7 +229,7 @@ actualizarLista(): void {
   }
  
   
-  private obtenerMiniaturaDelUltimoVideo(videos: any[]): string {
+  public obtenerMiniaturaDelUltimoVideo(videos: any[]): string {
     if (videos.length > 0) {
       const ultimoVideo = videos[videos.length - 1];
       return ultimoVideo.miniatura || 'assets/images/cover-default.png';

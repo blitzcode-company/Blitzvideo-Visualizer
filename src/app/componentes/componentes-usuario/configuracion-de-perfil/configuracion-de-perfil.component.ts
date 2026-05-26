@@ -79,8 +79,7 @@ export class ConfiguracionDePerfilComponent {
     this.usuarioSubscription = this.authService.usuario$.subscribe(res => {
       this.usuario = res;
       this.userId = this.usuario.id
-      this.obtenerCanal(this.userId);  
-      this.cambiarContraseña();
+      this.obtenerCanal(this.userId);
     });
     this.authService.mostrarUserLogueado().subscribe();
   }
@@ -109,13 +108,24 @@ export class ConfiguracionDePerfilComponent {
 }
 
 cambiarContraseña(): void {
+    // Validar que los campos no estén vacíos
+    if (!this.passwordData.current_password || !this.passwordData.new_password) {
+      this.snackBar.open('Por favor completa todos los campos', 'Cerrar', { duration: 3000 });
+      return;
+    }
+
+    if (this.passwordData.new_password !== this.passwordData.new_password_confirmation) {
+      this.snackBar.open('Las contraseñas no coinciden', 'Cerrar', { duration: 3000 });
+      return;
+    }
+
     this.authService.cambiarPassword({
       user_id: this.usuario.id,
       current_password: this.passwordData.current_password,
       new_password: this.passwordData.new_password,
       new_password_confirmation: this.passwordData.new_password_confirmation
     }).subscribe({
-      next: () => {
+      next: (res: any) => {
         this.snackBar.open('Contraseña cambiada exitosamente', 'Cerrar', { duration: 3000 });
         this.passwordData = {
           current_password: '',
@@ -123,9 +133,10 @@ cambiarContraseña(): void {
           new_password_confirmation: ''
         };
       },
-      error: err => {
-        const errorMessage = err.error?.message || err.error?.error || 'Error al cambiar la contraseña';
-        this.snackBar.open(errorMessage, 'Cerrar', { duration: 3000 });
+      error: (err: any) => {
+        console.error('Error al cambiar contraseña:', err);
+        const errorMessage = err.error?.message || err.error?.error || err.message || 'Error al cambiar la contraseña';
+        this.snackBar.open(errorMessage, 'Cerrar', { duration: 5000 });
       }
     });
   }
@@ -139,6 +150,20 @@ onFileSelected(event: Event): void {
       this.fotoPreview = e.target.result;
     };
     reader.readAsDataURL(this.fotoFile);
+  }
+}
+
+openFileInput(): void {
+  const fileInput = document.getElementById('userPhoto') as HTMLInputElement;
+  if (fileInput) {
+    fileInput.click();
+  }
+}
+
+openFileInputPortada(): void {
+  const fileInput = document.getElementById('portadaImage') as HTMLInputElement;
+  if (fileInput) {
+    fileInput.click();
   }
 }
 
@@ -287,10 +312,6 @@ onFileSelected(event: Event): void {
 
   onSubmitPassword(form: NgForm) {
     if (form.valid) {
-      if (this.passwordData.new_password !== this.passwordData.new_password_confirmation) {
-        this.snackBar.open('Las contraseñas no coinciden', 'Cerrar', { duration: 3000 });
-        return;
-      }
       this.cambiarContraseña();
     }
   }

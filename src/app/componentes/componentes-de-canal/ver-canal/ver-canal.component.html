@@ -98,21 +98,32 @@
         </div>
       </section>
 
-      <section class="video-grid" *ngIf="videos.length">
-        <h2>Más videos</h2>
-        <div class="video-card" *ngFor="let video of videos">
-          <div [routerLink]="['/video', video.id]" class="video-link">
-            <div class="miniatura-container">
-              <img [src]="video.miniatura ? video.miniatura : 'assets/images/video-default.png'" (error)="onImageError($event)" alt="Miniatura del video">
-              <p class="duracionVideo"> {{  video.duracionFormateada  }}</p>
-            </div>
-            <div class="video-info">
-              <h3>{{ video.titulo }}</h3>
-              <p>{{ video.visitas_count }} vistas • {{ video.created_at | tiempo }}</p>
-            </div>
-          </div>
+<section *ngIf="videos.length">
+
+  <h2 class="videos-title">Más videos</h2>
+  <div class="video-grid">
+    <div class="video-card" *ngFor="let video of videos">
+      <div [routerLink]="['/video', video.id]" class="video-link">
+        <div class="miniatura-container">
+          <img
+            [src]="video.miniatura ? video.miniatura : 'assets/images/video-default.png'"
+            (error)="onImageError($event)"
+            alt="Miniatura del video">
+          <p class="duracionVideo">
+            {{ video.duracionFormateada }}
+          </p>
         </div>
-      </section>
+        <div class="video-info">
+          <h3>{{ video.titulo }}</h3>
+          <p>
+            {{ video.visitas_count }} vistas •
+            {{ video.created_at | tiempo }}
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
       <div class="no-content-message" *ngIf="!tieneContenido">
         <i class="fas fa-video-slash no-content-icon"></i>
           <h2>Este canal no tiene contenido</h2>

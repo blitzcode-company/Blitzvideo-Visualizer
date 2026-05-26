@@ -97,6 +97,12 @@
     font-size: 16px;
   }
   
+  .channel-link {
+    text-decoration: none;
+    color: inherit;
+  }
+
+
   .results-grid {
     display: grid;
     gap: 24px;

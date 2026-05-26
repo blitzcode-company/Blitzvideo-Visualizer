@@ -191,7 +191,6 @@
     opacity: 1;
   }
   
-  /* MÓVIL */
   @media (max-width: 767px) {
     .video-row {
       flex-direction: column;
@@ -429,7 +428,6 @@
 
 :host-context(.dark-theme)
   .playlist-header {
-    background: #1a1a1a !important;
     color: white;
     border-bottom: 1px solid #333 !important;
   }

@@ -50,10 +50,16 @@
             <button *ngIf="alertMessageStream && alertMessageStream.includes('Error')" class="btn-submit" (click)="cargarStreamData()">Reintentar</button>
         </div>
 
-        <ng-template #noCanalTemplate>
-            <div class="alert alert-warning">
-                No tienes un canal creado. <a [href]="serverIp + '3001' + '/#/crearCanal'">Haz click aquí para crear uno</a>.
+      <ng-template #noCanalTemplate>
+        <div class="alert alert-info" *ngIf="!tieneCanal">
+          <div class="alert-content">
+            <mat-icon class="alert-icon">info</mat-icon>
+            <div class="alert-text">
+              <strong>No tienes un canal creado.</strong>
+              <a [href]="serverIp + '3001' + '/#/crearCanal'" class="alert-link">Crear canal</a>
             </div>
-        </ng-template>
+          </div>
+        </div>
+    </ng-template>
     </div>
 </div>

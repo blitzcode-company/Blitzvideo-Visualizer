@@ -1,0 +1,93 @@
+<div class="dropdown noti-bell-wrapper">
+  <button mat-icon-button class="noti-bell" (click)="toggleNotiDropdown()"
+          [class.ringing]="contadorNotificaciones > 0"
+          [attr.aria-expanded]="isOpen">
+    <mat-icon>{{ contadorNotificaciones > 0 ? 'notifications_active' : 'notifications' }}</mat-icon>
+    <span class="noti-badge" *ngIf="contadorNotificaciones > 0">
+      {{ contadorNotificaciones > 99 ? '99+' : contadorNotificaciones }}
+    </span>
+  </button>
+
+  <div class="noti-panel" [class.open]="isOpen">
+    <div class="panel-header">
+      <h5>Notificaciones</h5>
+    </div>
+
+    <div class="panel-body">
+      <div class="empty-state" *ngIf="notificaciones.length === 0">
+        <div class="empty-icon-wrapper">
+          <mat-icon class="empty-bell" svgIcon="bell-off" aria-hidden="true"></mat-icon>
+        </div>
+        
+        <h6 class="empty-title">Todo está en calma por aquí</h6>
+        <p class="empty-text">
+          Cuando alguien comente, responda o suba algo nuevo,<br>
+          aparecerá aquí al instante.
+        </p>
+        
+        <div class="empty-decoration">
+          <span></span><span></span><span></span>
+        </div>
+      </div>
+
+      <div *ngFor="let n of notificaciones; trackBy: trackByNotif"
+            class="noti-item"
+            [class.unread]="n.leido === 0"
+            [routerLink]="n.id_video ? ['/video', n.id_video] : null"
+            (click)="irANotificacion(n)">
+
+        <img [src]="n.foto_perfil_comentador || n.foto_perfil_subidor || 'assets/images/user.svg'"
+            class="user-avatar"
+            [alt]="n.nombre_comentador || n.nombre_subidor || 'Usuario'">
+
+        <div class="noti-content">
+
+          <div class="message">
+            <strong class="user-name">
+              {{ getNombreUsuario(n) }}
+            </strong>
+
+            <span class="action-text" [ngSwitch]="n.referencia_tipo">
+
+              <span *ngSwitchCase="'new_video'">
+                subió un nuevo vídeo
+              </span>
+
+              <span *ngSwitchCase="'new_comment'">
+                comentó tu vídeo
+              </span>
+
+              <span *ngSwitchCase="'new_reply'">
+                respondió a tu comentario
+              </span>            
+
+              <span *ngSwitchDefault>
+                interactuó contigo
+              </span>
+            </span>
+          </div>
+
+          <div class="video-title" *ngIf="n.titulo_video">
+            {{ n.titulo_video }}
+          </div>
+
+          <div class="comment-preview" *ngIf="n.texto_comentario">
+            <span class="quote">"</span>{{ n.texto_comentario }}<span class="quote">"</span>
+          </div>
+
+          <div class="time-ago">
+            {{ n.fecha_creacion | tiempo }}
+          </div>
+        </div>
+
+        <img *ngIf="n.miniatura_video" 
+            [src]="n.miniatura_video"
+            class="video-thumb" 
+            alt="Miniatura"
+            (error)="onImgError($event)">
+
+        <div class="unread-dot" *ngIf="n.leido === 0"></div>
+      </div>
+    </div>
+  </div>
+</div>
