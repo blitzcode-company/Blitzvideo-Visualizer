@@ -271,7 +271,7 @@
 </div>
   </div>
       <div class="columnaLateral"  *ngIf="!isCinemaMode">
-        <div class="chat-replay" #chatContainer>
+        <div class="chat-replay" *ngIf="startedAt" #chatContainer>
           <div class="chat-replay-header">Reproduccion del chat</div>
           <div *ngFor="let msg of mensajesVisibles" class="mensaje">
             <img [src]="msg.user_photo || 'assets/images/user.svg'" (error)="onImageErrorUser($event)">
@@ -380,7 +380,7 @@
     </div>
 
     <div class="cinema-footer-right">
-      <div class="chat-replay" #chatContainer>
+      <div class="chat-replay" *ngIf="startedAt" #chatContainer>
           <div class="chat-replay-header">Reproduccion del chat</div>
           <div *ngFor="let msg of mensajesVisibles" class="mensaje">
             <img [src]="msg.user_photo || 'assets/images/user.svg'" (error)="onImageErrorUser($event)">

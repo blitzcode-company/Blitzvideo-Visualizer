@@ -2569,6 +2569,9 @@ text-decoration: none;
   word-break: break-word;
 }
 
+.mat-mdc-outlined-button {
+  letter-spacing: 0 !important;
+}
 :host-context(.dark-theme) .text {
   color: #e0e0e0;
 }
