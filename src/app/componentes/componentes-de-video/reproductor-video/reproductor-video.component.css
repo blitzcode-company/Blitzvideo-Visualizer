@@ -22,66 +22,48 @@
   height: 100%; 
 }
 
-/* ============================================
-   SISTEMA DE VARIABLES DINÁMICAS PARA REPRODUCTOR
-   Adaptado del sistema de YouTube
-   ============================================ */
 
-/* Variables globales (pueden ser sobrescritas) */
+
 :root {
-    /* Variables base de layout */
-    --player-masthead-height: 0px;        /* Altura del header si existe */
-    --player-top-padding: 0px;            /* Padding superior del contenedor */
-    --player-space-below: 20px;           /* Espacio debajo del reproductor */
-    --player-horizontal-margin: 0px;      /* Márgenes laterales */
-    --player-sidebar-width: 0px;          /* Ancho de sidebar si existe */
+    --player-masthead-height: 0px;       
+    --player-top-padding: 0px;            
+    --player-space-below: 20px;         
+    --player-horizontal-margin: 0px;    
+    --player-sidebar-width: 0px;          
     
-    /* Límites del reproductor */
     --player-min-height: 240px;
     --player-max-height: none;
     --player-min-width: 320px;
     --player-max-width: 100%;
     
-    /* Proporciones del video */
     --player-width-ratio: 16;
     --player-height-ratio: 9;
     
-    /* Variables de UI */
     --player-controls-height: 48px;
     --player-border-radius: 0px;
 }
 
-/* Variables específicas para el contenedor del reproductor */
 .reproductor-video-container {
-    /* Proporciones base */
     --player-width-ratio: 16;
     --player-height-ratio: 9;
     
-    /* Configuración de layout */
     --player-masthead-height: 0px;
     --player-top-padding: 0px;
     --player-space-below: 20px;
     --player-horizontal-margin: 0px;
     --player-sidebar-width: 0px;
     
-    /* Límites */
     --player-min-height: 240px;
     --player-max-height: none;
     --player-min-width: 320px;
     --player-max-width: 100%;
-    
-    /* ======================================== */
-    /* VARIABLES CALCULADAS (NO MODIFICAR)      */
-    /* ======================================== */
-    
-    /* Altura total que NO es del reproductor */
+
     --player-non-player-height: calc(
         var(--player-masthead-height) + 
         var(--player-top-padding) + 
         var(--player-space-below)
     );
     
-    /* Altura máxima dinámica basada en viewport */
     --player-max-height-dynamic: calc(
         100vh - 
         var(--player-masthead-height) - 
@@ -89,56 +71,45 @@
         var(--player-space-below)
     );
     
-    /* Ancho máximo dinámico manteniendo proporción */
     --player-max-width-dynamic: calc(
         var(--player-max-height-dynamic) * 
         (var(--player-width-ratio) / var(--player-height-ratio))
     );
     
-    /* Ancho mínimo dinámico manteniendo proporción */
     --player-min-width-dynamic: calc(
         var(--player-min-height) * 
         (var(--player-width-ratio) / var(--player-height-ratio))
     );
     
-    /* Ancho final del reproductor (clamp automático) */
     --player-final-width: clamp(
         var(--player-min-width, 320px),
         var(--player-max-width-dynamic),
         var(--player-max-width, 100%)
     );
     
-    /* Altura final manteniendo proporción */
     --player-final-height: calc(
         var(--player-final-width) * 
         (var(--player-height-ratio) / var(--player-width-ratio))
     );
     
-    /* Ancho disponible para contenido lateral */
     --player-available-width: calc(
         100% - 
         var(--player-sidebar-width) - 
         (var(--player-horizontal-margin) * 2)
     );
     
-    /* Breakpoint para layout responsivo */
     --player-breakpoint: 1200px;
 }
 
-/* Aplicar las variables al contenedor */
 .reproductor-video-container {
-    /* Tamaños dinámicos */
     width: var(--player-final-width);
     max-width: var(--player-max-width);
     min-width: var(--player-min-width);
-    
-    /* Aspect ratio mantenido */
+
     aspect-ratio: var(--player-width-ratio) / var(--player-height-ratio);
     
-    /* Espaciado */
     margin-bottom: var(--player-space-below);
     
-    /* Mantener el resto de tus estilos originales */
     position: relative;
     background: #0f0f0f;
     overflow: hidden;
@@ -147,7 +118,6 @@
     justify-content: center;
     align-items: center;
     
-    /* Transición suave para cambios de tamaño */
     transition: width 0.3s ease, height 0.3s ease;
 }
 
@@ -653,8 +623,8 @@ input.volume::-webkit-slider-thumb {
 
 .recomendaciones-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr)); /* 3 columnas fijas */
-  grid-template-rows: repeat(3, auto); /* 3 filas fijas */
+  grid-template-columns: repeat(3, minmax(0, 1fr)); 
+  grid-template-rows: repeat(3, auto); 
   gap: 0.5rem;
   width: 100%;
   height: 100%;
@@ -1287,4 +1257,7 @@ input.volume::-webkit-slider-thumb {
 .reproductor-video-container[data-aspect="2.35:1"] {
     --player-width-ratio: 2.35;
     --player-height-ratio: 1;
+}
+mat-icon {
+  overflow: none !important;
 }

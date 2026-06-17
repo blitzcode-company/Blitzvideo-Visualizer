@@ -30,7 +30,7 @@ background-color: #0f0f0f;
 
 :host-context(.dark-theme) .fotoUsuario {
    border-radius: 50%;
-   border: 2px solid #fbe0e7;
+   border: 2px solid #f1f1f1;
 }
 
 
@@ -72,7 +72,7 @@ background-color: #0f0f0f;
 }
 
 :host-context(.dark-theme) .comentario p{
-  color: #fbe0e7;
+  color: #f1f1f1;
  
 }
 
@@ -108,7 +108,7 @@ background-color: #0f0f0f;
 
 
 :host-context(.dark-theme) .megustas a {
-  color: #fbe0e7;
+  color: #f1f1f1;
  
 }
 
@@ -269,7 +269,7 @@ background-color: #0f0f0f;
 }
 
 :host-context(.dark-theme) .toggle-respuestas{
-  color: #fbe0e7;
+  color: #f1f1f1;
  
 }
 
@@ -518,29 +518,29 @@ background-color: #0f0f0f;
 }
 
  :host-context(.dark-theme) .comentario-header{
-    color: #fbe0e7 !important;
+    color: #f1f1f1 !important;
   }
   :host-context(.dark-theme) .nombreyfecha strong{
-    color: #fbe0e7 !important;
+    color: #f1f1f1 !important;
   }
   :host-context(.dark-theme) .comentario p{
-    color: #fbe0e7 !important;
+    color: #f1f1f1 !important;
   }
   :host-context(.dark-theme) .megustas a{
-    color: #fbe0e7 !important;
+    color: #f1f1f1 !important;
   } 
   :host-context(.dark-theme) .toggle-respuestas{
-    color: #fbe0e7 !important;
+    color: #f1f1f1 !important;
   } 
   :host-context(.dark-theme) .contador {
-    color: #fbe0e7 !important;
+    color: #f1f1f1 !important;
   }
 
   :host-context(.dark-theme) .date{
-    color: #fbe0e7 !important;
+    color: #f1f1f1 !important;
   } 
   :host-context(.dark-theme) .megustas a{
-    color: #fbe0e7 !important;
+    color: #f1f1f1 !important;
   } 
   :host-context(.dark-theme) .contador {
     color: #aaaaaa !important;
@@ -555,7 +555,7 @@ background-color: #0f0f0f;
   }
 
   :host-context(.dark-theme) .botonLike.liked i{
-    color: #fbe0e7 !important;
+    color: #f1f1f1 !important;
   } 
 
 
@@ -597,7 +597,7 @@ background-color: #0f0f0f;
   }
 
   :host-context(.dark-theme).responderComentario input{
-    color: #fbe0e7 !important;
+    color: #f1f1f1 !important;
   } 
  :host-context(.dark-theme) .input-respuesta {
     background: transparent !important;
@@ -610,7 +610,7 @@ background-color: #0f0f0f;
   }
 
   :host-context(.dark-theme).input-respuesta:focus{
-    color: #fbe0e7 !important;
+    color: #f1f1f1 !important;
   } 
 
 
@@ -636,7 +636,7 @@ background-color: #0f0f0f;
   }
 
  :host-context(.dark-theme)  .fotoUsuario{
-    color: #fbe0e7 !important;
+    color: #f1f1f1 !important;
   } 
   :host-context(.dark-theme) .avatar-pequeno {
     border: 2px solid #333 !important;

@@ -1,63 +1,117 @@
 <app-header></app-header>
+
 <div class="configuracion" [class.collapsed]="sidebarCollapsed$ | async">
   <div class="sidebar">
-    <a  href="/ajustes/perfil"> <mat-icon>account_box</mat-icon>
-
-      <span>Perfil</span></a>
-    <a class="selected" href="/ajustes/pagos"><mat-icon>payment</mat-icon>
-      <span>Pagos</span></a>
-    <a href="/ajustes/streams"> <mat-icon>view_stream</mat-icon>
-      <span>Streams</span></a>
+    <a routerLink="/ajustes/perfil" routerLinkActive="selected" [routerLinkActiveOptions]="{exact: true}">
+      <mat-icon>account_box</mat-icon>
+      <span>Perfil</span>
+    </a>
+    <a routerLink="/ajustes/pagos" routerLinkActive="selected" [routerLinkActiveOptions]="{exact: true}">
+      <mat-icon>payment</mat-icon>
+      <span>Pagos</span>
+    </a>
+    <a routerLink="/ajustes/streams" routerLinkActive="selected">
+      <mat-icon>view_stream</mat-icon>
+      <span>Streams</span>
+    </a>
   </div>
-  <div class="container-fluid" *ngIf="!planUsuario">
-    <div>
-      <h2>Selecciona un Método de Pago</h2>
-      
+
+  <div *ngIf="isLoading" class="loading-state">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Cargando información de tu suscripción...</p>
+  </div>
+
+  <div *ngIf="hasError && !isLoading" class="error-state">
+    <mat-icon class="error-icon">error_outline</mat-icon>
+    <p>{{ errorMessage }}</p>
+    <button (click)="recargarDatos()" class="btn-retry">
+      <mat-icon>refresh</mat-icon> Reintentar
+    </button>
+  </div>
+
+  <div class="container-fluid" *ngIf="!planUsuario && !isLoading && !hasError">
+    <div class="header-premium">
+      <h1>BlitzVideo <span class="premium-badge">Premium</span></h1>
+      <p class="subtitle">Disfruta de tu contenido favorito sin interrupciones</p>
+    </div>
+
+    <div class="upgrade-section">
+      <div class="premium-offer">
+        <div class="offer-card">
+          <i class="fas fa-shield-alt"></i>
+          <h2>Premium - Sin Anuncios</h2>
+          <ul class="benefits-list">
+            <li><mat-icon>check_circle</mat-icon> Experiencia completamente sin anuncios</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3 class="select-title">Selecciona método de pago</h3>
+
       <div class="payment-methods">
         <label class="payment-card" [class.selected]="selectedPaymentMethod === 'paypal'">
-          <input type="radio" name="paymentMethod" value="paypal" (change)="cambiarMetodoPago('paypal')" checked />
-          <i class="fab fa-paypal"></i>
-          PayPal
+          <input type="radio" name="paymentMethod" value="paypal" 
+                 (change)="cambiarMetodoPago('paypal')" [checked]="selectedPaymentMethod === 'paypal'">
+          <i class="fab fa-paypal fa-2x"></i>
+          <strong>PayPal</strong>
+          <span class="payment-badge">Seguro y Rápido</span>
         </label>
-      
+
         <label class="payment-card" [class.selected]="selectedPaymentMethod === 'stripe'">
-          <input type="radio" name="paymentMethod" value="stripe" (change)="cambiarMetodoPago('stripe')" />
-          <i class="fas fa-credit-card"></i>
-          Tarjeta de crédito/débito
+          <input type="radio" name="paymentMethod" value="stripe" 
+                 (change)="cambiarMetodoPago('stripe')" [checked]="selectedPaymentMethod === 'stripe'">
+          <i class="fas fa-credit-card fa-2x"></i>
+          <strong>Tarjeta de Crédito/Débito</strong>
+          <span class="payment-badge">Visa, Mastercard, Amex</span>
         </label>
-      </div>
-      <div *ngIf="selectedPaymentMethod === 'paypal'">
-        <app-suscripcion-paypal></app-suscripcion-paypal>
-      </div>
-      
-      <div *ngIf="selectedPaymentMethod === 'stripe'">
-        <app-pagos></app-pagos>
       </div>
 
-      
+      <div *ngIf="selectedPaymentMethod === 'paypal'" class="payment-component">
+        <app-suscripcion-paypal 
+          (suscripcionExitosa)="onPagoExitoso()"
+          (error)="onPaymentError($event)">
+        </app-suscripcion-paypal>
+      </div>
+
+      <div *ngIf="selectedPaymentMethod === 'stripe'" class="payment-component">
+        <app-pagos 
+          (pagoExitoso)="onPagoExitoso()"
+          (error)="onPaymentError($event)">
+        </app-pagos>
+      </div>
     </div>
   </div>
-  <div *ngIf="planUsuario" class="plandelusuario">
-    <h2>Detalles del Plan</h2>
+
+  <div *ngIf="planUsuario && !isLoading" class="plandelusuario">
+    <div class="status-header">
+      <span class="active-badge" [class.expiring-soon]="isExpiringSoon()">
+        <mat-icon>verified</mat-icon> 
+        {{ isExpiringSoon() ? 'Próximo a expirar' : 'Activo' }}
+      </span>
+      <h2>Tu Plan Premium</h2>
+      <p class="expiration-info" *ngIf="getTiempoRestante()">
+        <mat-icon>schedule</mat-icon> {{ getTiempoRestante() }}
+      </p>
+    </div>
     <hr>
-  
+
     <div class="plan-cards">
       <div class="plan-card">
         <i class="fas fa-gem"></i>
         <div>
           <p class="card-title">Plan</p>
-          <p class="card-value">{{ planUsuario.plan }}</p>
+          <p class="card-value">{{ planUsuario.plan || 'Premium - Sin Anuncios' }}</p>
         </div>
       </div>
-  
+
       <div class="plan-card">
         <i class="fas fa-credit-card"></i>
         <div>
           <p class="card-title">Método de Pago</p>
-          <p class="card-value">{{ planUsuario.metodo_de_pago }}</p>
+          <p class="card-value">{{ planUsuario.metodo_de_pago | titlecase }}</p>
         </div>
       </div>
-  
+
       <div class="plan-card">
         <i class="fas fa-calendar-alt"></i>
         <div>
@@ -65,17 +119,34 @@
           <p class="card-value">{{ planUsuario.fecha_inicio | date:'dd/MM/yyyy' }}</p>
         </div>
       </div>
-  
+
       <div class="plan-card">
         <i class="fas fa-id-card"></i>
         <div>
           <p class="card-title">ID de Suscripción</p>
-          <p class="card-value">{{ planUsuario.suscripcion_id }}</p>
+          <p class="card-value suscripcion-id">{{ planUsuario.suscripcion_id | slice:0:12 }}...</p>
+          <button class="btn-copy" (click)="copiarIdSuscripcion()" title="Copiar ID">
+            <mat-icon>content_copy</mat-icon>
+          </button>
         </div>
       </div>
     </div>
-  
-    <button (click)="confirmarBajaPlan()" class="btn btn-danger">Dar de baja el plan Premium</button>
+
+    <div class="plan-features" *ngIf="planUsuario.fecha_expiracion">
+      <div class="feature-info">
+        <mat-icon>info_outline</mat-icon>
+        <p>Tu suscripción se renueva automáticamente cada mes. Puedes cancelar en cualquier momento.</p>
+      </div>
+    </div>
+
+    <div class="actions-container">
+      <button (click)="confirmarBajaPlan()" class="btn btn-danger" [disabled]="isLoading">
+        <mat-icon>cancel</mat-icon> Dar de baja Premium
+      </button>
+      <button (click)="recargarDatos()" class="btn btn-refresh" [disabled]="isLoading">
+        <mat-icon>refresh</mat-icon> Actualizar
+      </button>
+    </div>
+
   </div>
 </div>
-

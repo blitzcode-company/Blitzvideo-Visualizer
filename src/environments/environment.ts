@@ -5,5 +5,6 @@ export const environment = {
     pagosApi: 'http://localhost:8003/',
     serverIp: 'http://localhost:',
     socketHost: 'http://soketi:6001',
-    dockerHost: 'http://blitzvideo-api:8000/'
+    dockerHost: 'http://blitzvideo-api:8000/',
+    cookieDomain: 'localhost',
 };

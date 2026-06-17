@@ -36,7 +36,9 @@ export class ThemeService {
   }
 
   private cargarTemaGuardado() {
-    const guardado = localStorage.getItem(this.STORAGE_KEY);
+    const deCookie = this.cookieService.get(this.STORAGE_KEY);
+    const deStorage = localStorage.getItem(this.STORAGE_KEY);
+    const guardado = deCookie || deStorage;
 
     if (guardado === 'light' || guardado === 'dark' || guardado === 'auto') {
       this.temaActual.set(guardado as 'light' | 'dark' | 'auto');
@@ -50,7 +52,11 @@ export class ThemeService {
   setTema(tema: 'light' | 'dark' | 'auto') {
     this.temaActual.set(tema);
     localStorage.setItem(this.STORAGE_KEY, tema);
-    this.cookieService.set(this.STORAGE_KEY, tema);
+    this.cookieService.set(this.STORAGE_KEY, tema, {
+      expires: 365,
+      path: '/',
+      domain: 'localhost'
+    });
   }
 
   getTema() {

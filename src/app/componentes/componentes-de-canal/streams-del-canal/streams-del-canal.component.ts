@@ -12,13 +12,13 @@ import { UsuarioGlobalService } from '../../../servicios/usuario-global.service'
 import { switchMap } from 'rxjs/operators';
 
 @Component({
-  selector: 'app-videos-del-canal',
-  templateUrl: './videos-del-canal.component.html',
-  styleUrl: './videos-del-canal.component.css'
+  selector: 'app-streams-del-canal',
+  templateUrl: './streams-del-canal.component.html',
+  styleUrl: './streams-del-canal.component.css'
 })
-export class VideosDelCanalComponent {
+export class StreamsDelCanalComponent {
 
-  usuario: any = {};
+   usuario: any = {};
   
   usuarioCanal: any = {};
   canal: any = {};
@@ -140,10 +140,11 @@ export class VideosDelCanalComponent {
 
 
       this.videos = videosFormateados.filter(
-        (video: any) => video.estado === 'VIDEO'
+        (video: any) => video.estado === 'FINALIZADO'
       );
+
       this.tieneContenido = this.videos.length > 0;
-      
+
       this.videosOriginales = [...this.videos];
 
       this.ordenarVideos('recientes');
@@ -298,5 +299,4 @@ onImageError(event: any) {
   private handleError(error: any): void {
     this.mensaje = error.error.message || 'Ha ocurrido un error inesperado.';
   }
-
 }

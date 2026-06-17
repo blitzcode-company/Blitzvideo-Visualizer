@@ -85,7 +85,7 @@
         <div class="mobile-chat-container">
           <div class="chat-header-mobile">
             <h3>Chat en vivo</h3>
-            <span class="live-badge">
+            <span class="live-badge" *ngIf="stream?.activo === 1">
               <span class="live-dot"></span>
               EN VIVO
             </span>
@@ -177,7 +177,7 @@
           </div>
         </div>
         <div #descripcion class="descripcion" *ngIf="!isCinemaMode" [ngClass]="{'expanded': isExpanded}">
-          <p class="fechadescripcion">Fecha de subida: {{ stream.video.created_at }}</p>
+          <p class="fechadescripcion">Fecha de transmision: {{ stream.video.created_at }}</p>
           <p [innerHTML]="stream.video.descripcion | safeHtml"></p>
             <div class="toggle-container" *ngIf="showToggleLink">
               <a class="toggle-link" 

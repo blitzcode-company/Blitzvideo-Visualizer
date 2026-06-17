@@ -51,7 +51,7 @@
 
 
 <div class="container-fluid video-page-content" *ngIf="video && !isNotFound && !isBlocked && !errorMessage"
-                             [class.collapsed]="sidebarCollapsed"
+                             [class.collapsed]="sidebarCollapsed$"
                              [ngClass]="{'cinema-mode': isCinemaMode}">
 
   
@@ -181,7 +181,11 @@
           'selected': puntuacionSeleccionada === val,
           'hovered': hoverValor === val || (hoverValor !== null && val <= hoverValor)
         }"
-                    (click)="puntuar(val)">
+                    (click)="puntuar(val)"
+                   [matTooltip]="getDescripcion(val)"
+            matTooltipPosition="above"        
+            matTooltipShowDelay="200"
+            matTooltipHideDelay="0">
               <img [src]="'assets/images/' + val + '.svg'" [alt]="'Puntuación ' + val">
             </button>
           </div>

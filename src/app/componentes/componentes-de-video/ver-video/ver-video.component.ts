@@ -1,13 +1,12 @@
-import { Component, HostListener, OnInit, OnDestroy, EventEmitter,ElementRef, ViewChild, QueryList, AfterViewInit, AfterViewChecked, Input, Output, ChangeDetectorRef, Renderer2 } from '@angular/core';
-import { ActivatedRoute, ParamMap, Router } from '@angular/router';
+import { Component, HostListener, OnInit, OnDestroy, EventEmitter, ElementRef, ViewChild, QueryList, AfterViewInit, AfterViewChecked, Input, Output, ChangeDetectorRef, Renderer2 } from '@angular/core';
+import { ActivatedRoute, ParamMap, Router, NavigationEnd } from '@angular/router';
 import { Overlay } from '@angular/cdk/overlay';
 import { VideosService } from '../../../servicios/videos.service';
 import { AuthService } from '../../../servicios/auth.service';
 import { Title } from '@angular/platform-browser';
 import { PuntuacionesService } from '../../../servicios/puntuaciones.service';
 import { StatusService } from '../../../servicios/status.service';
-import { Observable, Subscription, take, filter, fromEvent, } from 'rxjs';
-import { debounceTime } from 'rxjs/operators';
+import { Observable, Subscription, take, filter, combineLatest } from 'rxjs';
 import { Videos } from '../../../clases/videos';
 import { environment } from '../../../../environments/environment';
 import { MatDialog } from '@angular/material/dialog';
@@ -23,11 +22,8 @@ import { ModocineService } from '../../../servicios/modocine.service';
 import { UsuarioGlobalService } from '../../../servicios/usuario-global.service';
 import { ReproductorVideoComponent } from '../reproductor-video/reproductor-video.component';
 import { Usuario } from '../../../clases/usuario';
-import { NavigationEnd } from '@angular/router';
-import { combineLatest } from 'rxjs';
 import { AutoplayService } from '../../../servicios/autoplay.service';
 import { ChatstreamService } from '../../../servicios/chatstream.service';
-
 
 @Component({
   selector: 'app-ver-video',
@@ -35,110 +31,102 @@ import { ChatstreamService } from '../../../servicios/chatstream.service';
   styleUrls: ['./ver-video.component.css']
 })
 export class VerVideoComponent implements OnInit, OnDestroy, AfterViewInit, AfterViewChecked {
-  puntuacionSeleccionada: number | null = null;
-  videoId: number = 0;
-  canalId: number = 0;
-  userId: number = 0;
+
+  videoId = 0;
+  canalId = 0;
+  userId = 0;
+  playlistId: any;
+  videoIdPlaylist: any;
+  streamIdDelVideo: number | null = null;
+
   video: Videos = new Videos();
-  isLoading = true;
-  comentario: string = '';
   usuario: Usuario = new Usuario();
-  visitaRealizada: boolean = false;
-  visitaRealizadaInvitado: boolean = false;
-  public loggedIn: boolean = false;
+  usuarioConCanal: any;
+  numeroDeSuscriptores: any;
   puntuacionActual: any = {};
-  valorPuntuacion: number | null = null;
+  puntuaciones: any = { puntuacion_1: 0, puntuacion_2: 0, puntuacion_3: 0, puntuacion_4: 0, puntuacion_5: 0 };
+  publicidad: any = null;
+  videosDePlaylist: any[] = [];
+  videosRecomendadosColumnaLateral: any[] = [];
+  videosRecomendadosPantallaFinal: any[] = [];
+  siguienteVideoDatos: any = null;
+  mensajesDelChat: any[] = [];
+  mensajesVisibles: any[] = [];
+
+  videoUrl: any;
+  miniaturaUrl = '';
+  videoPublicidadUrl: string | null = null;
   serverIp = environment.serverIp;
+  defaultAvatar = 'assets/images/user.svg';
+
+  isBlocked = false;
+  isNotFound = false;
+  cargando = false;
+  fromPlaylist = false;
+  visitaContada = false;
+  visitaYaContadaParaEsteVideo = false;
+  publicidadCargando = false;
+  reproduciendoPublicidad = false;
+  notificacionesActivas = false;
+  mostrarColumnaLateral = false;
+  videosPantallaFinalListos = false;
+  mostrarEndScreen = false;
+  videoTerminado = false;
+  sidebarVisible = false;
+  isMobile = false;
+  commentsSheetOpen = false;
+  siguienteVideoDisponible = true;
+
+  isCinemaMode = false;
   isExpanded = false;
   showToggleLink = false;
   isContentOverflowing = false;
-  public isCinemaMode = false;
-  public suscrito: string = '';
-  mensaje: string = '';
-  idDelCanalDelUsuario: number = 0;
-  usuarioConCanal: any;
-  idCanal: number = 0;
-  canales: any;
-  private visitaContada: boolean = false;
-  videosRecomendadosListos: boolean = false;  
-  numeroDeSuscriptores: any;
-  errorMessage: string = '';
-  isBlocked: boolean = false;
-  isNotFound: boolean = false;  
-  private visitaYaContadaParaEsteVideo: boolean = false;
-  dropdownVisible: boolean = false;
+  dropdownVisible = false;
   dropdownVisibleLateral: number | null = null;
-  publicidad: any = null;
-  reproduciendoPublicidad: boolean = false;
-  contadorVideos: number = 0;
-  videoUrl: any;
-  publicidadDuracionRestante!: number;
-  mostrarBotonSaltar: boolean = false;
-  nombrePublicidad: any;
-  videosDePlaylist: any[] = [];
-  playlistId: any;
-  fromPlaylist: boolean = false;
-  videoIdPlaylist: any;
-  videoUrlPlaylist: any;
-  notificacionesActivas: boolean = false;
-  cargando: boolean = false;
-  public videoPublicidadUrl: string | null = null;
-  sidebarVisible: boolean = false;
+  errorMessage = '';
+  mensaje = '';
+  suscrito = '';
   hoverValor: number | null = null;
-  defaultAvatar = 'assets/images/user.svg';
-  startedAt: string | null = null;
-  mensajesDelChat: any[] = [];
-  mensajesVisibles: any[] = [];
-  videosRecomendadosColumnaLateral: any[] = [];   
-  videosRecomendadosPantallaFinal: any[] = [];   
-  mostrarColumnaLateral: boolean = false;     
-  videosPantallaFinalListos: boolean = false;
-  mostrarEndScreen: boolean = false;
-  @Output() autoplayFinish = new EventEmitter<void>();
-  @ViewChild(ReproductorVideoComponent) reproductor!: ReproductorVideoComponent;
-
-  modoGuardado: any;
+  highlightCommentId: number | null = null;
   nombrePlaylist: any;
-  sidebarCollapsed = false;
-  duracionFormateada: string = '';
-  duracionFormateadaPlaylist: string = '';
-  sidebarCollapsed$: Observable<boolean>;
-  forceSidebarClosed: boolean = true;
-  isAutoplayEnabled = false;
-  miniaturaUrl: string = '';
+  startedAt: string | null = null;
+  totalVotos = 0;
+  totalComentarios = 0;
 
-  autoplayActivado = false;
-  private autoplaySub!: Subscription;
-  isMobile = false;
-  commentsSheetOpen = false;
+  publicidadDuracionRestante!: number;
+  mostrarBotonSaltar = false;
+  nombrePublicidad: any;
+
+  puntuacionSeleccionada: number | null = null;
+  valorPuntuacion: number | null = null;
+
   isDragging = false;
   startY = 0;
   currentY = 0;
   deltaY = 0;
-  totalComentarios = 0;
 
-  private sidebarSubscription!: Subscription;
-  private cinemaModeSubscription!: Subscription;
-  private zoomSubscription!: Subscription;
-  private routerEventsSubscription!: Subscription;
-  private autoplaySubscription!: Subscription;
-  private usuarioConCanalSubscription!: Subscription;
-  private usuarioSubscription!: Subscription;
+  sidebarCollapsed$: Observable<boolean>;
+  autoplayActivado = false;
 
+  private subs: Subscription[] = [];
   private pendingTimeouts: number[] = [];
-  private overlayComment!: HTMLElement;
+  private progresoInterval: any = null;
 
+  @Output() autoplayFinish = new EventEmitter<void>();
+  @ViewChild(ReproductorVideoComponent) reproductor!: ReproductorVideoComponent;
+  @ViewChild('reproductorRef') reproductorComponent: any;
+  @ViewChild('reproductorVideo') reproductorVideo!: ReproductorVideoComponent;
   @ViewChild('descripcion') descripcionElement!: ElementRef;
   @ViewChild('commentsSheet') sheetRef!: ElementRef<HTMLElement>;
   @ViewChild('commentsOverlay') overlayRef!: ElementRef<HTMLElement>;
   @ViewChild('videoWrapper', { static: false }) videoWrapper!: ElementRef;
   @ViewChild('sheet', { static: false }) sheet!: ElementRef;
+  @ViewChild('videoPageWrapper') videoPageWrapper!: ElementRef;
+  @ViewChild('chatContainer') chatContainer!: ElementRef;
+  @ViewChild('videoItem') videoItems!: QueryList<ElementRef>;
 
-  @HostListener('window:beforeunload', ['$event'])
-  onBeforeUnload(): void {
-    this.limpiarEstadoPlaylist();
-  }
-
+  private overlayComment!: HTMLElement;
+  videoIdPlaylistAux: any;
 
   constructor(
     private route: ActivatedRoute,
@@ -161,334 +149,1002 @@ export class VerVideoComponent implements OnInit, OnDestroy, AfterViewInit, Afte
     private renderer: Renderer2,
     private notificacionesService: NotificacionesService
   ) {
-
-    this.routerEventsSubscription = this.router.events.subscribe(event => {
-        if (event instanceof NavigationEnd) {
-          const id = +this.route.snapshot.paramMap.get('id')!;
-          
-          if (id && id !== this.videoId) {
-            const currentUrl = event.url;
-            const hasPlaylistParam = currentUrl.includes('/playlist/');
-            const wasFromPlaylist = this.fromPlaylist;
-            
-            if (wasFromPlaylist && !hasPlaylistParam) {
-              console.log('🔄 Navegando fuera de playlist, limpiando estado...');
-              this.limpiarEstadoPlaylist();
-            }
-            
-            this.videoId = id;
-            this.videoIdPlaylist = id;
-            this.visitaContada = false;
-            this.visitaYaContadaParaEsteVideo = false; 
-            this.mostrarVideo(); 
-          }
-        }
-      });
-
     this.sidebarCollapsed$ = this.usuarioGlobal.sidebarCollapsed$;
+    this.escucharNavegacion();
   }
 
-highlightCommentId: number | null = null;
 
-ngOnInit(): void {
-
-const idComentario = localStorage.getItem('scrollToCommentId');
-  if (idComentario) {
-    this.highlightCommentId = +idComentario;
-    console.log('Resaltando comentario (desde localStorage):', this.highlightCommentId);
-  }
-    
-    this.route.paramMap.subscribe((params: ParamMap) => {
-    const newVideoId = Number(params.get('id'));
-    const playlistIdFromParams = params.get('playlistId');
-    
-    console.log('📍 NAVEGACIÓN DETECTADA:', {
-      videoAnterior: this.videoId,
-      videoNuevo: newVideoId,
-      playlistId: playlistIdFromParams,
-      url: window.location.pathname,
-      esNavegacionManual: this.videoId !== newVideoId
-    });
-    
-    this.videoId = newVideoId;
-    console.log('✅ VideoID actualizado a:', this.videoId);
-    
-    console.log('🔍 Parámetros de ruta completos:', {
-      id: params.get('id'),
-      playlistId: playlistIdFromParams,
-      ruta: window.location.pathname,
-      allParams: params.keys.map(key => ({ [key]: params.get(key) }))
-    });
-
-    const playlistIdNumber = playlistIdFromParams ? Number(playlistIdFromParams) : 0;
-    
-    if (playlistIdFromParams && playlistIdNumber > 0) {
-      this.playlistId = playlistIdNumber;
-      this.fromPlaylist = true;
-      
-      localStorage.setItem('fromPlaylist', 'true');
-      localStorage.setItem('currentPlaylistId', this.playlistId.toString());
-      
-      this.siguienteVideoDisponible = true;
-      
-      console.log('✅ Playlist detectada desde URL - ID:', this.playlistId, 'Ruta:', window.location.pathname);
-    } else {
-      console.log('❌ No se encontró playlistId válido en URL, limpiando estado de playlist...');
-      this.limpiarEstadoPlaylist();
-    }
-
-    this.videoIdPlaylist = this.videoId;
-
-    console.log('🟢 Video ID:', this.videoId, 'Playlist ID:', this.playlistId, 'fromPlaylist:', this.fromPlaylist);
-
-    this.mostrarVideo();
-
-    if (this.fromPlaylist) {
-        this.obtenerVideosDePlaylist();
-    }
-
-    this.autoplaySubscription = this.autoplayService.getAutoplay().subscribe(enabled => {
-      console.log('UI: Autoplay estado:', enabled);
-    });
-
-    this.isCinemaMode = this.cinemaModeService.getCinemaModeValue();
-    this.cinemaModeSubscription = this.cinemaModeService.getCinemaMode().subscribe(enabled => {
-      this.isCinemaMode = enabled;
-    });
-    
-    this.usuarioConCanalSubscription = this.usuarioGlobal.usuarioConCanal$.subscribe(uc => {
-      this.usuarioConCanal = uc;
-      this.cdr.detectChanges();
-    });
-
+  ngOnInit(): void {
+    this.recuperarHighlightComentario();
+    this.inicializarCinemaMode();
     this.detectMobile();
     window.addEventListener('resize', () => this.detectMobile());
-
-    this.obtenerEstadoDeNotificaciones();
-    this.obtenerUsuario();
     this.mostrarSidebar();
-    this.verificarEdicionVideo();
-    this.scrollToCurrentVideo();
+    this.obtenerUsuario();
 
-    this.checkDescriptionHeight(); 
+    this.subs.push(
+      this.usuarioGlobal.usuarioConCanal$.subscribe(uc => {
+        this.usuarioConCanal = uc;
+        this.cdr.detectChanges();
+      }),
+      this.autoplayService.getAutoplay().subscribe(enabled => {
+        this.autoplayActivado = enabled;
+      })
+    );
+
+    this.subs.push(
+      this.route.paramMap.subscribe((params: ParamMap) => {
+        this.videoId = Number(params.get('id'));
+        this.videoIdPlaylist = this.videoId;
+
+        const playlistIdFromParams = params.get('playlistId');
+        const playlistIdNumber = playlistIdFromParams ? Number(playlistIdFromParams) : 0;
+
+        if (playlistIdFromParams && playlistIdNumber > 0) {
+          this.playlistId = playlistIdNumber;
+          this.fromPlaylist = true;
+          localStorage.setItem('fromPlaylist', 'true');
+          localStorage.setItem('currentPlaylistId', this.playlistId.toString());
+          this.siguienteVideoDisponible = true;
+        } else {
+          this.limpiarEstadoPlaylist();
+        }
+
+        this.resetearEstadoVideo();
+        this.mostrarVideo();
+
+        if (this.fromPlaylist) {
+          this.obtenerVideosDePlaylist();
+        }
+
+        const storedCinemaMode = localStorage.getItem('cinemaMode');
+        this.isCinemaMode = storedCinemaMode ? JSON.parse(storedCinemaMode) : false;
+        this.cdr.detectChanges();
+
+        this.scheduleTimeout(() => this.verificarSuscripcion(), 100);
+      })
+    );
+  }
+
+  ngAfterViewInit(): void {
+    this.scrollToBottom();
+    this.overlayComment = document.querySelector('.comments-overlay') as HTMLElement;
+    this.inicializarStickyPlayer();
+  }
+
+  ngAfterViewChecked(): void {}
+
+  ngOnDestroy(): void {
+    this.subs.forEach(s => s.unsubscribe());
+    this.pendingTimeouts.forEach(id => clearTimeout(id));
+    if (this.progresoInterval) clearInterval(this.progresoInterval);
+    this.limpiarEstadoPlaylist();
+    this.visitaContada = false;
+  }
+
+  @HostListener('window:beforeunload')
+  onBeforeUnload(): void {
+    this.limpiarEstadoPlaylist();
+  }
+
+
+  private escucharNavegacion(): void {
+    const sub = this.router.events.subscribe(event => {
+      if (!(event instanceof NavigationEnd)) return;
+
+      const id = +this.route.snapshot.paramMap.get('id')!;
+      if (!id || id === this.videoId) return;
+
+      const hasPlaylist = event.url.includes('/playlist/');
+      if (this.fromPlaylist && !hasPlaylist) {
+        this.limpiarEstadoPlaylist();
+      }
+
+      this.videoId = id;
+      this.videoIdPlaylist = id;
+      this.visitaContada = false;
+      this.visitaYaContadaParaEsteVideo = false;
+      this.mostrarVideo();
+    });
+    this.subs.push(sub);
+  }
+
+  private recuperarHighlightComentario(): void {
+    const id = localStorage.getItem('scrollToCommentId');
+    if (id) this.highlightCommentId = +id;
+  }
+
+  private inicializarCinemaMode(): void {
+    this.isCinemaMode = this.cinemaModeService.getCinemaModeValue();
+    this.subs.push(
+      this.cinemaModeService.getCinemaMode().subscribe(enabled => {
+        this.isCinemaMode = enabled;
+      })
+    );
+  }
+
+  private resetearEstadoVideo(): void {
+    this.visitaContada = false;
+    this.visitaYaContadaParaEsteVideo = false;
     this.mostrarColumnaLateral = false;
     this.videosPantallaFinalListos = false;
-    this.mostrarEndScreen = false; 
-
-    this.scheduleTimeout(() => this.verificarSuscripcion(), 100);
-
-    const storedCinemaMode = localStorage.getItem('cinemaMode');
-    this.isCinemaMode = storedCinemaMode ? JSON.parse(storedCinemaMode) : false;
-    this.cdr.detectChanges();
-
-    this.scheduleTimeout(() => {
-    this.cdr.detectChanges();
-      }, 500);
-  });
-}
-
-
-
-detectMobile() {
-  this.isMobile = window.innerWidth <= 1024;
-  
-  if (this.isMobile && this.isCinemaMode) {
-    this.isCinemaMode = false;
-    this.cinemaModeService.setCinemaMode(false);
-  }
-  
-  if (!this.isMobile && this.commentsSheetOpen) {
-    this.commentsSheetOpen = false;
-    document.body.style.overflow = '';
-    
-    if (this.sheet?.nativeElement) {
-      const el = this.sheet.nativeElement;
-      el.style.transform = '';
-      el.style.transition = '';
-      el.classList.remove('open');
-    }
-  }
-}
-
-openCommentsSheet() {
-  this.commentsSheetOpen = true;
-  document.body.style.overflow = 'hidden';
-
-  this.scheduleTimeout(() => {
-    if (this.sheet?.nativeElement) {
-      const el = this.sheet.nativeElement;
-
-      el.style.transition = '';
-      el.style.transform = 'translateY(0)';
-      el.classList.add('open');
-    }
-  }, 20)
-}
-
-closeCommentsSheet() {
-  this.commentsSheetOpen = false;
-  document.body.style.overflow = '';
-
-  requestAnimationFrame(() => {
-    if (this.sheet?.nativeElement) {
-      const el = this.sheet.nativeElement;
-
-      el.classList.remove('open');
-      el.style.transition = '';
-      el.style.transform = 'translateY(100%)';
-    }
-  });
-}
-onTouchStart(e: TouchEvent) {
-  const target = e.target as HTMLElement;
-  
-  if (!target.closest('.sheet-header')) return;
-
-  const inner = this.sheet.nativeElement.querySelector('app-comentarios');
-  if (inner && inner.scrollTop > 0) return;
-
-  this.startY = e.touches[0].clientY;
-  this.currentY = this.startY;
-  this.isDragging = true;
-
-  this.sheet.nativeElement.classList.remove('open');
-  this.sheet.nativeElement.style.transition = 'none';
-}
-
-onTouchMove(evt: TouchEvent) {
-  if (!this.isDragging) return;
-
-  const currentY = evt.touches[0].clientY;
-  let delta = currentY - this.startY;
-
-  if (delta < 0) delta = 0;
-
-  this.sheet.nativeElement.style.transform = `translateY(${delta}px)`;
-}
-onTouchEnd() {
-  if (!this.isDragging) return;
-
-  const sheetEl = this.sheet.nativeElement;
-  sheetEl.style.transition = 'transform 0.3s ease';
-
-  const match = sheetEl.style.transform.match(/translateY\(([\d.]+)px\)/);
-  const delta = match ? Number(match[1]) : 0;
-
-  if (delta > 120) {
-  sheetEl.style.transform = `translateY(100%)`;
-
-  this.scheduleTimeout(() => {
-    this.closeCommentsSheet();
-
-    sheetEl.style.transition = '';
-    sheetEl.style.transform = '';
-    sheetEl.classList.remove('open');
-  }, 250)
-}
-  else {
-    sheetEl.classList.add('open');
-    sheetEl.style.transform = 'translateY(0)';
+    this.mostrarEndScreen = false;
+    this.checkDescriptionHeight();
   }
 
-  this.isDragging = false;
-}
-
-  puedeEditar(video: any): boolean {
-    if (!this.usuarioConCanal || !this.usuarioConCanal.canales) return false;
-    return this.usuarioConCanal.canales.id === video.canal_id;
-  }
-
-  get puedeEditarVideo(): boolean {
-    return !!this.usuarioConCanal?.canales && !!this.video && this.usuarioConCanal.canales.id === this.video.canal_id;
-  }
-
-  comentarioIdParaIr: number | null = null;
-  @ViewChild('videoPageWrapper') videoPageWrapper!: ElementRef;
-
-  ngAfterViewInit() {
-
-        this.scrollToBottom();
-
-    this.overlayComment = document.querySelector('.comments-overlay') as HTMLElement;
+  private inicializarStickyPlayer(): void {
     if (window.innerWidth > 1024) return;
 
     const wrapper = this.videoPageWrapper.nativeElement;
     let ticking = false;
     let lastScrollY = 0;
 
-    const updatePlayer = () => {
-      const scrollY = window.scrollY;
-      const threshold = 120; 
-
-      if (scrollY > threshold && scrollY > lastScrollY) { 
-        this.scheduleTimeout(() => {
-          wrapper.classList.add('sticky-header-player');
-          wrapper.classList.remove('pre-active'); 
-        }, 10) 
-      } else if (scrollY < threshold) {
-        wrapper.classList.remove('sticky-header-player');
-      }
-
-      lastScrollY = scrollY;
-      ticking = false;
-    };
-
     window.addEventListener('scroll', () => {
-      if (!ticking) {
-        requestAnimationFrame(updatePlayer);
-        ticking = true;
+      if (ticking) return;
+      requestAnimationFrame(() => {
+        const scrollY = window.scrollY;
+        const threshold = 120;
+
+        if (scrollY > threshold && scrollY > lastScrollY) {
+          this.scheduleTimeout(() => {
+            wrapper.classList.add('sticky-header-player');
+            wrapper.classList.remove('pre-active');
+          }, 10);
+        } else if (scrollY < threshold) {
+          wrapper.classList.remove('sticky-header-player');
+        }
+
+        lastScrollY = scrollY;
+        ticking = false;
+      });
+      ticking = true;
+    });
+  }
+
+
+  obtenerUsuario(): void {
+    this.subs.push(
+      this.usuarioGlobal.usuario$.subscribe(res => {
+        this.usuario = res;
+
+        if (this.usuario?.id && this.usuario.id > 1) {
+          this.userId = this.usuario.id;
+
+          if (this.videoId && this.video && !this.visitaYaContadaParaEsteVideo) {
+            this.cargarProgresoAnterior();
+            this.iniciarHeartbeatProgreso();
+            this.visitar(this.userId);
+          }
+
+          this.obtenerEstadoDeNotificaciones();
+          this.obtenerPuntuacionActual();
+          this.verificarSuscripcion();
+        }
+      })
+    );
+    this.authService.mostrarUserLogueado().subscribe();
+  }
+
+
+  mostrarVideo(): void {
+    this.resetearEstadoVideo();
+
+    this.videoService.obtenerInformacionVideo(this.videoId).subscribe({
+      next: (res) => {
+        this.video = new Videos(res);
+        this.startedAt = res.stream?.started_at ?? null;
+        this.streamIdDelVideo = res.stream?.id ?? null;
+        this.errorMessage = '';
+        this.canalId = this.video.canal_id;
+
+        if (this.startedAt && this.streamIdDelVideo) {
+          this.cargarMensajesDelChat();
+        }
+
+        if (this.video?.error?.code === 403) {
+          this.isBlocked = true;
+          this.errorMessage = 'Este video ha sido bloqueado y no se puede acceder.';
+          this.mostrarColumnaLateral = true;
+          return;
+        }
+
+        this.isBlocked = false;
+        this.videoUrl = this.video.link;
+        this.miniaturaUrl = this.video.miniatura;
+        this.cargarProgresoAnterior();
+        this.procesarFechaDeCreacion();
+        this.actualizarTituloDePagina();
+        this.calcularTotalVotos();
+        this.cdr.detectChanges();
+
+        if (this.playlistId) this.obtenerVideosDePlaylist();
+        if (!this.fromPlaylist) this.videosDePlaylist = [];
+
+        this.scheduleTimeout(() => this.scheduleDescriptionHeightCheck(), 150);
+
+        this.scheduleTimeout(() => {
+          const idFinal = this.userId > 1 ? this.userId : undefined;
+          if (!this.visitaYaContadaParaEsteVideo) this.visitar(idFinal);
+        }, 800);
+
+        this.scheduleTimeout(() => {
+          this.mostrarColumnaLateral = true;
+          this.obtenerVideosRelacionados(this.videoId);
+          this.listarNumeroDeSuscriptores(this.canalId);
+          if (this.canalId) this.obtenerEstadoDeNotificaciones();
+          this.cdr.detectChanges();
+        }, 300);
+      },
+      error: (err) => {
+        this.mostrarColumnaLateral = true;
+
+        if (err.status === 404) {
+          this.isNotFound = true;
+          this.isBlocked = false;
+          this.errorMessage = '';
+          return;
+        }
+        if (err.status === 403 || err.status === 451) {
+          this.manejarBloqueo();
+          return;
+        }
+
+        this.isBlocked = false;
+        this.isNotFound = false;
+        this.errorMessage = this.obtenerMensajeDeErrorAmigable(err);
       }
     });
+  }
 
-  const videoEl = this.obtenerElementoVideo();
-  if (videoEl) {
-    videoEl.addEventListener('canplay', () => {
-      console.log('[VIDEO] canplay disparado → forzando currentTime si hay progreso');
+
+  private cargarMensajesDelChat(): void {
+    if (!this.streamIdDelVideo || !this.startedAt) return;
+
+    const startedAtUTC = this.startedAt.replace(' ', 'T') + 'Z';
+
+    this.chatService.cargarMensaje(this.streamIdDelVideo).subscribe({
+      next: (res: any) => {
+        this.mensajesDelChat = res.map((msg: any) => ({
+          id: msg.id,
+          user: msg.user?.name || 'Anónimo',
+          user_photo: msg.user?.foto || null,
+          text: msg.mensaje || '',
+          created_at: msg.created_at,
+          offset: (new Date(msg.created_at).getTime() - new Date(startedAtUTC).getTime()) / 1000
+        }));
+      }
     });
   }
-  }
 
+  onTiempoActualizado(segundos: number): void {
+    const anterior = this.mensajesVisibles.length;
+    this.mensajesVisibles = this.mensajesDelChat.filter(msg => msg.offset <= segundos);
 
-  ngAfterViewChecked(): void {
-  }
-
-  ngOnChanges() {
-    if (this.video?.descripcion) {
+    if (this.mensajesVisibles.length > anterior) {
       this.scheduleTimeout(() => {
-        this.checkDescriptionHeight();
-        this.cdr.detectChanges();
-      }, 0);
+        const container = this.chatContainer?.nativeElement;
+        if (container) {
+          const messagesDiv = container.querySelector('.chat-messages-container');
+          if (messagesDiv) messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+      }, 50);
     }
   }
 
-  ngOnDestroy(): void {
-    this.sidebarSubscription?.unsubscribe();
-    this.cinemaModeSubscription?.unsubscribe();
-    this.autoplaySubscription?.unsubscribe();
-    this.zoomSubscription?.unsubscribe();
-    this.routerEventsSubscription?.unsubscribe();
-    this.usuarioConCanalSubscription?.unsubscribe();
-    this.usuarioSubscription?.unsubscribe();
-
-    this.pendingTimeouts.forEach(id => clearTimeout(id));
-    this.pendingTimeouts = [];
-
-    this.visitaContada = false;
-    if (this.progresoInterval) {
-    clearInterval(this.progresoInterval);
-  }
-    this.limpiarEstadoPlaylist();
+  scrollToBottom(): void {
+    if (this.chatContainer) {
+      this.chatContainer.nativeElement.scrollTop = this.chatContainer.nativeElement.scrollHeight;
+    }
   }
 
-  private limpiarEstadoPlaylist(): void {
-    console.log('🧹 Limpiando estado de playlist del localStorage');
-    this.fromPlaylist = false;
-    localStorage.removeItem('fromPlaylist');
-    localStorage.removeItem('currentPlaylistId');
-    localStorage.removeItem('currentPlaylistData');
-    this.playlistId = null;
-    this.videosDePlaylist = [];
+
+  private obtenerElementoVideo(): HTMLVideoElement | null {
+    return this.reproductor?.videoElement || null;
   }
+
+  private cargarProgresoAnterior(): void {
+    if (!this.userId || !this.videoId) return;
+
+    this.videoService.obtenerProgresoAnterior(this.userId, this.videoId).subscribe({
+      next: (res) => {
+        if (res.progreso <= 0) return;
+
+        const videoEl = this.obtenerElementoVideo();
+        if (!videoEl) return;
+
+        const setProgreso = () => {
+          videoEl.currentTime = res.progreso;
+          this.cdr.detectChanges();
+          videoEl.removeEventListener('loadedmetadata', setProgreso);
+        };
+
+        if (videoEl.readyState >= 1) {
+          setProgreso();
+        } else {
+          videoEl.addEventListener('loadedmetadata', setProgreso);
+        }
+      },
+      error: (err) => console.error('[PROGRESO] Error:', err)
+    });
+  }
+
+  private iniciarHeartbeatProgreso(): void {
+    if (this.progresoInterval) clearInterval(this.progresoInterval);
+
+    this.progresoInterval = setInterval(() => {
+      const videoEl = this.obtenerElementoVideo();
+      if (!videoEl || videoEl.paused || videoEl.ended || videoEl.readyState < 2) return;
+
+      const current = Math.floor(videoEl.currentTime);
+      const duration = Math.floor(videoEl.duration || 0);
+
+      if (current <= 0) return;
+
+      this.videoService.enviarProgreso(this.userId, this.videoId, current, duration).subscribe({
+        error: err => console.error('[HEARTBEAT] Error:', err)
+      });
+    }, 5000);
+  }
+
+
+  visitar(userId?: number, progresoSegundos = 0, completado = false): void {
+    if (this.visitaYaContadaParaEsteVideo) return;
+
+    let userIdFinal = userId ?? this.userId;
+    if (!userIdFinal || userIdFinal <= 1) userIdFinal = 1;
+
+    this.visitaYaContadaParaEsteVideo = true;
+    this.visitaContada = true;
+
+    const esInvitado = userIdFinal === 1;
+    const contadorClave = esInvitado ? 'contadorVideosInvitado' : `contadorVideos_${userIdFinal}`;
+    let contadorTotal = this.cargarContador(contadorClave) || 0;
+
+    const visitaObs = esInvitado
+      ? this.videoService.contarVisitaInvitado(this.videoId, progresoSegundos, completado)
+      : this.videoService.contarVisita(this.videoId, userIdFinal, progresoSegundos, completado);
+
+    visitaObs.pipe(take(1)).subscribe({
+      next: () => {
+        contadorTotal++;
+        this.guardarContador(contadorClave, contadorTotal);
+
+        if (contadorTotal >= 3 && (esInvitado || this.usuario?.premium !== 1)) {
+          this.guardarContador(contadorClave, 0);
+          this.cargarPublicidad();
+        }
+      },
+      error: (err) => console.error('[Visitar] Error:', err)
+    });
+  }
+
+
+  cargarPublicidad(): void {
+    if (this.publicidadCargando) return;
+
+    this.publicidadCargando = true;
+    this.mostrarEndScreen = false;
+
+    this.videoService.obtenerPublicidad().subscribe(
+      (data) => {
+        this.publicidad = data;
+        this.reproduciendoPublicidad = true;
+        this.videoPublicidadUrl = this.publicidad.link;
+        this.nombrePublicidad = this.publicidad.titulo;
+        this.publicidadDuracionRestante = this.publicidad.duracion;
+        this.mostrarBotonSaltar = false;
+
+        this.scheduleTimeout(() => {
+          const intervalo = setInterval(() => {
+            if (this.publicidadDuracionRestante > 0) {
+              this.publicidadDuracionRestante--;
+            } else {
+              clearInterval(intervalo);
+              this.reproduciendoPublicidad = false;
+              this.finalizarPublicidad();
+            }
+          }, 1000);
+
+          this.scheduleTimeout(() => {
+            this.mostrarBotonSaltar = true;
+            this.cdr.detectChanges();
+          }, 5000);
+        }, 500);
+      },
+      () => { this.publicidadCargando = false; }
+    );
+  }
+
+  finalizarPublicidad(): void {
+    this.reproduciendoPublicidad = false;
+    this.videoPublicidadUrl = null;
+    this.mostrarColumnaLateral = false;
+    this.videosPantallaFinalListos = false;
+
+    this.videoService.obtenerInformacionVideo(this.videoId).subscribe(
+      (res) => {
+        this.video = res;
+        this.canalId = this.video.canal_id;
+
+        if (this.video?.error?.code === 403) {
+          this.isBlocked = true;
+          this.errorMessage = 'Este video ha sido bloqueado y no se puede acceder.';
+          this.mostrarColumnaLateral = true;
+          return;
+        }
+
+        this.isBlocked = false;
+        if (this.reproductor) this.reproductor.cambiarVideoSinMutear(this.video.link);
+        if (this.videoUrl !== this.video.link) this.videoUrl = this.video.link;
+
+        this.procesarFechaDeCreacion();
+        this.actualizarTituloDePagina();
+
+        this.scheduleTimeout(() => {
+          this.mostrarColumnaLateral = true;
+          this.obtenerVideosRelacionados(this.videoId);
+          this.listarNumeroDeSuscriptores(this.canalId);
+          this.cdr.detectChanges();
+          this.publicidadCargando = false;
+        }, 800);
+
+        if (this.progresoInterval) clearInterval(this.progresoInterval);
+        this.iniciarHeartbeatProgreso();
+        this.cargarProgresoAnterior();
+      },
+      () => {
+        this.isBlocked = false;
+        this.mostrarColumnaLateral = true;
+      }
+    );
+  }
+
+  saltarPublicidad(): void {
+    this.reproduciendoPublicidad = false;
+    this.mostrarBotonSaltar = false;
+    this.publicidadCargando = false;
+    this.finalizarPublicidad();
+  }
+
+
+  obtenerVideosRelacionados(videoId: number): void {
+    this.videoService.listarVideosRelacionados(videoId).subscribe(
+      (res: any[]) => {
+        const videos = res.map(v => ({ ...v, duracionFormateada: this.convertirDuracion(v.duracion) }));
+        this.videosRecomendadosColumnaLateral = videos;
+        this.videosRecomendadosPantallaFinal = videos;
+        this.siguienteVideoDisponible = videos.length > 0;
+        this.cdr.detectChanges();
+      },
+      () => {
+        this.videosRecomendadosColumnaLateral = [];
+        this.videosRecomendadosPantallaFinal = [];
+        this.siguienteVideoDisponible = false;
+        this.cdr.detectChanges();
+      }
+    );
+  }
+
+  obtenerVideosDePlaylist(): void {
+    this.playlistService.obtenerPlaylistConVideos(this.playlistId, this.videoId, this.fromPlaylist, this.userId)
+      .subscribe({
+        next: (res) => {
+          if (!res?.data?.playlist || !res.data.videos?.length) {
+            this.limpiarEstadoPlaylist();
+            return;
+          }
+
+          this.videosDePlaylist = res.data.videos.map((v: any) => ({
+            ...new Videos(v),
+            duracionFormateadaPlaylist: this.convertirDuracion(v.duracion)
+          }));
+
+          this.nombrePlaylist = res.data.playlist.nombre;
+          this.siguienteVideoDisponible = true;
+          this.cdr.detectChanges();
+        },
+        error: () => this.limpiarEstadoPlaylist()
+      });
+  }
+
+  siguienteVideo(): void {
+    if (!this.autoplayService.getAutoplayValue()) {
+      this.mostrarEndScreen = true;
+      return;
+    }
+
+    if (!this.playlistId || !this.videoId) {
+      this.mostrarEndScreen = true;
+      return;
+    }
+
+    this.playlistService.obtenerSiguienteVideo(this.playlistId, this.videoId).subscribe({
+      next: (res: any) => {
+        if (res?.data?.id) {
+          this.router.navigate(['/video', res.data.id, 'playlist', this.playlistId]);
+        } else {
+          this.siguienteVideoDisponible = false;
+          this.mostrarEndScreen = true;
+          this.cdr.detectChanges();
+        }
+      },
+      error: () => {
+        this.siguienteVideoDisponible = false;
+        this.mostrarEndScreen = true;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  verificarYNavegar(): void {
+    this.siguienteVideo();
+  }
+
+
+  onVideoTerminado(): void {
+    this.terminarVideo();
+  }
+
+  onSolicitarSiguienteVideo(): void {
+    if (!this.autoplayService.getAutoplayValue()) return;
+
+    if (this.fromPlaylist && this.playlistId) {
+      this.verificarYNavegar();
+    } else if (this.videosRecomendadosPantallaFinal?.length > 0) {
+      this.router.navigate(['/video', this.videosRecomendadosPantallaFinal[0].id]);
+    }
+  }
+
+  onVerificarSiguienteVideo(): void {
+    if (this.fromPlaylist && this.playlistId) {
+      this.playlistService.obtenerSiguienteVideo(this.playlistId, this.videoId).subscribe({
+        next: (res: any) => {
+          if (res?.data?.id) {
+            this.siguienteVideoDisponible = true;
+            this.reproductorComponent?.startAutoplayCountdown?.();
+          } else {
+            this.siguienteVideoDisponible = false;
+            this.reproductorComponent?.mostrarEndScreenConRecomendados?.();
+          }
+        },
+        error: () => {
+          this.siguienteVideoDisponible = false;
+          this.reproductorComponent?.mostrarEndScreenConRecomendados?.();
+        }
+      });
+    } else if (this.videosRecomendadosPantallaFinal?.length > 0) {
+      this.siguienteVideoDisponible = true;
+      this.reproductorComponent?.startAutoplayCountdown?.();
+    } else {
+      this.siguienteVideoDisponible = false;
+      this.reproductorComponent?.mostrarEndScreenConRecomendados?.();
+    }
+  }
+
+  terminarVideo(): void {
+    this.videoTerminado = true;
+    if (this.reproduciendoPublicidad) {
+      this.finalizarPublicidad();
+    } else {
+      this.mostrarEndScreen = true;
+    }
+  }
+
+  get videosRecomendadosParaReproductor(): any[] {
+    return this.videosRecomendadosPantallaFinal || [];
+  }
+
+  get videosParaMostrar(): Videos[] {
+    return this.videosDePlaylist.filter(v => v.id !== this.videoIdPlaylist);
+  }
+
+
+  handleCinemaMode(isCinemaMode: boolean): void {
+    this.isCinemaMode = isCinemaMode;
+    this.cinemaModeService.setCinemaMode(isCinemaMode);
+  }
+
+  detectMobile(): void {
+    this.isMobile = window.innerWidth <= 1024;
+
+    if (this.isMobile && this.isCinemaMode) {
+      this.isCinemaMode = false;
+      this.cinemaModeService.setCinemaMode(false);
+    }
+
+    if (!this.isMobile && this.commentsSheetOpen) {
+      this.commentsSheetOpen = false;
+      document.body.style.overflow = '';
+      const el = this.sheet?.nativeElement;
+      if (el) {
+        el.style.transform = '';
+        el.style.transition = '';
+        el.classList.remove('open');
+      }
+    }
+  }
+
+  openCommentsSheet(): void {
+    this.commentsSheetOpen = true;
+    document.body.style.overflow = 'hidden';
+    this.scheduleTimeout(() => {
+      const el = this.sheet?.nativeElement;
+      if (el) {
+        el.style.transition = '';
+        el.style.transform = 'translateY(0)';
+        el.classList.add('open');
+      }
+    }, 20);
+  }
+
+  closeCommentsSheet(): void {
+    this.commentsSheetOpen = false;
+    document.body.style.overflow = '';
+    requestAnimationFrame(() => {
+      const el = this.sheet?.nativeElement;
+      if (el) {
+        el.classList.remove('open');
+        el.style.transition = '';
+        el.style.transform = 'translateY(100%)';
+      }
+    });
+  }
+
+  onTouchStart(e: TouchEvent): void {
+    const target = e.target as HTMLElement;
+    if (!target.closest('.sheet-header')) return;
+
+    const inner = this.sheet.nativeElement.querySelector('app-comentarios');
+    if (inner && inner.scrollTop > 0) return;
+
+    this.startY = e.touches[0].clientY;
+    this.isDragging = true;
+    this.sheet.nativeElement.classList.remove('open');
+    this.sheet.nativeElement.style.transition = 'none';
+  }
+
+  onTouchMove(evt: TouchEvent): void {
+    if (!this.isDragging) return;
+    const delta = Math.max(0, evt.touches[0].clientY - this.startY);
+    this.sheet.nativeElement.style.transform = `translateY(${delta}px)`;
+  }
+
+  onTouchEnd(): void {
+    if (!this.isDragging) return;
+
+    const sheetEl = this.sheet.nativeElement;
+    sheetEl.style.transition = 'transform 0.3s ease';
+
+    const match = sheetEl.style.transform.match(/translateY\(([\d.]+)px\)/);
+    const delta = match ? Number(match[1]) : 0;
+
+    if (delta > 120) {
+      sheetEl.style.transform = 'translateY(100%)';
+      this.scheduleTimeout(() => {
+        this.closeCommentsSheet();
+        sheetEl.style.transition = '';
+        sheetEl.style.transform = '';
+        sheetEl.classList.remove('open');
+      }, 250);
+    } else {
+      sheetEl.classList.add('open');
+      sheetEl.style.transform = 'translateY(0)';
+    }
+
+    this.isDragging = false;
+  }
+
+
+  toggleExpand(event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const el = this.descripcionElement.nativeElement;
+    if (!this.isExpanded) {
+      el.style.height = `${el.scrollHeight}px`;
+    } else {
+      el.style.height = `${el.scrollHeight}px`;
+      void el.offsetHeight;
+      el.style.height = '150px';
+    }
+
+    this.isExpanded = !this.isExpanded;
+    this.cdr.detectChanges();
+  }
+
+  checkDescriptionHeight(): void {
+    if (!this.descripcionElement?.nativeElement || !this.video?.descripcion) {
+      this.showToggleLink = false;
+      this.isExpanded = false;
+      return;
+    }
+
+    const el = this.descripcionElement.nativeElement;
+    const original = el.style.height;
+    el.style.height = 'auto';
+    const scrollHeight = el.scrollHeight;
+    el.style.height = original || '150px';
+
+    this.showToggleLink = scrollHeight > 180;
+    this.isExpanded = !this.showToggleLink;
+    this.cdr.detectChanges();
+  }
+
+  checkContentOverflow(): void {
+    if (this.descripcionElement) {
+      const el = this.descripcionElement.nativeElement;
+      this.isContentOverflowing = el.scrollHeight > el.clientHeight;
+    }
+  }
+
+  private scheduleDescriptionHeightCheck(): void {
+    if (!this.descripcionElement) return;
+    this.scheduleTimeout(() => {
+      requestAnimationFrame(() => requestAnimationFrame(() => this.checkDescriptionHeight()));
+    }, 100);
+  }
+
+
+  calcularTotalVotos(): void {
+    this.totalVotos = [1, 2, 3, 4, 5].reduce((acc, n) => acc + (this.video[`puntuacion_${n}`] || 0), 0);
+  }
+
+  puntuar(valora: number): void {
+    if (!this.usuario?.id) {
+      window.location.href = `${this.serverIp}3002/#/`;
+      return;
+    }
+
+    if (this.puntuacionSeleccionada === valora) {
+      this.eliminarPuntuacion();
+    } else {
+      this.valorPuntuacion = valora;
+      this.puntuacionSeleccionada = valora;
+      this.crearActualizarPuntuacion();
+    }
+  }
+
+  obtenerPuntuacionActual(): void {
+    this.puntuarService.obtenerPuntuacionActual(this.videoId, this.usuario.id).subscribe(
+      res => {
+        this.puntuacionActual = res;
+        this.puntuacionSeleccionada = res.valora;
+        this.mostrarVideo();
+      },
+      err => {
+        if (err.status === 404) this.puntuacionSeleccionada = null;
+      }
+    );
+  }
+
+  eliminarPuntuacion(): void {
+    if (this.valorPuntuacion === null) return;
+
+    const valorAnterior = this.puntuacionSeleccionada;
+    this.puntuacionSeleccionada = null;
+
+    this.puntuarService.quitarPuntuacion(this.videoId, this.usuario.id, this.valorPuntuacion).subscribe(
+      () => {
+        this.puntuacionActual = null;
+        this.valorPuntuacion = null;
+        this.mostrarVideo();
+      },
+      () => { this.puntuacionSeleccionada = valorAnterior; }
+    );
+  }
+
+  crearActualizarPuntuacion(): void {
+    if (this.valorPuntuacion === null) return;
+
+    const valorAnterior = this.puntuacionSeleccionada;
+    this.puntuarService.puntuar(this.videoId, this.usuario.id, this.valorPuntuacion).subscribe(
+      res => {
+        this.puntuacionSeleccionada = res.valora;
+        this.valorPuntuacion = res.valora;
+        this.obtenerPuntuacionActual();
+      },
+      () => { this.puntuacionSeleccionada = valorAnterior; }
+    );
+  }
+
+
+  suscribirse(): void {
+    if (!this.usuario?.id) {
+      window.location.href = `${this.serverIp}3002/#/`;
+      return;
+    }
+
+    this.cargando = true;
+    this.suscripcionService.suscribirse(this.userId, this.canalId).subscribe(
+      () => {
+        this.suscrito = 'suscrito';
+        this.notificacionesService.cambiarEstado(this.canalId, this.userId, true).subscribe({
+          next: () => { this.notificacionesActivas = true; this.cargando = false; this.cdr.detectChanges(); },
+          error: () => { this.notificacionesActivas = true; this.cargando = false; this.cdr.detectChanges(); }
+        });
+      },
+      err => { this.cargando = false; this.handleError(err); }
+    );
+  }
+
+  anularSuscripcion(): void {
+    const ref = this.dialog.open(ConfirmacionDesuscribirModalComponent);
+    ref.afterClosed().subscribe(result => {
+      if (!result) return;
+      this.suscripcionService.anularSuscripcion(this.userId, this.canalId).subscribe(
+        () => {
+          this.suscrito = 'desuscrito';
+          this.notificacionesActivas = false;
+          this.cdr.detectChanges();
+        },
+        err => this.handleError(err)
+      );
+    });
+  }
+
+  toggleSuscripcion(): void {
+    if (this.suscrito === 'suscrito') {
+      this.anularSuscripcion();
+    } else {
+      this.suscribirse();
+    }
+  }
+
+  verificarSuscripcion(): void {
+    if (!this.userId || !this.canalId) return;
+
+    this.suscripcionService.verificarSuscripcion(this.userId, this.canalId).subscribe(
+      res => {
+        this.suscrito = res.estado;
+        if (res.estado === 'suscrito') this.notificacionesActivas = true;
+        if (res.estado === 'desuscrito') this.notificacionesActivas = false;
+      },
+      err => {
+        if (err.status === 404) this.suscrito = 'desuscrito';
+      }
+    );
+  }
+
+  listarNumeroDeSuscriptores(canalId: number): void {
+    this.suscripcionService.listarNumeroDeSuscriptores(canalId).subscribe(
+      res => { this.numeroDeSuscriptores = res; }
+    );
+  }
+
+  toggleNotificaciones(): void {
+    this.cargando = true;
+    this.notificacionesService.cambiarEstado(this.canalId, this.userId, !this.notificacionesActivas).subscribe({
+      next: () => { this.notificacionesActivas = !this.notificacionesActivas; this.cargando = false; this.cdr.detectChanges(); },
+      error: () => { this.cargando = false; this.cdr.detectChanges(); }
+    });
+  }
+
+  obtenerEstadoDeNotificaciones(): void {
+    if (!this.userId || !this.canalId) return;
+    this.notificacionesService.obtenerEstado(this.canalId, this.userId).subscribe({
+      next: (res: any) => { this.notificacionesActivas = res.notificaciones; },
+      error: () => { this.notificacionesActivas = false; }
+    });
+  }
+
+
+  toggleDropdown(): void {
+    this.dropdownVisible = !this.dropdownVisible;
+  }
+
+  toggleDropdownLateral(videoId: number, event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.dropdownVisibleLateral = this.dropdownVisibleLateral === videoId ? null : videoId;
+  }
+
+  @HostListener('document:click', ['$event'])
+  onClickOutside(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.options')) this.dropdownVisible = false;
+    if (!target.closest('.options-btn-lateral') && !target.closest('.dropdown-menu-lateral')) {
+      this.dropdownVisibleLateral = null;
+    }
+  }
+
+  agregarAVideoALista(): void {
+    if (!this.status.isLoggedIn) {
+      window.location.href = this.serverIp + '3002/#/';
+      return;
+    }
+
+    this.dialog.open(AgregarListaComponent, {
+      data: { videoId: this.videoId },
+      autoFocus: false,
+      restoreFocus: false,
+      scrollStrategy: this.overlay.scrollStrategies.noop()
+    });
+
+    this.dropdownVisible = false;
+  }
+
+  agregarVideoALista(videoId: number, event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (!this.status.isLoggedIn) {
+      window.location.href = this.serverIp + '3002/#/';
+      return;
+    }
+
+    this.dialog.open(AgregarListaComponent, {
+      data: { videoId },
+      autoFocus: false,
+      restoreFocus: false,
+      scrollStrategy: this.overlay.scrollStrategies.noop()
+    });
+
+    this.dropdownVisibleLateral = null;
+  }
+
+  crearLista(): void {
+    const ref = this.dialog.open(CrearListaComponent);
+    ref.afterClosed().subscribe(result => {
+      if (result) this.agregarAVideoALista();
+    });
+  }
+
+  openReportModal(): void {
+    if (!this.status.isLoggedIn) {
+      window.location.href = this.serverIp + '3002/#/';
+      return;
+    }
+
+    this.dialog.open(ModalReporteVideoComponent, {
+      width: '400px',
+      data: { videoId: this.videoId, userId: this.userId }
+    });
+
+    this.dropdownVisible = false;
+  }
+
+  openReportModalForVideo(videoId: number, event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (!this.status.isLoggedIn) {
+      window.location.href = this.serverIp + '3002/#/';
+      return;
+    }
+
+    this.dialog.open(ModalReporteVideoComponent, {
+      width: '400px',
+      data: { videoId, userId: this.userId }
+    });
+
+    this.dropdownVisibleLateral = null;
+  }
+
+
+  private mostrarSidebar(): void {
+    this.usuarioGlobal.setSidebarVisible(false);
+    this.subs.push(
+      this.usuarioGlobal.sidebarCollapsed$.subscribe(visible => {
+        this.sidebarVisible = visible;
+        this.cdr.detectChanges();
+      })
+    );
+  }
+
+  toggleSidebar(): void {
+    this.usuarioGlobal.toggleSidebar();
+  }
+
+
+  scrollToCurrentVideo(): void {
+    this.scheduleTimeout(() => {
+      const current = this.videoItems?.find(
+        el => +el.nativeElement.querySelector('.video-link')?.href.split('/').slice(-3, -2)[0] === this.videoIdPlaylist
+      );
+      current?.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 200);
+  }
+
 
   private scheduleTimeout(callback: () => void, delay: number): number {
     const id = window.setTimeout(callback, delay);
@@ -496,999 +1152,19 @@ onTouchEnd() {
     return id;
   }
 
-
-
-  videoTerminado: boolean = false;
-
-  get videosRecomendadosParaReproductor(): any[] {
-
-    return this.videosRecomendadosPantallaFinal || [];
-  }
-
- @ViewChild('reproductorVideo') reproductorVideo!: ReproductorVideoComponent;
-
-  private mostrarSidebar(): void {
-    this.usuarioGlobal.setSidebarVisible(false);
-    this.sidebarSubscription = this.usuarioGlobal.sidebarCollapsed$.subscribe(visible => {
-      this.sidebarVisible = visible;
-      this.cdr.detectChanges();
-    });
-  }
-
-  toggleSidebar(): void {
-    this.usuarioGlobal.toggleSidebar();
-  }
-
-    puntuaciones: any = {
-      puntuacion_1: 0,
-      puntuacion_2: 0,
-      puntuacion_3: 0,
-      puntuacion_4: 0,
-      puntuacion_5: 0
-    };
-
-    totalVotos: number = 0;
-
-
-
-  obtenerEstadoDeNotificaciones() {
-    if (!this.userId || !this.canalId) {
-      console.log('[Notificaciones] userId o canalId no definidos, se retrasa la llamada');
-      return;
-    }
-    this.notificacionesService.obtenerEstado(this.canalId, this.userId).subscribe({
-      next: (res: any) => this.notificacionesActivas = res.notificaciones,
-      error: () => this.notificacionesActivas = false
-    });
-  }
-
- toggleNotificaciones(): void {
-  this.cargando = true;
-  this.notificacionesService.cambiarEstado(this.canalId, this.userId, !this.notificacionesActivas).subscribe({
-    next: () => {
-      this.notificacionesActivas = !this.notificacionesActivas;
-      this.cargando = false;
-      this.cdr.detectChanges();
-    },
-    error: () => {
-      this.cargando = false;
-      this.cdr.detectChanges();
-    }
-  });
-}
-
-  obtenerIdDePlaylist() {
-    const playlistIdFromRoute = this.route.snapshot.params['playlistId'];
-    
-    if (playlistIdFromRoute) {
-      this.playlistId = Number(playlistIdFromRoute);
-      this.fromPlaylist = true;
-      console.log('playlistId recibido desde URL:', this.playlistId);
-      return;
-    }
-
-    const state = history.state as { playlistId: number };
-    if (state && state.playlistId) {
-      this.playlistId = state.playlistId;
-      this.fromPlaylist = true;
-      console.log('playlistId recibido desde history.state:', this.playlistId);
-      return;
-    }
-
-    const fromPlaylistStorage = localStorage.getItem('fromPlaylist');
-    const playlistIdStorage = localStorage.getItem('currentPlaylistId');
-    const playlistDataStorage = localStorage.getItem('currentPlaylistData');
-    
-    if (fromPlaylistStorage === 'true' && playlistIdStorage) {
-      this.playlistId = Number(playlistIdStorage);
-      this.fromPlaylist = true;
-      console.log('playlistId recuperado desde localStorage (ID):', this.playlistId);
-      return;
-    }
-    
-    if (fromPlaylistStorage === 'true' && playlistDataStorage) {
-      try {
-        const playlistData = JSON.parse(playlistDataStorage);
-        this.playlistId = playlistData.id;
-        this.fromPlaylist = true;
-        console.log('playlistId recuperado desde localStorage (datos):', this.playlistId);
-        return;
-      } catch (error) {
-        console.error('Error parsing playlist data from localStorage:', error);
-      }
-    }
-
+  private limpiarEstadoPlaylist(): void {
     this.fromPlaylist = false;
-    console.log('No se encontró información de playlist');
+    this.playlistId = null;
+    this.videosDePlaylist = [];
+    localStorage.removeItem('fromPlaylist');
+    localStorage.removeItem('currentPlaylistId');
+    localStorage.removeItem('currentPlaylistData');
   }
 
-  reloadPage(event: Event) {
-    event.preventDefault();
-    const target = event.currentTarget as HTMLAnchorElement;
-    window.location.href = target.href;
-  }
-
-  obtenerUsuario(): void {
-    this.usuarioSubscription = this.usuarioGlobal.usuario$.subscribe(res => {
-      console.log('[obtenerUsuario] Usuario recibido:', res);
-      this.usuario = res;
-      console.log(res)
-
-if (this.usuario && this.usuario.id && this.usuario.id > 1) {  // >1 para evitar invitado
-      this.userId = this.usuario.id;
-      console.log('[obtenerUsuario] Usuario REAL confirmado:', this.userId);
-
-      // Solo si el video ya está cargado y no se visitó aún
-      if (this.videoId && this.video && !this.visitaYaContadaParaEsteVideo) {
-        console.log('[obtenerUsuario] Video listo → progreso + visita REAL');
-        this.cargarProgresoAnterior();
-        this.iniciarHeartbeatProgreso();
-        this.visitar(this.userId);  // siempre con ID real
-      }
-
-        this.obtenerEstadoDeNotificaciones();
-        this.obtenerPuntuacionActual();
-        this.verificarSuscripcion();
-
-      } else {
-        console.log('[obtenerUsuario] Usuario NO logueado, es invitado');
-     
-      }
-     
-    });
-    this.authService.mostrarUserLogueado().subscribe();
-  }
-
-toggleExpand(event: Event): void {
-  event.preventDefault();
-  event.stopPropagation();
-
-  const element = this.descripcionElement.nativeElement;
-
-  if (!this.isExpanded) {
-    const fullHeight = element.scrollHeight;
-    
-    element.style.height = `${fullHeight}px`;
-  } else {
-    element.style.height = `${element.scrollHeight}px`;
-    void element.offsetHeight; 
-    element.style.height = '150px';
-  }
-
-  this.isExpanded = !this.isExpanded;
-  this.cdr.detectChanges();
-}
-
-checkDescriptionHeight(): void {
-  if (!this.descripcionElement?.nativeElement || !this.video?.descripcion) {
-    this.showToggleLink = false;
-    this.isExpanded = false;
-    return;
-  }
-
-  const element = this.descripcionElement.nativeElement;
-  
-  const originalHeight = element.style.height;
-  element.style.height = 'auto';
-  const scrollHeight = element.scrollHeight;
-  element.style.height = originalHeight || '150px';
-
-  this.showToggleLink = scrollHeight > 180; 
-  this.isExpanded = !this.showToggleLink;
-
-  console.log('[DESCRIPCIÓN] scrollHeight:', scrollHeight, 'showToggleLink:', this.showToggleLink);
-
-  this.cdr.detectChanges();
-}
-
-  checkContentOverflow() {
-    if (this.descripcionElement) {
-      const element = this.descripcionElement.nativeElement;
-      this.isContentOverflowing = element.scrollHeight > element.clientHeight;
-    }
-  }
-
-  obtenerVideosRelacionados(videoId: number) {
-    console.log('[DEBUG] Cargando recomendados... Columna:', this.mostrarColumnaLateral);
-    this.videoService.listarVideosRelacionados(videoId).subscribe(
-      (res: any[]) => {
-        const videosConDuracion = res.map(video => ({
-          ...video,
-          duracionFormateada: this.convertirDuracion(video.duracion)
-        }));
-        
-        this.videosRecomendadosColumnaLateral = videosConDuracion; 
-        this.videosRecomendadosPantallaFinal = videosConDuracion; 
-        
-        console.log('[Recomendados] Cargados:', videosConDuracion.length);
-        console.log('🎯 Videos disponibles para autoplay:', this.videosRecomendadosPantallaFinal.length);
-        
-        this.siguienteVideoDisponible = videosConDuracion.length > 0;
-        this.cdr.detectChanges();
-      },
-      error => {
-        console.error('Error al obtener videos relacionados:', error);
-        this.videosRecomendadosColumnaLateral = [];
-        this.videosRecomendadosPantallaFinal  = [];
-        this.siguienteVideoDisponible = false;
-        this.cdr.detectChanges();
-      }
-    );
-  }
-
-  private verificarEdicionVideo(): void {
-    this.usuarioGlobal.usuarioConCanal$.pipe(
-      filter(uc => uc !== null),
-      take(1)
-    ).subscribe(uc => {
-      this.usuarioConCanal = uc;
-      this.cdr.detectChanges();
-    });
-  }
-
-  toggleDropdown() {
-    this.dropdownVisible = !this.dropdownVisible;
-  }
-
-  toggleDropdownLateral(videoId: number, event: Event) {
-    event.preventDefault();
-    event.stopPropagation();
-    this.dropdownVisibleLateral = this.dropdownVisibleLateral === videoId ? null : videoId;
-  }
-
-  agregarVideoALista(videoId: number, event: Event): void {
-    event.preventDefault();
-    event.stopPropagation();
-    
-    if (!this.status.isLoggedIn) {
-      window.location.href = this.serverIp + '3002/#/';
-      return;
-    }
-    
-    const dialogRef = this.dialog.open(AgregarListaComponent, {
-      data: { videoId: videoId },
-      autoFocus: false,
-      restoreFocus: false,
-      scrollStrategy: this.overlay.scrollStrategies.noop()
-    });
-    
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        console.log('Video agregado a la lista');
-      }
-    });
-    
-    this.dropdownVisibleLateral = null;
-  }
-
-  @HostListener('document:click', ['$event'])
-  onClickOutside(event: MouseEvent) {
-    const target = event.target as HTMLElement;
-    if (!target.closest('.options')) {
-      this.dropdownVisible = false;
-    }
-    if (!target.closest('.options-btn-lateral') && !target.closest('.dropdown-menu-lateral')) {
-      this.dropdownVisibleLateral = null;
-    }
-  }
-
-  envioReportar(formData: any) {
-    this.reporteService.crearReporteVideo(formData).subscribe(
-      response => {
-        console.log('Reporte enviado exitosamente:', response);
-      },
-      error => {
-        console.error('Error al enviar el reporte:', error);
-      }
-    );
-  }
-
-  onImageError(event: any) {
-    event.target.src = 'assets/images/video-default.png';
-  }
-
-  onImageErrorUser(event: any) {
-    event.target.src = 'assets/images/user.svg';
-  }
-
-
-  publicidadCargando: boolean = false; 
-
-
-  cargarPublicidad(): void {
-  if (this.publicidadCargando) {
-    console.log('[PUBLICIDAD] Ya cargando, ignorando...');
-    return;
-  }
-  
-  this.publicidadCargando = true;
-  this.mostrarEndScreen = false;
-  console.log('[PUBLICIDAD] Iniciando...');
-  
-  this.videoService.obtenerPublicidad().subscribe(
-    (data) => {
-      this.publicidad = data;
-      this.reproduciendoPublicidad = true;
-      this.videoPublicidadUrl = this.publicidad.link;
-      this.nombrePublicidad = this.publicidad.titulo;
-      this.publicidadDuracionRestante = this.publicidad.duracion;
-      this.mostrarBotonSaltar = false;
-      
-      let intervalo: any;
-      
-      this.scheduleTimeout(() => {
-        intervalo = setInterval(() => {
-          if (this.publicidadDuracionRestante > 0) {
-            this.publicidadDuracionRestante--;
-          } else {
-            clearInterval(intervalo);
-            this.reproduciendoPublicidad = false;
-            this.finalizarPublicidad();
-          }
-        }, 1000);
-        
-        this.scheduleTimeout(() => {
-          this.mostrarBotonSaltar = true;
-          this.cdr.detectChanges(); 
-        }, 5000); 
-
-      }, 500)
-    },
-    error => {
-      console.error('Error al cargar publicidad:', error);
-      this.publicidadCargando = false;
-    }
-  );
-}
-
-  finalizarPublicidad(): void {
-    this.reproduciendoPublicidad = false;
-    this.videoPublicidadUrl = null;
-    this.mostrarColumnaLateral = false;      
-    this.videosPantallaFinalListos= false;       
-    
-    this.videoService.obtenerInformacionVideo(this.videoId).subscribe(
-      (res) => {
-        this.video = res;
-        this.canalId = this.video.canal_id;
-     
-        if (this.video?.error?.code === 403) {
-          this.isBlocked = true;
-          this.errorMessage = 'Este video ha sido bloqueado y no se puede acceder.';
-          this.mostrarColumnaLateral = true;  
-          return;
-        }
-        
-        this.isBlocked = false;
-
-
-      if (this.reproductor) {
-        this.reproductor.cambiarVideoSinMutear(this.video.link);
-      }
-        
-        if (this.videoUrl !== this.video.link) {
-          this.videoUrl = this.video.link;
-        }
-        this.procesarFechaDeCreacion();
-        this.actualizarTituloDePagina();
-        
-        this.scheduleTimeout(() => {
-          this.mostrarColumnaLateral = true;
-          this.obtenerVideosRelacionados(this.videoId);
-          this.listarNumeroDeSuscriptores(this.canalId);
-          
-          this.scheduleTimeout(() => {
-            const lateral = document.querySelector('.columnaLateral') as HTMLElement;
-            if (lateral) lateral.classList.add('mostrar');
-          }, 50);
-          
-          this.cdr.detectChanges();
-          this.publicidadCargando = false;
-        }, 800)
-        if (this.progresoInterval) clearInterval(this.progresoInterval);
-        this.iniciarHeartbeatProgreso();
-        this.cargarProgresoAnterior();   
-      },
-      error => {
-        this.isBlocked = false;
-        this.errorMessage = this.obtenerMensajeDeError(error);
-        this.mostrarColumnaLateral = true;
-      }
-    );
-  }
-
-
-  handleCinemaMode(isCinemaMode: boolean) {
-    console.log('Iniciando handleCinemaMode, isCinemaMode:', isCinemaMode);
-    this.isCinemaMode = isCinemaMode;
-    this.cinemaModeService.setCinemaMode(isCinemaMode);
-    console.log('CinemaMode guardado en servicio:', isCinemaMode);
-  }
-  saltarPublicidad(): void {
-    this.reproduciendoPublicidad = false;
-    this.mostrarBotonSaltar = false;
-    this.finalizarPublicidad();
-    this.publicidadCargando = false;
-  }
-
-  openReportModal() {
-    if (!this.status.isLoggedIn) {
-      window.location.href = this.serverIp + '3002/#/';
-      return;
-    }
-    
-    const dialogRef = this.dialog.open(ModalReporteVideoComponent, {
-      width: '400px',
-      data: { videoId: this.videoId, userId: this.userId }
-    });
-    dialogRef.afterClosed().subscribe(response => {
-      if (response) {
-        this.handleReportSubmitted(response);
-      }
-    });
-    this.dropdownVisible = false;
-  }
-
-  openReportModalForVideo(videoId: number, event: Event) {
-    event.preventDefault();
-    event.stopPropagation();
-    
-    if (!this.status.isLoggedIn) {
-      window.location.href = this.serverIp + '3002/#/';
-      return;
-    }
-    
-    const dialogRef = this.dialog.open(ModalReporteVideoComponent, {
-      width: '400px',
-      data: { videoId: videoId, userId: this.userId }
-    });
-    dialogRef.afterClosed().subscribe(response => {
-      if (response) {
-        this.handleReportSubmitted(response);
-      }
-    });
-    this.dropdownVisibleLateral = null;
-  }
-
-  handleReportSubmitted(response: any) {
-    console.log('Reporte enviado exitosamente:', response);
-    this.dialog.closeAll();
-  }
-
-    calcularTotalVotos() {
-    this.totalVotos =
-      this.video.puntuacion_1 +
-      this.video.puntuacion_2 +
-      this.video.puntuacion_3 +
-      this.video.puntuacion_4 +
-      this.video.puntuacion_5;
-  }
-
-private progresoInterval: any = null;
-
-
-private obtenerElementoVideo(): HTMLVideoElement | null {
-  return this.reproductor?.videoElement || null;
-}
-
-private cargarProgresoAnterior(): void {
-  console.log('[PROGRESO] Intentando cargar progreso - userId:', this.userId, 'videoId:', this.videoId);
-
-  if (!this.userId || !this.videoId) {
-    console.log('[PROGRESO] Faltan datos → saliendo');
-    return;
-  }
-
-  this.videoService.obtenerProgresoAnterior(this.userId, this.videoId)
-    .subscribe({
-      next: (res) => {
-        console.log('[PROGRESO] Respuesta backend:', res);
-
-        if (res.progreso <= 0) {
-          console.log('[PROGRESO] No hay progreso guardado (0)');
-          return;
-        }
-
-        const videoEl = this.obtenerElementoVideo();
-        if (!videoEl) {
-          console.warn('[PROGRESO] No se encontró <video> → saliendo');
-          return;
-        }
-
-        const onLoadedMetadata = () => {
-          console.log('[PROGRESO] loadedmetadata OK - readyState:', videoEl.readyState);
-          videoEl.currentTime = res.progreso;
-          console.log(`[PROGRESO] ¡Seteado! Tiempo: ${res.progreso}s`);
-
-          this.cdr.detectChanges();
-          videoEl.removeEventListener('loadedmetadata', onLoadedMetadata);
-        };
-
-        if (videoEl.readyState >= 1) { 
-          onLoadedMetadata();
-        } else {
-          videoEl.addEventListener('loadedmetadata', onLoadedMetadata);
-          console.log('[PROGRESO] Esperando loadedmetadata...');
-        }
-      },
-      error: (err) => console.error('[PROGRESO] Error:', err)
-    });
-}
-
-private iniciarHeartbeatProgreso(): void {
-  if (this.progresoInterval) clearInterval(this.progresoInterval);
-
-  this.progresoInterval = setInterval(() => {
-    const videoEl = this.obtenerElementoVideo();
-
-    console.log('[HEARTBEAT TICK] Elemento video encontrado:', !!videoEl);
-
-    if (!videoEl) {
-      console.warn('[HEARTBEAT] No se encontró <video>');
-      return;
-    }
-
-    console.log('[HEARTBEAT TICK] Estado video → paused:', videoEl.paused, 'ended:', videoEl.ended, 'readyState:', videoEl.readyState);
-
-    if (videoEl.paused || videoEl.ended || videoEl.readyState < 2) {
-      console.log('[HEARTBEAT] Video no listo/reproduciendo → skip');
-      return;
-    }
-
-    const current = Math.floor(videoEl.currentTime);
-    const duration = Math.floor(videoEl.duration || 0);
-
-    console.log('[HEARTBEAT TICK] Valor REAL capturado → currentTime:', current, 'duration:', duration);
-
-    if (current <= 0) {
-      console.log('[HEARTBEAT] currentTime es 0 → skip envío');
-      return;
-    }
-
-    this.videoService.enviarProgreso(this.userId, this.videoId, current, duration)
-      .subscribe({
-        next: () => console.log('[HEARTBEAT] Envío OK para', current, 'segundos'),
-        error: err => console.error('[HEARTBEAT] Error en envío:', err)
-      });
-  }, 5000);
-}
-
-streamIdDelVideo: number | null = null;
-
-  mostrarVideo(): void {
-    this.visitaContada = false;
-    this.visitaYaContadaParaEsteVideo = false;
-    this.mostrarColumnaLateral = false;      
-    this.videosPantallaFinalListos = false;     
-    
-
-    this.videoService.obtenerInformacionVideo(this.videoId).subscribe({
-     next: (res) => {
-      this.video = new Videos(res);
-      this.startedAt = res.stream?.started_at ?? null;
-      this.streamIdDelVideo = res.stream?.id ?? null;
-
-     if (this.startedAt && this.streamIdDelVideo) {
-      this.cargarMensajesDelChat();
-    }
-        console.log(res)
-        this.cdr.detectChanges();
-        this.errorMessage = '';
-        this.canalId = this.video.canal_id;
-        
-        if (this.video?.error?.code === 403) {
-          this.isBlocked = true;
-          this.errorMessage = 'Este video ha sido bloqueado y no se puede acceder.';
-          this.mostrarColumnaLateral = true;
-          return;
-        }
-        this.cargarProgresoAnterior();
-        
-        if (this.playlistId) {
-          this.obtenerVideosDePlaylist();
-        }
-
-        if (!this.fromPlaylist) {
-          this.videosDePlaylist = [];
-        }
-        
-        this.isBlocked = false;
-        this.videoUrl = this.video.link;
-        this.miniaturaUrl = this.video.miniatura;
-        this.procesarFechaDeCreacion();
-        this.actualizarTituloDePagina();
-        this.calcularTotalVotos();
-
-        this.cdr.detectChanges(); 
-
-          this.scheduleTimeout(() => {
-            this.scheduleDescriptionHeightCheck(); 
-          }, 150);
-        
-          this.scheduleTimeout(() => {
-          if (this.userId && this.userId > 1 && !this.visitaYaContadaParaEsteVideo) {
-            console.log('[mostrarVideo] Usuario real listo → visita con ID:', this.userId);
-            this.visitar(this.userId);
-          } else if (!this.userId && !this.visitaYaContadaParaEsteVideo) {
-            console.log('[mostrarVideo] No hay usuario real → visita como invitado');
-            this.visitar(); 
-          }
-        }, 800);
-        this.scheduleTimeout(() => {
-          this.mostrarColumnaLateral = true;
-          this.obtenerVideosRelacionados(this.videoId);
-          this.listarNumeroDeSuscriptores(this.canalId);
-          if (this.canalId) {
-            this.obtenerEstadoDeNotificaciones();
-          }
-          this.cdr.detectChanges();
-        }, 300)
-      },
-     error: (err) => {
-      console.warn('Error al cargar video:', err);
-
-      this.mostrarColumnaLateral = true;
-
-      if (err.status === 404) {
-        this.isNotFound = true;
-        this.isBlocked = false;
-        this.errorMessage = '';
-        return;
-      }
-
-      if (err.status === 403 || err.status === 451) {
-        this.manejarBloqueo();
-        return;
-      }
-
-      this.isBlocked = false;
-      this.isNotFound = false;
-      this.errorMessage = this.obtenerMensajeDeErrorAmigable(err);
-    }
-  });
-  }
-
-onTiempoActualizado(segundos: number): void {
-  this.mensajesVisibles = this.mensajesDelChat.filter(msg => msg.offset <= segundos);
-  
-  if (Math.floor(segundos) % 5 === 0) {
-    console.log('tiempo:', segundos);
-    console.log('startedAt:', this.startedAt);
-    console.log('mensajesDelChat:', this.mensajesDelChat.length);
-    console.log('mensajesVisibles:', this.mensajesVisibles.length);
-  }
-}
-
-private cargarMensajesDelChat(): void {
-  if (!this.streamIdDelVideo || !this.startedAt) return;
-
-  const startedAtUTC = this.startedAt.replace(' ', 'T') + 'Z';
-
-  this.chatService.cargarMensaje(this.streamIdDelVideo).subscribe({
-    next: (res: any) => {
-      this.mensajesDelChat = res.map((msg: any) => ({
-        id: msg.id,
-        user: msg.user?.name || 'Anónimo',
-        user_photo: msg.user?.foto || null,
-        text: msg.mensaje || '',
-        created_at: msg.created_at,
-        offset: (new Date(msg.created_at).getTime() - new Date(startedAtUTC).getTime()) / 1000
-      }));
-      console.log('primer mensaje offset:', this.mensajesDelChat[0]?.offset);
-    }
-  });
-}
-
-  @ViewChild('chatContainer') chatContainer!: ElementRef;
-
-
-  scrollToBottom(): void {
-    if (this.chatContainer) {
-      const element = this.chatContainer.nativeElement;
-      element.scrollTop = element.scrollHeight;
-    }
-  }
   private manejarBloqueo(): void {
     this.isBlocked = true;
     this.isNotFound = false;
     this.errorMessage = 'Este video ha sido bloqueado y no se puede acceder.';
-  }
-
-  private obtenerMensajeDeErrorAmigable(error: any): string {
-    if (error.status === 0) {
-      return 'No hay conexión a internet. Verifica tu red e inténtalo de nuevo.';
-    }
-    if (error.status >= 500) {
-      return 'Error en el servidor. Inténtalo más tarde.';
-    }
-    return 'Ocurrió un error al cargar el video. Por favor, intenta de nuevo.';
-  }
-
-
-
-  private scheduleDescriptionHeightCheck(): void {
-    if (!this.descripcionElement) {
-      console.warn('descripcionElement no disponible aún');
-      return;
-    }
-
-    this.scheduleTimeout(() => {
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          this.checkDescriptionHeight();
-        });
-      });
-    }, 100);
-  }
-
-  convertirDuracion(segundos: number): string {
-    const minutos = Math.floor(segundos / 60);
-    const segundosRestantes = segundos % 60;
-    const segundosFormateados = segundosRestantes < 10 ? '0' + segundosRestantes : segundosRestantes;
-    return `${minutos}:${segundosFormateados}`;
-  }
-
-  terminarVideo(): void {
-    console.log('[END-SCREEN] Video terminado!');
-    this.videoTerminado = true;  
-    
-    if (this.reproduciendoPublicidad) {
-      this.finalizarPublicidad();
-    } else {
-      this.mostrarEndScreen = true;
-    }
-    
-  }
-  siguienteVideoDisponible: boolean = true;
-  onVideoTerminado(): void {
-    console.log('🎯 Video terminado SIN autoplay - mostrando end screen');
-    this.terminarVideo();
-  }
-
-  onSolicitarSiguienteVideo(): void {
-    console.log('📨 COUNTDOWN COMPLETADO - Reproductor solicita siguiente video');
-    console.log('🔍 Estado actual:', {
-      fromPlaylist: this.fromPlaylist,
-      playlistId: this.playlistId,
-      videoId: this.videoId,
-      URLactual: window.location.pathname,
-      autoplay: this.autoplayService.getAutoplayValue(),
-      siguienteDisponible: this.siguienteVideoDisponible,
-      videosRecomendados: this.videosRecomendadosPantallaFinal.length
-    });
-    
-    if (!this.autoplayService.getAutoplayValue()) {
-      console.log('⚠️ Autoplay desactivado - no reproducir siguiente');
-      return;
-    }
-    
-    if (this.fromPlaylist && this.playlistId) {
-      console.log('🎬 Navegando al siguiente video de la playlist');
-      this.verificarYNavegar();
-    } 
-    else if (this.videosRecomendadosPantallaFinal && this.videosRecomendadosPantallaFinal.length > 0) {
-      const primerRecomendado = this.videosRecomendadosPantallaFinal[0];
-      console.log('🎥 Reproduciendo primer video recomendado:', primerRecomendado.id, primerRecomendado.titulo);
-      this.router.navigate(['/video', primerRecomendado.id]);
-    } else {
-      console.log('⚠️ No hay siguiente video disponible');
-    }
-  }
-
-  verificarYNavegar(): void {
-    console.log('� INICIANDO verificación de siguiente video');
-    console.log('🔍 Datos:', { playlist: this.playlistId, videoActual: this.videoId });
-    console.log('📍 URL actual:', window.location.pathname);
-    this.siguienteVideo();
-  }
-
-  onVerificarSiguienteVideo(): void {
-    console.log('🔍 Reproductor solicita verificación ANTES del countdown');
-    
-    if (this.fromPlaylist && this.playlistId) {
-      this.playlistService.obtenerSiguienteVideo(this.playlistId, this.videoId)
-        .subscribe({
-          next: (res: any) => {
-            if (res?.data?.id) {
-              console.log('✅ HAY siguiente video en playlist - iniciando countdown');
-              this.siguienteVideoDisponible = true;
-              if (this.reproductorComponent && this.reproductorComponent.startAutoplayCountdown) {
-                console.log('🎯 Llamando countdown directamente al reproductor');
-                this.reproductorComponent.startAutoplayCountdown();
-              }
-            } else {
-              console.log('❌ NO HAY más videos en playlist - mostrar end screen con recomendados');
-              this.siguienteVideoDisponible = false;
-              if (this.reproductorComponent) {
-                console.log('🛑 Mostrando end screen con recomendados');
-                this.reproductorComponent.mostrarEndScreenConRecomendados();
-              }
-            }
-          },
-          error: (err) => {
-            console.error('❌ Error verificando siguiente video de playlist:', err);
-            this.siguienteVideoDisponible = false;
-            if (this.reproductorComponent) {
-              console.log('🛑 Error - mostrando end screen con recomendados');
-              this.reproductorComponent.mostrarEndScreenConRecomendados();
-            }
-          }
-        });
-    } else {
-      console.log('📺 No estamos en playlist - verificando videos recomendados');
-      if (this.videosRecomendadosPantallaFinal && this.videosRecomendadosPantallaFinal.length > 0) {
-        console.log('✅ HAY videos recomendados disponibles - iniciando countdown');
-        this.siguienteVideoDisponible = true;
-        if (this.reproductorComponent && this.reproductorComponent.startAutoplayCountdown) {
-          console.log('🎯 Llamando countdown para videos recomendados');
-          this.reproductorComponent.startAutoplayCountdown();
-        }
-      } else {
-        console.log('❌ NO HAY videos recomendados - mostrar end screen vacío');
-        this.siguienteVideoDisponible = false;
-        if (this.reproductorComponent) {
-          console.log('🛑 Mostrando end screen sin recomendados');
-          this.reproductorComponent.mostrarEndScreenConRecomendados();
-        }
-      }
-    }
-  }
-
-  @ViewChild('reproductorRef') reproductorComponent: any;
-
-
-
-  cargarSiguienteVideoDePlaylist(): void {
-    if (!this.playlistId || !this.videoId) return;
-  
-    this.cargando = true;
-  
-    this.playlistService.obtenerSiguienteVideo(this.playlistId, this.videoId).subscribe({
-      next: (response: any) => {
-        this.cargando = false;
-  
-        if (response.success && response.data) {
-          const siguiente = response.data;
-  
-          this.videoUrl = siguiente.link; 
-  
-          this.videoId = siguiente.id;
-          this.videoIdPlaylist = siguiente.id;
-  
-          this.video = { ...this.video, ...siguiente };
-          this.actualizarTituloDePagina();
-  
-          this.canalId = siguiente.canal_id;
-          this.listarNumeroDeSuscriptores(this.canalId);
-  
-          this.cdr.detectChanges();
-  
-          this.scheduleTimeout(() => {
-            const videoElement = document.querySelector('video') as HTMLVideoElement;
-            if (videoElement) {
-              videoElement.play().catch(err => {
-                console.warn('Autoplay bloqueado (política del navegador):', err);
-              });
-            }
-          }, 300)
-          console.log('No hay más videos:', response.message);
-          this.terminarVideo(); 
-        }
-      },
-      error: (err) => {
-        this.cargando = false;
-        console.error('Error al obtener siguiente video:', err);
-        this.terminarVideo();
-      }
-    });
-  }
-
-  
-obtenerVideosDePlaylist(): void {
-  this.playlistService.obtenerPlaylistConVideos(this.playlistId, this.videoId, this.fromPlaylist, this.userId)
-    .subscribe({
-      next: (res) => {
-        console.log('📦 Respuesta del servicio de playlist:', res);
-        if (!res?.data?.playlist || !res.data.videos?.length) {
-          console.warn('Playlist no encontrada o vacía, manteniendo en modo video');
-          this.fromPlaylist = false;
-          localStorage.removeItem('fromPlaylist');
-          localStorage.removeItem('currentPlaylistId');
-          return;
-        }
-
-        const playlist = res.data.playlist;
-        const videos = res.data.videos;
-
-        this.videosDePlaylist = videos.map((v: any) => ({
-          ...new Videos(v), 
-          duracionFormateadaPlaylist: this.convertirDuracion(v.duracion)
-        }));
-
-        this.nombrePlaylist = playlist.nombre;
-        this.siguienteVideoDisponible = true; 
-
-        this.cdr.detectChanges();
-      },
-      error: (err) => {
-        console.error('❌ Error al cargar playlist:', err);
-        this.fromPlaylist = false;
-        localStorage.removeItem('fromPlaylist');
-        localStorage.removeItem('currentPlaylistId');
-      }
-    });
-}
-
-  @ViewChild('videoItem') videoItems!: QueryList<ElementRef>;
-
-
-  scrollToCurrentVideo(): void {
-    this.scheduleTimeout(() => {
-      const currentItem = this.videoItems.find(
-        el => +el.nativeElement.querySelector('.video-link')?.href.split('/').slice(-3, -2)[0] === this.videoIdPlaylist
-      );
-      if (currentItem) {
-        currentItem.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-    }, 200);
-  }
-
-  siguienteVideoDatos: any = null;
-
-  siguienteVideo(): void {
-
-    if (!this.autoplayService.getAutoplayValue()) {
-        console.log('Autoplay desactivado → no avanzar');
-        this.mostrarEndScreen = true;
-        return;
-      }
-
-    if (!this.playlistId || !this.videoId) {
-      console.warn('⚠️ No hay playlist o video actual definidos');
-      this.mostrarEndScreen = true;
-      return;
-    }
-
-
-    this.playlistService.obtenerSiguienteVideo(this.playlistId, this.videoId)
-      .subscribe({
-        next: (res: any) => { 
-          console.log('📊 RESPUESTA COMPLETA del backend:', res);
-          console.log('🔍 Video actual solicitado:', this.videoId);
-          console.log('🎯 Siguiente video devuelto:', res?.data?.id);
-          
-                this.siguienteVideoDatos = {
-                  id: res.id,
-                  titulo: res.titulo,
-                  miniatura: res.miniatura,
-                };
-
-          if (res?.data?.id) {
-            const siguienteId = res.data.id;
-            console.log('🎬 Navegando de', this.videoId, 'hacia', siguienteId);
-            
-            this.router.navigate(['/video', siguienteId, 'playlist', this.playlistId]);
-          } else {
-            console.log('📁 FINAL DE PLAYLIST DETECTADO - desactivando autoplay');
-            console.log('🛑 Seteando siguienteVideoDisponible = false');
-            this.siguienteVideoDisponible = false;
-            this.mostrarEndScreen = true;
-            this.cdr.detectChanges();
-            console.log('✅ End screen mostrado, bucle detenido');
-          }
-        },
-        error: (err) => {
-          console.error('❌ Error al obtener siguiente video:', err);
-          this.siguienteVideoDisponible = false;
-          this.mostrarEndScreen = true;
-          this.cdr.detectChanges();
-        }
-      });
-  }
-
-
-  get videosParaMostrar(): Videos[] {
-    return this.videosDePlaylist.filter(video => video.id !== this.videoIdPlaylist);
   }
 
   private procesarFechaDeCreacion(): void {
@@ -1507,305 +1183,73 @@ obtenerVideosDePlaylist(): void {
   }
 
   private obtenerMensajeDeError(error: any): string {
-    return error?.error?.message || error?.message || '' + JSON.stringify(error);
+    return error?.error?.message || error?.message || JSON.stringify(error);
   }
 
-
-
-  puntuar(valora: number): void {
-    if (!this.usuario || !this.usuario.id) {
-      window.location.href = `${this.serverIp}3002/#/`;
-      return; 
-    }
-
-    if (this.puntuacionSeleccionada === valora) {
-      this.eliminarPuntuacion();
-    } else {
-      this.valorPuntuacion = valora;
-      this.puntuacionSeleccionada = valora;
-      this.crearActualizarPuntuacion();
-    }
+  private obtenerMensajeDeErrorAmigable(error: any): string {
+    if (error.status === 0) return 'No hay conexión a internet.';
+    if (error.status >= 500) return 'Error en el servidor. Inténtalo más tarde.';
+    return 'Ocurrió un error al cargar el video.';
   }
 
-
-  obtenerPuntuacionActual(): void {
-    this.puntuarService.obtenerPuntuacionActual(this.videoId, this.usuario.id).subscribe(
-      response => {
-        this.puntuacionActual = response;
-        this.puntuacionSeleccionada = this.puntuacionActual.valora;
-        this.mostrarVideo()
-      },
-      error => {
-        if (error.status === 404) {
-          console.warn('El usuario no ha dado una valoración para este video.');
-          this.puntuacionSeleccionada = null;
-        } else {
-          console.error('Error al obtener la puntuación actual:', error);
-        }
-      }
-    );
+  convertirDuracion(segundos: number): string {
+    const min = Math.floor(segundos / 60);
+    const sec = segundos % 60;
+    return `${min}:${sec < 10 ? '0' : ''}${sec}`;
   }
 
-eliminarPuntuacion(): void {
-  if (this.valorPuntuacion === null) {
-    console.error('No se ha seleccionado un valor de puntuación para eliminar.');
-    return;
+  convertirFechaALineaDeTexto(fecha: Date): string {
+    const meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+    return `${fecha.getDate()} de ${meses[fecha.getMonth()]} de ${fecha.getFullYear()}`;
   }
 
-  const valorAnterior = this.puntuacionSeleccionada;
-  this.puntuacionSeleccionada = null;
-
-  this.puntuarService.quitarPuntuacion(this.videoId, this.usuario.id, this.valorPuntuacion).subscribe(
-    response => {
-      this.puntuacionActual = null;
-      this.valorPuntuacion = null;
-      this.puntuacionSeleccionada = null;
-      this.mostrarVideo()
-
-    },
-    error => {
-      console.error('Error al eliminar la puntuación:', error.error.message);
-
-      this.puntuacionSeleccionada = valorAnterior;
-    }
-  );
-}
-
-
-crearActualizarPuntuacion(): void {
-  if (this.valorPuntuacion === null) {
-    console.error('No se ha seleccionado un valor de puntuación para crear o actualizar.');
-    return;
+  reloadPage(event: Event): void {
+    event.preventDefault();
+    window.location.href = (event.currentTarget as HTMLAnchorElement).href;
   }
 
-  const valorAnterior = this.puntuacionSeleccionada;
-  this.puntuacionSeleccionada = this.valorPuntuacion;
-
-  this.puntuarService.puntuar(this.videoId, this.usuario.id, this.valorPuntuacion).subscribe(
-    response => {
-      this.obtenerPuntuacionActual();
-        this.puntuacionSeleccionada = response.valora;
-        this.valorPuntuacion = response.valora;
-    },
-    error => {
-      console.error('Error al crear o actualizar la puntuación:', error.error.message);
-
-      this.puntuacionSeleccionada = valorAnterior;
-    }
-  );
-}
-
-  visitar(userId?: number, progresoSegundos: number = 0, completado: boolean = false): void {
-  if (this.visitaYaContadaParaEsteVideo) {
-    console.log('Visita ya contada para este video en esta sesión, ignorando...');
-    return;
+  onImageError(event: any): void {
+    event.target.src = 'assets/images/video-default.png';
   }
 
-    let userIdFinal = userId ?? this.userId;
-
-      // Si el ID final es inválido (null, undefined, 0 o <=1), forzar invitado
-      if (!userIdFinal || userIdFinal <= 1) {
-        userIdFinal = 1;  // invitado explícito
-        console.warn('[VISITAR] ID inválido o no disponible → forzando invitado (1)');
-      }
-
-    console.log('[VISITAR] DEBUG INFO:', {
-        userIdPassed: userId,
-        thisUserId: this.userId,
-        userIdFinal: userIdFinal,
-        esInvitado: userIdFinal === 1,
-        videoId: this.videoId
-      });
-    
-  this.visitaYaContadaParaEsteVideo = true;
-  this.visitaContada = true;
-
-  const esInvitado = userIdFinal === 1;
-  
-  const contadorClave = esInvitado
-    ? 'contadorVideosInvitado'
-    : `contadorVideos_${userIdFinal}`;
-
-  let contadorTotal = this.cargarContador(contadorClave) || 0;
-
-  console.log('[VISITAR] Calling service with:', {
-    esInvitado,
-    videoId: this.videoId,
-    userIdFinal,
-    endpoint: esInvitado ? 'contarVisitaInvitado' : 'contarVisita'
-  });
-
-  const visitaObservable = esInvitado
-    ? this.videoService.contarVisitaInvitado(this.videoId, progresoSegundos, completado)
-    : this.videoService.contarVisita(this.videoId, userIdFinal, progresoSegundos, completado);
-
-  visitaObservable.pipe(take(1)).subscribe({
-    next: (res) => {
-      contadorTotal++;
-      this.guardarContador(contadorClave, contadorTotal);
-      console.log('[VISITAR] Visita registrada exitosamente para user:', userIdFinal);
-
-      if (contadorTotal >= 3 && (esInvitado || this.usuario?.premium !== 1)) {
-        this.guardarContador(contadorClave, 0); 
-        this.cargarPublicidad();
-      }
-    },
-    error: (err) => console.error('[Visitar] Error:', err)
-  });
-}  
+  onImageErrorUser(event: any): void {
+    event.target.src = 'assets/images/user.svg';
+  }
 
   guardarContador(clave: string, valor: number): void {
     localStorage.setItem(clave, valor.toString());
   }
 
   cargarContador(clave: string): number {
-    const valor = localStorage.getItem(clave);
-    return valor ? parseInt(valor, 10) : 0;
+    return parseInt(localStorage.getItem(clave) || '0', 10);
   }
 
-  convertirFechaALineaDeTexto(fecha: Date): string {
-    const meses = [
-      'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
-      'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
-    ];
-    const dia = fecha.getDate();
-    const mes = meses[fecha.getMonth()];
-    const año = fecha.getFullYear();
-    return `${dia} de ${mes} de ${año}`;
+  puedeEditar(video: any): boolean {
+    return !!this.usuarioConCanal?.canales && this.usuarioConCanal.canales.id === video.canal_id;
   }
 
-  suscribirse(): void {
-    if (!this.usuario || !this.usuario.id) {
-      window.location.href = `${this.serverIp}3002/#/`; 
-      return;
-    }
-    this.cargando = true;
-    this.suscripcionService.suscribirse(this.userId, this.canalId).subscribe(
-      response => {
-        this.mensaje = 'Suscripción exitosa';
-        this.suscrito = 'suscrito';
-
-        this.notificacionesService.cambiarEstado(this.canalId, this.userId, true).subscribe({
-          next: () => {
-            this.notificacionesActivas = true;
-            this.cargando = false;
-            this.cdr.detectChanges();
-          },
-          error: () => {
-            this.notificacionesActivas = true;
-            this.cargando = false;
-            this.cdr.detectChanges();
-          }
-        });
-      },
-      error => {
-        this.cargando = false;
-        this.handleError(error);
-      }
-    );
+  get puedeEditarVideo(): boolean {
+    return !!this.usuarioConCanal?.canales && !!this.video && this.usuarioConCanal.canales.id === this.video.canal_id;
   }
 
-  listarNumeroDeSuscriptores(canalId: number) {
-    this.suscripcionService.listarNumeroDeSuscriptores(canalId).subscribe(res => {
-      this.numeroDeSuscriptores = res;
-    });
+  envioReportar(formData: any): void {
+    this.reporteService.crearReporteVideo(formData).subscribe();
   }
 
-  anularSuscripcion(): void {
-    const dialogRef = this.dialog.open(ConfirmacionDesuscribirModalComponent);
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.suscripcionService.anularSuscripcion(this.userId, this.canalId).subscribe(
-          () => {
-            this.mensaje = 'Suscripción anulada';
-            this.suscrito = 'desuscrito';
-            this.notificacionesActivas = false; 
-            this.cdr.detectChanges();
-          },
-          error => this.handleError(error)
-        );
-      }
-    });
-  }
-
-  agregarAVideoALista(): void {
-    if (!this.status.isLoggedIn) {
-      window.location.href = this.serverIp + '3002/#/';
-      return;
-    }
-    
-    const dialogRef = this.dialog.open(AgregarListaComponent, {
-      data: { videoId: this.videoId },
-      autoFocus: false,
-      restoreFocus: false,
-      scrollStrategy: this.overlay.scrollStrategies.noop()
-    });
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-      }
-    });
-    this.dropdownVisible = false;
-  }
-
-  crearLista(): void {
-    const dialogRef = this.dialog.open(CrearListaComponent);
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.agregarAVideoALista();
-      }
-    });
-  }
-
-  toggleSuscripcion(): void {
-    if (this.suscrito) {
-      this.anularSuscripcion();
-    } else {
-      this.suscribirse();
-    }
-  }
-
-  verificarSuscripcion(): void {
-    if (!this.userId || !this.canalId) {
-      return;
-    }
-    this.suscripcionService.verificarSuscripcion(this.userId, this.canalId).subscribe(
-      response => {
-        switch (response.estado) {
-          case 'propietario':
-            this.suscrito = 'propietario';
-            break;
-          case 'suscrito':
-            this.suscrito = 'suscrito';
-            this.notificacionesActivas = true;
-            break;
-          case 'desuscrito':
-            this.suscrito = 'desuscrito';
-            this.notificacionesActivas = false;
-            break;
-          default:
-            console.warn('Estado desconocido:', response.estado);
-        }
-      },
-      error => {
-        if (error.status === 404) {
-          console.warn('No se encontró la suscripción.');
-          this.suscrito = 'desuscrito';
-        } else {
-          console.error('Error al verificar la suscripción:', error);
-        }
-      }
-    );
-  }
-
-
-  
-
-  private handleError(error: any): void {
-    if (error.status === 409) {
-      this.mensaje = 'Ya estás suscrito a este canal.';
-    } else {
-      this.mensaje = error.error.message || 'Ha ocurrido un error inesperado.';
-    }
-  }
+  getDescripcion(val: number): string {
+  const descripciones: { [key: number]: string } = {
+    1: 'Me enoja',
+    2: 'Me entristece',
+    3: 'Me gusta',
+    4: 'Me divierte',
+    5: 'Me encanta'
+  };
+  return descripciones[val] || '';
 }
 
+  private handleError(error: any): void {
+    this.mensaje = error.status === 409
+      ? 'Ya estás suscrito a este canal.'
+      : error.error?.message || 'Ha ocurrido un error inesperado.';
+  }
+}

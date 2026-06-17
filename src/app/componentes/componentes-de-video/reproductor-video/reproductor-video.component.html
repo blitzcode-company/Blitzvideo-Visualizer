@@ -174,7 +174,7 @@
       </button>
         <button [hidden]="isFullscreen" [matTooltip]="isCinemaMode ? 'Vista predeterminada (C)' : 'Modo cine (C)'" 
                 (click)="toggleMode()">
-          <i [class]="isCinemaMode ? 'fa fa-compress' : 'fa fa-video'"></i>
+              <mat-icon [svgIcon]="isCinemaMode ? 'default-view' : 'theater-mode'"></mat-icon>
         </button>
       </div>
     </div>

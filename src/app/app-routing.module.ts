@@ -22,6 +22,7 @@ import { VideosDeEtiquetaComponent } from './componentes/home/videos-de-etiqueta
 import { InfoCanalComponent } from './componentes/componentes-de-canal/info-canal/info-canal.component';
 import { PlaylistDelCanalComponent } from './componentes/componentes-de-canal/playlist-del-canal/playlist-del-canal.component';
 import { MasVistosComponent } from './componentes/home/mas-vistos/mas-vistos.component';
+import { StreamsDelCanalComponent } from './componentes/componentes-de-canal/streams-del-canal/streams-del-canal.component';
 const routes: Routes = [
   {path: '', component: HomeComponent},
   {path: 'video/:id', component: VerVideoComponent, },
@@ -32,6 +33,7 @@ const routes: Routes = [
   { path: 'canal/:id/videos', component: VideosDelCanalComponent},
   {path: 'canal/:id/sobre', component: InfoCanalComponent},
   {path: 'canal/:id/playlists', component: PlaylistDelCanalComponent},
+  {path: 'canal/:id/streams', component: StreamsDelCanalComponent},
   { path: 'playlists', component: ListaDeReproduccionComponent, canActivate: [autenticacionGuard]},
   { path: 'playlists/:id', component: ContenidoListaDeReproduccionComponent},
   {path: 'ajustes/pagos', component: SeleccionPagoComponent, canActivate: [autenticacionGuard]},

@@ -422,9 +422,6 @@
 }
 
 @media (max-width: 768px) {
-  .containerHome {
-    margin-top: 60px;
-  }
 
   .sidebar-container {
     position: fixed !important;

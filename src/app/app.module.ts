@@ -83,6 +83,7 @@ import { InfoCanalComponent } from './componentes/componentes-de-canal/info-cana
 import { PlaylistDelCanalComponent } from './componentes/componentes-de-canal/playlist-del-canal/playlist-del-canal.component';
 import { MasVistosComponent } from './componentes/home/mas-vistos/mas-vistos.component';
 import { NotificacionesPanelComponent } from './componentes/componentes-layout/notificaciones-panel/notificaciones-panel.component';
+import { StreamsDelCanalComponent } from './componentes/componentes-de-canal/streams-del-canal/streams-del-canal.component';
 @NgModule({
   declarations: [
     AppComponent,
@@ -130,6 +131,7 @@ import { NotificacionesPanelComponent } from './componentes/componentes-layout/n
     PlaylistDelCanalComponent,
     MasVistosComponent,
     NotificacionesPanelComponent,
+    StreamsDelCanalComponent,
     
     
   ],

@@ -1026,7 +1026,7 @@ text-decoration: none;
 }
 
 .descripcion .fechadescripcion {
-  font-weight: 500;
+  font-weight: 700;
 }
 
 :host-context(.dark-theme) 
@@ -1243,12 +1243,11 @@ text-decoration: none;
 .subscribe-btn {
   margin: 0;
       min-width: 0;
- font-size: 14px;
-    font-weight: 500;
+ font-size: 15px;
+    font-weight: 600;
     line-height: 18px;
   height: 40px;
   border-radius: 20px;
-  font-family: "Roboto", "Arial", sans-serif;
   border-width: 2px;
   transition: all 0.2s ease;
   display: flex;
@@ -1258,6 +1257,9 @@ text-decoration: none;
   gap: 8px;
 }
 
+.mat-mdc-outlined-button {
+  letter-spacing: 0 !important;
+}
 
 .editarvideo {
   margin-top: 12px;
@@ -1481,8 +1483,6 @@ text-decoration: none;
 .mobile-chat-fixed {
   width: 100%;
   background: white;
-  border-top: 1px solid rgba(0, 0, 0, 0.1);
-  margin-top: 16px;
 }
 
 :host-context(.dark-theme) .mobile-chat-fixed {
@@ -1699,9 +1699,8 @@ text-decoration: none;
 .mobile-chat-fixed app-chat-de-stream ::ng-deep .chat-input input {
   flex: 1 !important;
   padding: 10px 16px !important;
-  border: 1px solid rgba(0, 0, 0, 0.15) !important;
   border-radius: 20px !important;
-  background: white !important;
+  background: #042234 !important;
   color: #0f0f0f !important;
   font-size: 14px !important;
   outline: none !important;
@@ -1712,7 +1711,7 @@ text-decoration: none;
 }
 
 :host-context(.dark-theme) .mobile-chat-fixed app-chat-de-stream ::ng-deep .chat-input input {
-  background: #1a1a1a !important;
+  background: #141414 !important;
   border-color: rgba(255, 255, 255, 0.2) !important;
   color: #f1f1f1 !important;
 }

@@ -3,9 +3,10 @@ import { Subscription } from 'rxjs';
 import { ModocineService } from '../../../servicios/modocine.service';
 import { Router } from '@angular/router';
 import { AutoplayService } from '../../../servicios/autoplay.service';
+import { MatIconRegistry } from '@angular/material/icon';
+import { DomSanitizer } from '@angular/platform-browser';
+
 import videojs from 'video.js';
-
-
 export interface PlayerDimensions {
     width: number;
     height: number;
@@ -40,7 +41,6 @@ export type AspectRatioType = '16:9' | '4:3' | '21:9' | '1:1' | '2.35:1';
     encapsulation: ViewEncapsulation.None
 })
 export class ReproductorVideoComponent implements OnInit, AfterViewInit {
-
     @Input() videoUrl?: string;
     @Input() isCinemaMode: boolean = false;
     @Input() controlsWidth!: number;
@@ -51,16 +51,13 @@ export class ReproductorVideoComponent implements OnInit, AfterViewInit {
     @Input() mostrarEndScreen: boolean = false;
     @Input() siguienteVideoDisponible: boolean = true;
     @Input() miniaturaUrl?: string;
-
     @Output() nextVideo = new EventEmitter<any>();
     @Output() toggleCinemaMode = new EventEmitter<boolean>();
     @Output() videoTerminado = new EventEmitter<void>();
     @Output() solicitarSiguienteVideo = new EventEmitter<void>();
     @Output() verificarSiguienteVideo = new EventEmitter<void>();
     @Output() autoplayChanged = new EventEmitter<boolean>();
-    @Output() tiempoActualizado = new EventEmitter<number>();
-
-
+    @Output() tiempoActualizado = new EventEmitter<number>()
     @ViewChild('previewThumbnail', { static: true }) previewThumbnail?: ElementRef<HTMLDivElement>;
     @ViewChild('previewVideo', { static: true }) previewVideo?: ElementRef<HTMLVideoElement>;
     @ViewChild('videoPlayer', { static: false }) videoPlayer?: ElementRef<HTMLVideoElement>;
@@ -72,8 +69,6 @@ export class ReproductorVideoComponent implements OnInit, AfterViewInit {
     @ViewChild('skipRight') skipRight?: ElementRef<HTMLDivElement>;
     @ViewChild('ambientCanvas') ambientCanvas!: ElementRef<HTMLCanvasElement>;
     @ViewChild('previewCanvas') previewCanvas?: ElementRef<HTMLCanvasElement>;
-
-
     nextVideoData: any = null;
     aspectRatio: string = "16 / 9";
     maxHeight = 720;
@@ -110,7 +105,6 @@ export class ReproductorVideoComponent implements OnInit, AfterViewInit {
     videoElement!: HTMLVideoElement;
     showSkipLeftAnimation = false;
     showSkipRightAnimation = false;
-
     private playerConfig: PlayerConfig = {
         mastheadHeight: 0,
         topPadding: 0,
@@ -126,22 +120,18 @@ export class ReproductorVideoComponent implements OnInit, AfterViewInit {
         controlsHeight: 48,
         borderRadius: 0
     };
-
     private resizeObserver?: ResizeObserver;
     private resizeThrottleTimeout: any;
     currentAspectRatio: AspectRatioType = '16:9';
     isFloatingMode: boolean = false;
     isCompactMode: boolean = false;
     showDebugPanel: boolean = false;
-
-
     private readonly STORAGE_KEY_AUDIO = 'audioDesbloqueado';
     private readonly STORAGE_KEY_VOLUME = 'playerVolume';
     private readonly STORAGE_KEY_MUTED = 'playerMuted';
     private readonly STORAGE_KEY_PLAYER_CONFIG = 'playerConfig';
     private readonly RATIO_16_9 = 16 / 9;
     private readonly TOLERANCIA_RATIO = 0.05;
-
     private browserZoomLevel = 1;
     private audioUnlocked = false;
     private previousVolume = 0.7;
@@ -164,16 +154,27 @@ export class ReproductorVideoComponent implements OnInit, AfterViewInit {
     private hideTimeout: any;
     private _blockSingleClick = false;
     private isTogglingCinemaMode = false;
-
     isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-
-
     constructor(
         private cdr: ChangeDetectorRef,
         private cinemaModeService: ModocineService,
         private autoplayService: AutoplayService,
-        private router: Router
-    ) {}
+        private router: Router,
+        private iconRegistry: MatIconRegistry,
+        private sanitizer: DomSanitizer
+    ) {
+
+    this.iconRegistry.addSvgIcon(
+      'default-view',
+      this.sanitizer.bypassSecurityTrustResourceUrl('assets/icons/default-view.svg')
+    );
+
+
+    this.iconRegistry.addSvgIcon(
+      'theater-mode',
+      this.sanitizer.bypassSecurityTrustResourceUrl('assets/icons/theater-mode.svg')
+    );
+    }
 
     ngOnInit(): void {
         this.cargarAjustesDeSonido();
