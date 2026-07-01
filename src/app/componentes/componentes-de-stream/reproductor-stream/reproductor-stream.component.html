@@ -66,10 +66,9 @@
             <i class="fas fa-external-link-alt"></i>
           </button>
 
-          <button [hidden]="isFullscreen"
-            (click)="toggleMode()"
-            [matTooltip]="isCinemaMode ? 'Vista predeterminada (C)' : 'Modo cine (C)'">
-            <i [class]="isCinemaMode ? 'fa fa-compress' : 'fa fa-video'"></i>
+          <button [hidden]="isFullscreen" [matTooltip]="isCinemaMode ? 'Vista predeterminada (C)' : 'Modo cine (C)'" 
+                  (click)="toggleMode()">
+                <mat-icon [svgIcon]="isCinemaMode ? 'default-view' : 'theater-mode'"></mat-icon>
           </button>
 
           <button (click)="toggleFullscreen(videoContainer)"

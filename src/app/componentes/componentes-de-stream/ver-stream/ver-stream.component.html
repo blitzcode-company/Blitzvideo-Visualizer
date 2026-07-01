@@ -163,13 +163,7 @@
             <div class="puntuaryguardar">
               
             </div>
-            <div class="options">
-              <i class="fa-solid fa-ellipsis-vertical botonTresPuntos" (click)="toggleDropdown()" aria-hidden="true"></i>
-                <div *ngIf="dropdownVisible" [class.show]="dropdownVisible" class="dropdown-menu">
-                  <a (click)="openReportModal()"><mat-icon>flag</mat-icon>
-                    Reportar Stream</a>
-                </div>
-            </div>
+           
             <div class="viewers-counter" *ngIf="stream?.activo === 1">
               <mat-icon class="viewers-icon">visibility</mat-icon>
               <span class="viewers-text" [class.animating]="viewersAnimating">{{ viewersCount | number }}</span>

@@ -3,6 +3,8 @@ import { Subscription } from 'rxjs';
 import videojs from 'video.js';
 import Hls from 'hls.js';
 import 'video.js/dist/video-js.css';
+import { MatIconRegistry } from '@angular/material/icon';
+import { DomSanitizer } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-reproductor-stream',
@@ -49,8 +51,23 @@ export class ReproductorStreamComponent implements OnInit, OnDestroy, AfterViewI
 
   constructor(
     private cdr: ChangeDetectorRef,
+    private iconRegistry: MatIconRegistry,
+    private sanitizer: DomSanitizer
 
-  ) { }
+  ) { 
+
+  this.iconRegistry.addSvgIcon(
+      'default-view',
+      this.sanitizer.bypassSecurityTrustResourceUrl('assets/icons/default-view.svg')
+    );
+
+
+    this.iconRegistry.addSvgIcon(
+      'theater-mode',
+      this.sanitizer.bypassSecurityTrustResourceUrl('assets/icons/theater-mode.svg')
+    );
+
+  }
 
   ngOnInit(): void {
     this.cargarAjustesDeSonido();

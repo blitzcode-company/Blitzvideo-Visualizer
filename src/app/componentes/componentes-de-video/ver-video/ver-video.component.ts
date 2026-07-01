@@ -24,6 +24,7 @@ import { ReproductorVideoComponent } from '../reproductor-video/reproductor-vide
 import { Usuario } from '../../../clases/usuario';
 import { AutoplayService } from '../../../servicios/autoplay.service';
 import { ChatstreamService } from '../../../servicios/chatstream.service';
+import {Location} from '@angular/common';
 
 @Component({
   selector: 'app-ver-video',
@@ -38,6 +39,7 @@ export class VerVideoComponent implements OnInit, OnDestroy, AfterViewInit, Afte
   playlistId: any;
   videoIdPlaylist: any;
   streamIdDelVideo: number | null = null;
+  isPlaylistOpen: boolean = true; 
 
   video: Videos = new Videos();
   usuario: Usuario = new Usuario();
@@ -52,7 +54,7 @@ export class VerVideoComponent implements OnInit, OnDestroy, AfterViewInit, Afte
   siguienteVideoDatos: any = null;
   mensajesDelChat: any[] = [];
   mensajesVisibles: any[] = [];
-
+  isLoading = false;
   videoUrl: any;
   miniaturaUrl = '';
   videoPublicidadUrl: string | null = null;
@@ -76,9 +78,11 @@ export class VerVideoComponent implements OnInit, OnDestroy, AfterViewInit, Afte
   isMobile = false;
   commentsSheetOpen = false;
   siguienteVideoDisponible = true;
+  isPrivado = false
 
   isCinemaMode = false;
   isExpanded = false;
+  
   showToggleLink = false;
   isContentOverflowing = false;
   dropdownVisible = false;
@@ -137,6 +141,7 @@ export class VerVideoComponent implements OnInit, OnDestroy, AfterViewInit, Afte
     private titleService: Title,
     private router: Router,
     private overlay: Overlay,
+    private location: Location,
     private chatService: ChatstreamService,
     private usuarioGlobal: UsuarioGlobalService,
     private puntuarService: PuntuacionesService,
@@ -154,62 +159,65 @@ export class VerVideoComponent implements OnInit, OnDestroy, AfterViewInit, Afte
   }
 
 
-  ngOnInit(): void {
-    this.recuperarHighlightComentario();
-    this.inicializarCinemaMode();
-    this.detectMobile();
-    window.addEventListener('resize', () => this.detectMobile());
-    this.mostrarSidebar();
-    this.obtenerUsuario();
+ ngOnInit(): void {
+  this.recuperarHighlightComentario();
+  this.inicializarCinemaMode();
+  this.detectMobile();
+  window.addEventListener('resize', () => this.detectMobile());
+  this.mostrarSidebar();
+  this.obtenerUsuario();
 
-    this.subs.push(
-      this.usuarioGlobal.usuarioConCanal$.subscribe(uc => {
-        this.usuarioConCanal = uc;
-        this.cdr.detectChanges();
-      }),
-      this.autoplayService.getAutoplay().subscribe(enabled => {
-        this.autoplayActivado = enabled;
-      })
-    );
+  this.subs.push(
+    this.autoplayService.getAutoplay().subscribe(enabled => {
+      this.autoplayActivado = enabled;
+    })
+  );
 
-    this.subs.push(
-      this.route.paramMap.subscribe((params: ParamMap) => {
-        this.videoId = Number(params.get('id'));
-        this.videoIdPlaylist = this.videoId;
+  this.subs.push(
+    combineLatest([
+      this.route.paramMap,
+      this.usuarioGlobal.usuarioConCanal$.pipe(
+        filter(uc => uc !== null && uc !== undefined),
+        take(1)
+      )
+    ]).subscribe(([params, uc]) => {
+      this.usuarioConCanal = uc;
 
-        const playlistIdFromParams = params.get('playlistId');
-        const playlistIdNumber = playlistIdFromParams ? Number(playlistIdFromParams) : 0;
+      this.videoId = Number(params.get('id'));
+      this.videoIdPlaylist = this.videoId;
 
-        if (playlistIdFromParams && playlistIdNumber > 0) {
-          this.playlistId = playlistIdNumber;
-          this.fromPlaylist = true;
-          localStorage.setItem('fromPlaylist', 'true');
-          localStorage.setItem('currentPlaylistId', this.playlistId.toString());
-          this.siguienteVideoDisponible = true;
-        } else {
-          this.limpiarEstadoPlaylist();
-        }
+      const playlistIdFromParams = params.get('playlistId');
+      const playlistIdNumber = playlistIdFromParams ? Number(playlistIdFromParams) : 0;
 
-        this.resetearEstadoVideo();
-        this.mostrarVideo();
+      if (playlistIdFromParams && playlistIdNumber > 0) {
+        this.playlistId = playlistIdNumber;
+        this.fromPlaylist = true;
+        localStorage.setItem('fromPlaylist', 'true');
+        localStorage.setItem('currentPlaylistId', this.playlistId.toString());
+        this.siguienteVideoDisponible = true;
+      } else {
+        this.limpiarEstadoPlaylist();
+      }
 
-        if (this.fromPlaylist) {
-          this.obtenerVideosDePlaylist();
-        }
+      this.resetearEstadoVideo();
+      this.mostrarVideo();
 
-        const storedCinemaMode = localStorage.getItem('cinemaMode');
-        this.isCinemaMode = storedCinemaMode ? JSON.parse(storedCinemaMode) : false;
-        this.cdr.detectChanges();
+      if (this.fromPlaylist) {
+        this.obtenerVideosDePlaylist();
+      }
 
-        this.scheduleTimeout(() => this.verificarSuscripcion(), 100);
-      })
-    );
-  }
+      const storedCinemaMode = localStorage.getItem('cinemaMode');
+      this.isCinemaMode = storedCinemaMode ? JSON.parse(storedCinemaMode) : false;
+      this.cdr.detectChanges();
+
+      this.scheduleTimeout(() => this.verificarSuscripcion(), 100);
+    })
+  );
+}
 
   ngAfterViewInit(): void {
     this.scrollToBottom();
     this.overlayComment = document.querySelector('.comments-overlay') as HTMLElement;
-    this.inicializarStickyPlayer();
   }
 
   ngAfterViewChecked(): void {}
@@ -265,6 +273,7 @@ export class VerVideoComponent implements OnInit, OnDestroy, AfterViewInit, Afte
 
   private resetearEstadoVideo(): void {
     this.visitaContada = false;
+    this.isPrivado = false
     this.visitaYaContadaParaEsteVideo = false;
     this.mostrarColumnaLateral = false;
     this.videosPantallaFinalListos = false;
@@ -272,34 +281,6 @@ export class VerVideoComponent implements OnInit, OnDestroy, AfterViewInit, Afte
     this.checkDescriptionHeight();
   }
 
-  private inicializarStickyPlayer(): void {
-    if (window.innerWidth > 1024) return;
-
-    const wrapper = this.videoPageWrapper.nativeElement;
-    let ticking = false;
-    let lastScrollY = 0;
-
-    window.addEventListener('scroll', () => {
-      if (ticking) return;
-      requestAnimationFrame(() => {
-        const scrollY = window.scrollY;
-        const threshold = 120;
-
-        if (scrollY > threshold && scrollY > lastScrollY) {
-          this.scheduleTimeout(() => {
-            wrapper.classList.add('sticky-header-player');
-            wrapper.classList.remove('pre-active');
-          }, 10);
-        } else if (scrollY < threshold) {
-          wrapper.classList.remove('sticky-header-player');
-        }
-
-        lastScrollY = scrollY;
-        ticking = false;
-      });
-      ticking = true;
-    });
-  }
 
 
   obtenerUsuario(): void {
@@ -325,27 +306,31 @@ export class VerVideoComponent implements OnInit, OnDestroy, AfterViewInit, Afte
     this.authService.mostrarUserLogueado().subscribe();
   }
 
+  volver(): void {
+    this.location.back();
+  }
+
+  reintentar() {
+    this.errorMessage = '';
+    this.isBlocked = false;
+    this.isNotFound = false;
+
+    this.mostrarVideo();
+  }
+
 
   mostrarVideo(): void {
-    this.resetearEstadoVideo();
-
-    this.videoService.obtenerInformacionVideo(this.videoId).subscribe({
+    this.videoService.obtenerInformacionVideo(this.videoId, this.usuarioConCanal?.canales?.id).subscribe({
       next: (res) => {
         this.video = new Videos(res);
         this.startedAt = res.stream?.started_at ?? null;
         this.streamIdDelVideo = res.stream?.id ?? null;
         this.errorMessage = '';
         this.canalId = this.video.canal_id;
+        
 
         if (this.startedAt && this.streamIdDelVideo) {
           this.cargarMensajesDelChat();
-        }
-
-        if (this.video?.error?.code === 403) {
-          this.isBlocked = true;
-          this.errorMessage = 'Este video ha sido bloqueado y no se puede acceder.';
-          this.mostrarColumnaLateral = true;
-          return;
         }
 
         this.isBlocked = false;
@@ -375,27 +360,59 @@ export class VerVideoComponent implements OnInit, OnDestroy, AfterViewInit, Afte
           this.cdr.detectChanges();
         }, 300);
       },
-      error: (err) => {
+     error: (err) => {
         this.mostrarColumnaLateral = true;
+        this.isLoading = false;
+        const status = err.status ?? err.code ?? err?.error?.code;
+        console.log('status resuelto:', status, 'err completo:', err);
 
-        if (err.status === 404) {
+      if (typeof err === 'string') {
+         if (err.toLowerCase().includes('bloqueado')) {
+          this.isBlocked = true;
+          this.isPrivado = false;
+          this.isNotFound = false;
+          this.errorMessage = err;
+          this.cdr.detectChanges();
+          return;
+        }
+
+        if (err.toLowerCase().includes('privado')) {
+          this.isPrivado = true;
+          this.isBlocked = false;
+          this.isNotFound = false;
+          this.errorMessage = err;
+          this.cdr.detectChanges();
+          return;
+        }
+      }
+        if (status === 403) {
+          this.isBlocked = true;
+          this.isNotFound = false;
+          this.errorMessage = err?.error?.error || err?.message || 'Este video ha sido bloqueado.';
+          this.cdr.detectChanges();
+          return;
+        }
+
+        if (status === 404) {
           this.isNotFound = true;
           this.isBlocked = false;
           this.errorMessage = '';
-          return;
-        }
-        if (err.status === 403 || err.status === 451) {
-          this.manejarBloqueo();
+          this.cdr.detectChanges();
           return;
         }
 
         this.isBlocked = false;
         this.isNotFound = false;
         this.errorMessage = this.obtenerMensajeDeErrorAmigable(err);
+        this.cdr.detectChanges();
       }
     });
   }
 
+
+  togglePlaylist() {
+    this.isPlaylistOpen = !this.isPlaylistOpen;
+  }
 
   private cargarMensajesDelChat(): void {
     if (!this.streamIdDelVideo || !this.startedAt) return;
@@ -442,31 +459,41 @@ export class VerVideoComponent implements OnInit, OnDestroy, AfterViewInit, Afte
     return this.reproductor?.videoElement || null;
   }
 
-  private cargarProgresoAnterior(): void {
-    if (!this.userId || !this.videoId) return;
+private cargarProgresoAnterior(): void {
+  if (!this.userId || !this.videoId) return;
 
-    this.videoService.obtenerProgresoAnterior(this.userId, this.videoId).subscribe({
-      next: (res) => {
-        if (res.progreso <= 0) return;
+  this.videoService.obtenerProgresoAnterior(this.userId, this.videoId).subscribe({
+    next: (res) => {
+      if (res.progreso <= 0) return;
 
-        const videoEl = this.obtenerElementoVideo();
-        if (!videoEl) return;
+      const videoEl = this.obtenerElementoVideo();
+      if (!videoEl) return;
 
-        const setProgreso = () => {
+      const setProgreso = () => {
+        const duracion = videoEl.duration;
+        const cuartaParte = duracion * 0.25;
+        const casiFinalizado = duracion * 0.95;
+
+        if (
+          res.progreso >= cuartaParte &&
+          res.progreso < casiFinalizado
+        ) {
           videoEl.currentTime = res.progreso;
           this.cdr.detectChanges();
-          videoEl.removeEventListener('loadedmetadata', setProgreso);
-        };
-
-        if (videoEl.readyState >= 1) {
-          setProgreso();
-        } else {
-          videoEl.addEventListener('loadedmetadata', setProgreso);
         }
-      },
-      error: (err) => console.error('[PROGRESO] Error:', err)
-    });
-  }
+
+        videoEl.removeEventListener('loadedmetadata', setProgreso);
+      };
+
+      if (videoEl.readyState >= 1) {
+        setProgreso();
+      } else {
+        videoEl.addEventListener('loadedmetadata', setProgreso);
+      }
+    },
+    error: (err) => console.error('[PROGRESO] Error:', err)
+  });
+}
 
   private iniciarHeartbeatProgreso(): void {
     if (this.progresoInterval) clearInterval(this.progresoInterval);
@@ -566,7 +593,7 @@ export class VerVideoComponent implements OnInit, OnDestroy, AfterViewInit, Afte
         this.video = res;
         this.canalId = this.video.canal_id;
 
-        if (this.video?.error?.code === 403) {
+        if (this.video?.code === 403) {
           this.isBlocked = true;
           this.errorMessage = 'Este video ha sido bloqueado y no se puede acceder.';
           this.mostrarColumnaLateral = true;
@@ -1180,10 +1207,6 @@ export class VerVideoComponent implements OnInit, OnDestroy, AfterViewInit, Afte
     if (this.video?.titulo) {
       this.titleService.setTitle(this.video.titulo + ' - BlitzVideo');
     }
-  }
-
-  private obtenerMensajeDeError(error: any): string {
-    return error?.error?.message || error?.message || JSON.stringify(error);
   }
 
   private obtenerMensajeDeErrorAmigable(error: any): string {

@@ -11,7 +11,6 @@ export function initEcho(cookieService: CookieService): Echo<any> {
   console.log('[ECHO] Token obtenido:', token ? 'Token presente' : 'NO HAY TOKEN');
   console.log('[ECHO] AuthEndpoint:', `${environment.apiUrl}broadcasting/auth`);
   
-  // Habilitar logs de Pusher para debugging
   Pusher.logToConsole = true;
   
   window.Pusher = Pusher;

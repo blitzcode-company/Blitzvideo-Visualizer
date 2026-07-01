@@ -1,4 +1,3 @@
-// clases/notificacion.ts
 export type ReferenciaTipo = 
   | 'new_video'
   | 'new_comment'
@@ -34,7 +33,6 @@ export class Notificacion {
     if (data) Object.assign(this, data);
   }
 
-  // Métodos útiles
   get esNoLeida(): boolean {
     return this.leido === 0;
   }

@@ -18,7 +18,6 @@ export class StatusService {
       this.isLoggedIn = true;
     }
 
-    // Sincronizar con authService.usuario$
     this.subscription.add(
       this.authService.usuario$.subscribe(user => {
         this.isLoggedIn = !!user;
@@ -26,7 +25,6 @@ export class StatusService {
     );
   }
 
-  // Limpieza de suscripciones
   ngOnDestroy() {
     this.subscription.unsubscribe();
   }

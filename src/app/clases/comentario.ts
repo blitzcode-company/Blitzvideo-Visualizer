@@ -19,7 +19,7 @@ export class Comentario {
 
     constructor(data?: Partial<Comentario>) {
         if (data) {
-            Object.assign(this, data); // copia todos los campos del backend
+            Object.assign(this, data);
         }
     }
 }

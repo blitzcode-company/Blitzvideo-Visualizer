@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable, throwError, of} from 'rxjs';
 import { catchError, delay, retryWhen, take, tap } from 'rxjs/operators';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Videos } from '../clases/videos';
 import { CookieService } from 'ngx-cookie-service';
 import { environment } from '../../environments/environment';
@@ -50,23 +50,25 @@ export class VideosService {
 
 
 
-  obtenerInformacionVideo(idVideo: any): Observable<any> {
-    const httpOptions = {
-      headers: new HttpHeaders({
-          'Content-Type' : 'application/json',
-      })
-    }
-    const url = `${this.apiUrl}api/v1/videos/${idVideo}`;
-    return this.httpClient.get(url, httpOptions).pipe(
-      catchError(error => {
-        if (error.status === 403) {
-          return throwError('El video está bloqueado y no se puede acceder.');
-        }
-        return throwError(error);
-      })
-    );
-  
+obtenerInformacionVideo(idVideo: any, canalId?: number): Observable<any> {
+  let params = new HttpParams();
+
+  if (canalId) {
+    params = params.set('canal_id', canalId.toString());
   }
+
+  const url = `${this.apiUrl}api/v1/videos/${idVideo}`;
+
+  return this.httpClient.get(url, { params }).pipe(
+    catchError(error => {
+      if (error.status === 403) {
+        const mensaje = error.error?.error || 'Acceso restringido.';
+        return throwError(() => mensaje);
+      }
+      return throwError(() => error);
+    })
+  );
+}
 
   listarVideosPorNombre(nombre:any): Observable<any> {
     const httpOptions = {

@@ -9,6 +9,14 @@ export interface Etiqueta {
   };
 }
 
+
+export interface VideoError {
+  error: string;
+  code: number;
+}
+
+
+
 export class Videos {
   id: number;
   canal_id: number;
@@ -34,10 +42,8 @@ export class Videos {
   estado?: string;
 
   etiquetas: Etiqueta[];
-  error?: {
-    code: number;
-    mensaje: string;
-  };
+  error?: string;       
+  code?: number;
   constructor(data: Partial<Videos> = {}) {
     this.id = data.id ?? 0;
     this.canal_id = data.canal_id ?? 0;
@@ -57,11 +63,15 @@ export class Videos {
     this.puntuacion_4 = data.puntuacion_4 ?? 0;
     this.puntuacion_5 = data.puntuacion_5 ?? 0;
     this.visitas_count = data.visitas_count ?? 0;
+    
     this.promedio_puntuaciones = data.promedio_puntuaciones ?? 0;
     this.canal = new Canal(data.canal);
     this.etiquetas = Array.isArray(data.etiquetas)
   ? data.etiquetas.map(et => ({ ...et }))
   : [];
+
+    this.error = typeof data.error === 'string' ? data.error : undefined;
+    this.code = typeof data.code === 'number' ? data.code : undefined;
   }
    [key: string]: any; 
 }

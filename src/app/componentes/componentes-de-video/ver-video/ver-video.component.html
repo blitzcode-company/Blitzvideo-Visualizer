@@ -4,36 +4,47 @@
 </div>
 <div class="overlay" [class.active]="sidebarVisible" (click)="toggleSidebar()"></div>
 <div class="video-error-wrapper" *ngIf="isNotFound || isBlocked || errorMessage">
-  <div class="error-card not-found" *ngIf="isNotFound">
+<div class="error-card private" *ngIf="isPrivado">
+  <mat-icon class="error-icon">visibility_off</mat-icon>
+  <h2>Video privado</h2>
+  <p class="main-text">Este video es privado y solo puede verlo su creador.</p>
+  <div class="error-actions">
+    <button mat-stroked-button (click)="volver()">
+      <mat-icon>arrow_back</mat-icon> Volver atrás
+    </button>
+  </div>
+</div>
+
+<div class="error-card not-found" *ngIf="isNotFound">
     <mat-icon class="error-icon">search_off</mat-icon>
     <h2>Vídeo no encontrado</h2>
     <p class="main-text">El vídeo que buscas ya no existe o ha sido eliminado.</p>
     <p class="sub-text">Puede que el enlace esté roto o el contenido haya sido retirado.</p>
     <div class="error-actions">
-     <a routerLink="/" class="back-home-btn">
+      <a routerLink="/" class="back-home-btn">
         Volver a la página principal
       </a>
     </div>
   </div>
 
-  <div class="error-card blocked" *ngIf="isBlocked && !isNotFound">
-    <mat-icon class="error-icon">lock_outline</mat-icon>
-    <h2>Acceso restringido</h2>
-    <p class="main-text">Este vídeo ha sido bloqueado y no está disponible.</p>
-    <p class="sub-text" *ngIf="errorMessage">{{ errorMessage }}</p>
-    <div class="error-actions">
-      <button mat-stroked-button>
-        <mat-icon>arrow_back</mat-icon> Volver atrás
-      </button>
+  <div class="error-card blocked" *ngIf="isBlocked">
+      <mat-icon class="error-icon">lock_outline</mat-icon>
+      <h2>Acceso restringido</h2>
+      <p class="main-text">Este vídeo ha sido bloqueado y no está disponible.</p>
+      <p class="sub-text" *ngIf="errorMessage">{{ errorMessage }}</p>
+      <div class="error-actions">
+        <button mat-stroked-button  (click)="volver()">
+          <mat-icon>arrow_back</mat-icon> Volver atrás
+        </button>
+      </div>
     </div>
-  </div>
 
-  <div class="error-card generic" *ngIf="errorMessage && !isBlocked && !isNotFound">
+<div class="error-card generic" *ngIf="errorMessage && !isBlocked && !isNotFound && !isPrivado">
     <mat-icon class="error-icon">error_outline</mat-icon>
     <h2>No se pudo cargar el vídeo</h2>
     <p class="main-text">{{ errorMessage }}</p>
     <div class="error-actions">
-      <button mat-flat-button color="accent" >
+      <button mat-flat-button color="accent" (click)="reintentar()">
         <mat-icon>refresh</mat-icon> Reintentar
       </button>
     </div>
@@ -286,49 +297,56 @@
           </div>
         </div>
         <div *ngIf="videosDePlaylist.length > 0" class="playlist-sidebar">
-          <div class="playlist-header">
-            <h3 class="playlist-title">
-              <i class="fas fa-list-ul"></i> {{ nombrePlaylist }}
-            </h3>
-            <span class="playlist-count">{{ videosDePlaylist.length }} videos</span>
+          <div class="playlist-header" (click)="togglePlaylist()" style="cursor: pointer;">
+            <div class="playlist-header-content">
+              <h3 class="playlist-title">
+                <i class="fas fa-list-ul"></i> {{ nombrePlaylist }}
+              </h3>
+              <span class="playlist-count">{{ videosDePlaylist.length }} videos</span>
+            </div>
+            <button class="playlist-toggle-btn" aria-label="Toggle playlist">
+              <i class="fas" [class.fa-chevron-up]="isPlaylistOpen" [class.fa-chevron-down]="!isPlaylistOpen"></i>
+            </button>
           </div>
 
-          <div class="playlist-scroll-container">
-            <div *ngFor="let video of videosDePlaylist; let i = index" 
-                class="playlist-item"
-                [ngClass]="{ 'current': video.id === +videoIdPlaylist }"
-                #videoItem
-                [attr.data-index]="i + 1">
+          <div class="playlist-scroll-wrapper" [class.collapsed]="!isPlaylistOpen">
+            <div class="playlist-scroll-container">
+              <div *ngFor="let video of videosDePlaylist; let i = index" 
+                  class="playlist-item"
+                  [ngClass]="{ 'current': video.id === +videoIdPlaylist }"
+                  #videoItem
+                  [attr.data-index]="i + 1">
 
-              <a [routerLink]="['/video', video.id, 'playlist', playlistId]" 
-                class="playlist-link"
-                (click)="scrollToCurrentVideo()">
-                
-                <div class="thumbnail-wrapper">
-                  <img [src]="video.miniatura" 
-                      alt="Miniatura de {{ video.titulo }}" 
-                      class="thumbnail"
-                      (error)="onImageError($event)">
+                <a [routerLink]="['/video', video.id, 'playlist', playlistId]" 
+                  class="playlist-link"
+                  (click)="scrollToCurrentVideo()">
                   
-                  <span class="duration-badge">{{ video.duracionFormateadaPlaylist }}</span>
-                  
-                  <div class="current-indicator" *ngIf="video.id === +videoIdPlaylist">
-                    <i class="fas fa-play"></i>
+                  <div class="thumbnail-wrapper">
+                    <img [src]="video.miniatura" 
+                        alt="Miniatura de {{ video.titulo }}" 
+                        class="thumbnail"
+                        (error)="onImageError($event)">
+                    
+                    <span class="duration-badge">{{ video.duracionFormateadaPlaylist }}</span>
+                    
+                    <div class="current-indicator" *ngIf="video.id === +videoIdPlaylist">
+                      <i class="fas fa-play"></i>
+                    </div>
                   </div>
-                </div>
 
-                <div class="video-info">
-                  <div class="video-index">{{ i + 1 }}</div>
-                  <div class="video-details">
-                    <h4 class="video-title">{{ video.titulo || 'Sin título' }}</h4>
-                    <p class="video-channel">{{ video.canal?.nombre || 'Sin canal' }}</p>
-                    <p class="video-meta">
-                      {{ (video.visitas_count ?? 0) | number }} vistas • 
-                      {{ (video.created_at | tiempo) || 'Reciente' }}
-                    </p>
+                  <div class="video-info">
+                    <div class="video-index">{{ i + 1 }}</div>
+                    <div class="video-details">
+                      <h4 class="video-title">{{ video.titulo || 'Sin título' }}</h4>
+                      <p class="video-channel">{{ video.canal?.nombre || 'Sin canal' }}</p>
+                      <p class="video-meta">
+                        {{ (video.visitas_count ?? 0) | number }} vistas • 
+                        {{ (video.created_at | tiempo) || 'Reciente' }}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              </a>
+                </a>
+              </div>
             </div>
           </div>
         </div>

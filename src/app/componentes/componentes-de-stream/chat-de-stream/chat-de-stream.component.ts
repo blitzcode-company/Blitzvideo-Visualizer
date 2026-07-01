@@ -121,26 +121,22 @@ export class ChatDeStreamComponent implements OnInit, AfterViewInit, OnDestroy {
       next: (msg) => {
         console.log('[CHAT] Mensaje recibido desde WebSocket:', msg);
         
-        // Buscar si hay un mensaje optimista (ID temporal alto) con el mismo texto
         const indexOptimista = this.messages.findIndex(m => 
-          m.id > 1000000000000 && // IDs optimistas basados en Date.now()
+          m.id > 1000000000000 && 
           m.text === msg.text && 
           m.user === msg.user
         );
         
         if (indexOptimista !== -1) {
-          // Reemplazar el mensaje optimista con el real
           console.log('[CHAT] Reemplazando mensaje optimista con el real');
           this.messages[indexOptimista] = msg;
         } else {
-          // Verificar si el mensaje ya existe (por ID real)
           const yaExiste = this.messages.some(m => m.id === msg.id);
           
           if (!yaExiste) {
             console.log('[CHAT] Agregando nuevo mensaje');
             this.messages.push(msg);
             
-            // Incrementar contador de no leídos si el chat está colapsado
             if (this.chatCollapsed) {
               this.unreadCount++;
             }

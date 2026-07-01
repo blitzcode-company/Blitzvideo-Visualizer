@@ -7,29 +7,9 @@ import { MatIconRegistry } from '@angular/material/icon';
 import { DomSanitizer } from '@angular/platform-browser';
 
 import videojs from 'video.js';
-export interface PlayerDimensions {
-    width: number;
-    height: number;
-    aspectRatio: string;
-    finalWidth: string;
-    finalHeight: string;
-}
+import { ConfiguracionReproductor } from '../../../clases/configuracion-reproductor';
+import { DimensionesReproductor } from '../../../clases/dimensiones-reproductor';
 
-export interface PlayerConfig {
-    mastheadHeight: number;
-    topPadding: number;
-    spaceBelow: number;
-    horizontalMargin: number;
-    sidebarWidth: number;
-    minHeight: number;
-    maxHeight: number | 'none';
-    minWidth: number;
-    maxWidth: number | '100%';
-    widthRatio: number;
-    heightRatio: number;
-    controlsHeight: number;
-    borderRadius: number;
-}
 
 export type PlayerMode = 'normal' | 'cinema' | 'fullscreen' | 'floating' | 'compact';
 export type AspectRatioType = '16:9' | '4:3' | '21:9' | '1:1' | '2.35:1';
@@ -105,7 +85,8 @@ export class ReproductorVideoComponent implements OnInit, AfterViewInit {
     videoElement!: HTMLVideoElement;
     showSkipLeftAnimation = false;
     showSkipRightAnimation = false;
-    private playerConfig: PlayerConfig = {
+    
+    private playerConfig: ConfiguracionReproductor = {
         mastheadHeight: 0,
         topPadding: 0,
         spaceBelow: 20,
@@ -120,6 +101,8 @@ export class ReproductorVideoComponent implements OnInit, AfterViewInit {
         controlsHeight: 48,
         borderRadius: 0
     };
+
+
     private resizeObserver?: ResizeObserver;
     private resizeThrottleTimeout: any;
     currentAspectRatio: AspectRatioType = '16:9';
@@ -273,15 +256,12 @@ export class ReproductorVideoComponent implements OnInit, AfterViewInit {
     }
 
     ngOnDestroy(): void {
-        // Limpiar subscriptions
         this.cinemaModeSubscription?.unsubscribe();
         this.autoplaySub?.unsubscribe();
         
-        // Limpiar event listeners
         document.removeEventListener('fullscreenchange', this.onFullscreenChange.bind(this));
         this.clearAutoplayCountdown();
         
-        // Limpiar event listeners del contenedor
         if (this.containerEl) {
             const c = this.containerEl;
             if (this.boundHandleContainerClick) c.removeEventListener('click', this.boundHandleContainerClick);
@@ -289,15 +269,12 @@ export class ReproductorVideoComponent implements OnInit, AfterViewInit {
             if (this.boundHandleTouchStart) c.removeEventListener('touchstart', this.boundHandleTouchStart);
         }
         
-        // Limpiar preview listeners
         this.detachPreviewListeners();
         
-        // Limpiar timeouts
         clearTimeout(this.touchTimeout);
         clearTimeout(this.hideControlsTimeout);
         if (this.resizeThrottleTimeout) clearTimeout(this.resizeThrottleTimeout);
         
-        // Limpiar ResizeObserver
         if (this.resizeObserver) {
             this.resizeObserver.disconnect();
             this.resizeObserver = undefined;
@@ -400,7 +377,7 @@ export class ReproductorVideoComponent implements OnInit, AfterViewInit {
         });
     }
 
-    updateConfig(config: Partial<PlayerConfig>): void {
+    updateConfig(config: Partial<ConfiguracionReproductor>): void {
         this.playerConfig = { ...this.playerConfig, ...config };
         this.applyAllVariables();
     }
@@ -552,8 +529,7 @@ export class ReproductorVideoComponent implements OnInit, AfterViewInit {
     }
 
 
-
-    getCurrentDimensions(): PlayerDimensions {
+    getCurrentDimensions(): DimensionesReproductor {
         const container = this.containerEl;
         if (!container) {
             return { width: 0, height: 0, aspectRatio: '16:9', finalWidth: '0px', finalHeight: '0px' };
