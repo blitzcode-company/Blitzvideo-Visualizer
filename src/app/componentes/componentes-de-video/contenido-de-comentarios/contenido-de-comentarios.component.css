@@ -97,6 +97,10 @@ background-color: #0f0f0f;
 }
 
 .megustas a:hover {
+  background-color: rgba(6, 93, 212, 0.1);
+}
+
+:host-context(.dark-theme).megustas a:hover {
   background-color:#17212f
 }
 
@@ -112,9 +116,6 @@ background-color: #0f0f0f;
  
 }
 
-.megustas a:hover {
-  color: black;
-}
 
 
 

@@ -108,7 +108,6 @@ export class ConfiguracionDePerfilComponent {
 }
 
 cambiarContraseña(): void {
-    // Validar que los campos no estén vacíos
     if (!this.passwordData.current_password || !this.passwordData.new_password) {
       this.snackBar.open('Por favor completa todos los campos', 'Cerrar', { duration: 3000 });
       return;
@@ -177,7 +176,7 @@ openFileInputPortada(): void {
         formData.append('portada', this.canal.portada);
     }
   
-    this.canalService.editarCanal(this.canal.id, formData).subscribe(
+    this.canalService.editarCanal(this.canal.id, this.userId, formData).subscribe(
         res => {
             if (res) {
                 console.log('Canal actualizado correctamente', res);

@@ -1710,7 +1710,7 @@ background:#042234;
 
 .subscribe-btn.subscribed {
   background-color: transparent;
-  color: var(--text-primary, #fff);
+  color: #4f9ffd;
   border-color: #303030; 
 }
 
